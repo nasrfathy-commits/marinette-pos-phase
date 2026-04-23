@@ -12,9 +12,9 @@
   إذا تركتها فارغة → Demo Mode تلقائياً
   ============================================================ -->
 <script>
-window.SUPABASE_URL = 'https://eungfmmpcigstvzrzi.supabase.co';
-window.SUPABASE_KEY = 'sb_publishable_s523PXnFpjZZqWJ-wlDC8A_gWo48wQW';
-window.SB_TIMEOUT_MS = 4000;
+window.SUPABASE_URL  = '';   /* مثال: 'https://xxxx.supabase.co'  */
+window.SUPABASE_KEY  = '';   /* مثال: 'eyJhbGci...'               */
+window.SB_TIMEOUT_MS = 4000; /* مدة الانتظار قبل الدخول لـ Demo   */
 </script>
 
 <style>
@@ -452,6 +452,26 @@ tr.editing td{background:var(--gold-dim)!important;}
 }
 
 /* Print frame */
+/* ── Validation: input-error, error-text, shake ── */
+.input-error{
+  border-color:var(--red)!important;
+  box-shadow:0 0 0 3px var(--red-dim)!important;
+}
+.error-text{
+  font-size:11px;font-weight:600;color:var(--red);
+  margin-top:5px;display:none;
+}
+@keyframes shakeX{
+  0%,100%{transform:translateX(0);}
+  15%{transform:translateX(-7px);}
+  30%{transform:translateX(7px);}
+  45%{transform:translateX(-5px);}
+  60%{transform:translateX(5px);}
+  75%{transform:translateX(-3px);}
+  90%{transform:translateX(3px);}
+}
+.shake{animation:shakeX 0.5s ease;}
+
 @media print{
   body>*:not(#printFrame){display:none!important;}
   #printFrame{display:block!important;position:fixed;inset:0;width:100%;height:100%;border:none;z-index:99999;}
@@ -489,6 +509,7 @@ tr.editing td{background:var(--gold-dim)!important;}
   <button class="tab-btn active" onclick="showPage('invoice')"   data-page="invoice">🧾 الفاتورة</button>
   <button class="tab-btn"        onclick="showPage('invoices')"  data-page="invoices">📋 الفواتير</button>
   <button class="tab-btn"        onclick="showPage('dashboard')" data-page="dashboard">📊 لوحة التحكم</button>
+  <button class="tab-btn"        onclick="showPage('returns')"   data-page="returns">↩️ المرتجعات</button>
   <button class="tab-btn"        onclick="showPage('products')"  data-page="products">📦 المنتجات</button>
   <button class="tab-btn"        onclick="showPage('channels')"  data-page="channels">🏪 العملاء</button>
 </nav>
@@ -523,6 +544,7 @@ tr.editing td{background:var(--gold-dim)!important;}
           <select id="invChannel">
             <option value="">— اختر العميل —</option>
           </select>
+          <div class="error-text" id="invChannelError">لازم تختار عميل</div>
         </div>
         <div class="form-group" style="min-width:200px;">
           <label style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">ملاحظات</label>
@@ -715,6 +737,8 @@ tr.editing td{background:var(--gold-dim)!important;}
       <div class="kpi-card"><div class="kpi-icon">🗂️</div><div class="kpi-label">أصناف مختلفة</div><div class="kpi-value" id="kpi_skus">—</div><div class="kpi-sub">صنف</div></div>
       <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-label">متوسط الفاتورة</div><div class="kpi-value" id="kpi_avg">—</div><div class="kpi-sub">ج.م</div></div>
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">أفضل عميل</div><div class="kpi-value" id="kpi_top_ch" style="font-size:15px;margin-top:4px;">—</div><div class="kpi-sub" id="kpi_top_ch_val"></div></div>
+      <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">ج.م</div></div>
+      <div class="kpi-card kpi-highlight"><div class="kpi-icon">💎</div><div class="kpi-label">الصافي الحقيقي</div><div class="kpi-value" id="kpi_true_net">—</div><div class="kpi-sub">بعد المرتجعات</div></div>
     </div>
 
     <!-- Daily Sales Chart -->
@@ -804,6 +828,105 @@ tr.editing td{background:var(--gold-dim)!important;}
       </div>
     </div>
   </div><!-- /page-dashboard -->
+
+
+  <!-- =================== PAGE: RETURNS (Phase 5) =================== -->
+  <div class="page" id="page-returns">
+
+    <!-- Scanner bar (same style as invoice) -->
+    <div class="scanner-wrap" id="retScannerWrap">
+      <div class="scanner-icon">↩️</div>
+      <div class="scanner-label"><p>مسح منتج للمرتجع</p></div>
+      <input type="text" id="retBarcodeInput" placeholder="امسح الباركود أو اكتبه..." autocomplete="off">
+      <div class="scanner-status" id="retScannerStatus">جاهز للمسح ...</div>
+    </div>
+
+    <!-- Return header -->
+    <div class="card card-gold" style="margin-bottom:20px;">
+      <div class="invoice-header">
+        <div class="inv-field">
+          <label>رقم المرتجع</label>
+          <span id="retNumber" class="num">—</span>
+        </div>
+        <div class="inv-field">
+          <label>التاريخ</label>
+          <span id="retDate" class="num">—</span>
+        </div>
+        <div class="form-group" style="min-width:200px;">
+          <label style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">العميل</label>
+          <select id="retChannel">
+            <option value="">— اختر العميل —</option>
+          </select>
+          <div class="error-text" id="retChannelError">لازم تختار عميل</div>
+        </div>
+        <div class="form-group" style="min-width:200px;">
+          <label style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">ملاحظات</label>
+          <input type="text" id="retNotes" placeholder="ملاحظات اختيارية...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Add product manually -->
+    <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="addReturnRow()">➕ إضافة صنف يدوياً</button>
+      <span class="muted small">أو امسح الباركود في الحقل أعلاه</span>
+    </div>
+
+    <!-- Items table -->
+    <div class="inv-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>باركود</th><th>اسم المنتج</th>
+            <th>الكمية المرتجعة</th><th>السعر</th><th>قيمة المرتجع</th><th>حذف</th>
+          </tr>
+        </thead>
+        <tbody id="retBody"></tbody>
+      </table>
+    </div>
+
+    <div id="retEmpty" class="empty" style="display:none;">
+      <div class="empty-icon">↩️</div>
+      <p>لا توجد أصناف بعد — امسح باركود أو أضف صنفاً يدوياً</p>
+    </div>
+
+    <!-- Totals -->
+    <div class="inv-totals" style="margin-top:16px;">
+      <div class="tot-item">
+        <div class="tot-label">إجمالي المرتجع</div>
+        <div class="tot-value red num" id="retTotal">0.00</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="inv-actions">
+      <button class="btn btn-danger btn-sm" onclick="clearReturn()">🗑 مسح</button>
+      <button class="btn btn-primary" onclick="confirmSaveReturn()">✅ حفظ المرتجع</button>
+    </div>
+
+    <!-- Returns history -->
+    <div style="margin-top:32px;">
+      <div class="sec-title">
+        <div class="icon-badge">📋</div>
+        <h2>سجل المرتجعات</h2>
+        <div class="gold-line"></div>
+        <button class="btn btn-outline btn-sm" onclick="renderReturnsList()">🔄 تحديث</button>
+        <button class="btn btn-export btn-sm" onclick="exportReturnsCSV()">⬇️ تصدير CSV</button>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="retSearch" placeholder="🔍 بحث برقم المرتجع أو العميل..." oninput="renderReturnsList()" style="max-width:340px;">
+        <span id="retListCount" class="muted small"></span>
+      </div>
+
+      <div id="retListWrap"></div>
+      <div id="retListEmpty" class="empty" style="display:none;">
+        <div class="empty-icon">↩️</div>
+        <p>لا توجد مرتجعات محفوظة بعد</p>
+      </div>
+    </div>
+  </div><!-- /page-returns -->
+
 
 </main><!-- /main -->
 
@@ -911,12 +1034,14 @@ tr.editing td{background:var(--gold-dim)!important;}
 
 /* ---- localStorage keys ---- */
 var K = {
-  PRODUCTS : 'marinette_products_v1',
-  CHANNELS : 'marinette_channels_v1',
-  INVOICES : 'marinette_invoices_v2',
-  INV_ITEMS: 'marinette_inv_items_v2',
-  DRAFT    : 'marinette_inv_draft_v1',
-  MODE     : 'marinette_mode_v2',      /* 'demo' | 'live' */
+  PRODUCTS   : 'marinette_products_v1',
+  CHANNELS   : 'marinette_channels_v1',
+  INVOICES   : 'marinette_invoices_v2',
+  INV_ITEMS  : 'marinette_inv_items_v2',
+  RETURNS    : 'marinette_returns_v1',      /* Phase 5 */
+  RET_ITEMS  : 'marinette_ret_items_v1',    /* Phase 5 */
+  DRAFT      : 'marinette_inv_draft_v1',
+  MODE       : 'marinette_mode_v2',
 };
 
 /* ---- App state ---- */
@@ -945,6 +1070,16 @@ var scannerFocusPaused = false;
 /* Phase 4: invoice editing state */
 var editingInvoiceId  = null;  /* null = new invoice, uuid = editing existing */
 
+/* Phase 5: returns state */
+var RET = {
+  number  : '',
+  date    : '',
+  channel : '',
+  notes   : '',
+  items   : [],   /* [{id, barcode, name, qty, price, total}] */
+};
+var retScannerDebounce = null;
+
 /* ---- Phase 3 Dashboard state ---- */
 var DASH = {
   period      : 0,          /* 0 = all, N = last N days */
@@ -957,6 +1092,7 @@ var DASH = {
   activeRTab  : 'products',  /* active report sub-tab */
   currentInv  : null,        /* invoice open in detail modal */
   currentItems: [],          /* items for current invoice */
+  returns     : [],          /* filtered returns (Phase 5) */
 };
 
 
@@ -1279,6 +1415,142 @@ var DB = {
     }
     return localGet(K.INV_ITEMS);
   },
+
+  /* ---- RETURNS (Phase 5) ---- */
+  getReturns: async function() {
+    if (APP.mode === 'live') {
+      try {
+        var res = await APP.sb.from('returns')
+          .select('*, channels(channel_name)')
+          .order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        return (res.data || []).map(function(r) {
+          return {
+            id          : r.id,
+            number      : r.return_number,
+            date        : r.return_date,
+            channel     : r.channels ? r.channels.channel_name : (r.channel_id||''),
+            notes       : r.notes,
+            totalReturn : parseFloat(r.total_return_amount) || 0,
+            createdAt   : r.created_at,
+          };
+        });
+      } catch(e) { console.warn('DB.getReturns:', e); return localGet(K.RETURNS); }
+    }
+    return localGet(K.RETURNS);
+  },
+
+  getReturnItems: async function(returnId) {
+    if (APP.mode === 'live') {
+      try {
+        var res = await APP.sb.from('return_items').select('*').eq('return_id', returnId).order('created_at');
+        if (res.error) throw res.error;
+        return (res.data || []).map(function(r) {
+          return {
+            id      : r.id,
+            returnId: r.return_id,
+            barcode : r.barcode,
+            name    : r.product_name_snapshot,
+            qty     : parseFloat(r.quantity)  || 0,
+            price   : parseFloat(r.price)     || 0,
+            total   : parseFloat(r.line_total) || 0,
+          };
+        });
+      } catch(e) { return []; }
+    }
+    return localGet(K.RET_ITEMS).filter(function(x){ return x.returnId === returnId; });
+  },
+
+  getAllReturnItems: async function() {
+    if (APP.mode === 'live') {
+      try {
+        var res = await APP.sb.from('return_items').select('*').order('created_at');
+        if (res.error) throw res.error;
+        return (res.data || []).map(function(r) {
+          return {
+            id      : r.id,
+            returnId: r.return_id,
+            barcode : r.barcode,
+            name    : r.product_name_snapshot,
+            qty     : parseFloat(r.quantity)  || 0,
+            price   : parseFloat(r.price)     || 0,
+            total   : parseFloat(r.line_total) || 0,
+          };
+        });
+      } catch(e) { return localGet(K.RET_ITEMS); }
+    }
+    return localGet(K.RET_ITEMS);
+  },
+
+  saveReturn: async function(ret, items) {
+    /* ret:   { number, date, channel, notes, totalReturn }
+     * items: [ { barcode, name, qty, price, total } ]
+     * Returns saved return id.
+     */
+    if (APP.mode === 'live') {
+      try {
+        var channelId = null;
+        if (ret.channel) {
+          var chRes = await APP.sb.from('channels').select('id').eq('channel_name', ret.channel).limit(1);
+          if (chRes.data && chRes.data.length > 0) channelId = chRes.data[0].id;
+        }
+        var retRow = {
+          return_number       : ret.number,
+          return_date         : ret.date,
+          channel_id          : channelId,
+          notes               : ret.notes || '',
+          total_return_amount : ret.totalReturn,
+          created_by          : APP.user ? APP.user.email : 'demo',
+        };
+        var res = await APP.sb.from('returns').insert(retRow).select().single();
+        if (res.error) throw res.error;
+        var savedId = res.data.id;
+        var itemRows = items.map(function(it) {
+          return {
+            return_id            : savedId,
+            barcode              : it.barcode,
+            product_name_snapshot: it.name,
+            quantity             : it.qty,
+            price                : it.price,
+            line_total           : it.total,
+          };
+        });
+        if (itemRows.length > 0) {
+          var ir = await APP.sb.from('return_items').insert(itemRows);
+          if (ir.error) console.warn('return_items insert:', ir.error);
+        }
+        return savedId;
+      } catch(e) {
+        console.warn('DB.saveReturn live failed:', e);
+        toast('⚠️ خطأ في الاتصال — تم الحفظ محلياً', 'err');
+      }
+    }
+    /* Demo / localStorage */
+    var id = uid();
+    var allRet = localGet(K.RETURNS);
+    allRet.unshift({ id:id, number:ret.number, date:ret.date, channel:ret.channel,
+      notes:ret.notes, totalReturn:ret.totalReturn, createdAt:new Date().toISOString() });
+    localSet(K.RETURNS, allRet);
+    var allRI = localGet(K.RET_ITEMS);
+    items.forEach(function(it) {
+      allRI.push({ id:uid(), returnId:id, barcode:it.barcode, name:it.name,
+        qty:it.qty, price:it.price, total:it.total });
+    });
+    localSet(K.RET_ITEMS, allRI);
+    return id;
+  },
+
+  deleteReturn: async function(id) {
+    if (APP.mode === 'live') {
+      try {
+        await APP.sb.from('return_items').delete().eq('return_id', id);
+        await APP.sb.from('returns').delete().eq('id', id);
+        return;
+      } catch(e) { console.warn('DB.deleteReturn:', e); }
+    }
+    localSet(K.RETURNS,   localGet(K.RETURNS).filter(function(x){ return x.id !== id; }));
+    localSet(K.RET_ITEMS, localGet(K.RET_ITEMS).filter(function(x){ return x.returnId !== id; }));
+  },
 };
 
 
@@ -1546,6 +1818,7 @@ function showPage(id) {
   if (id==='products')  renderProductsTable();
   if (id==='channels')  renderChannelsList();
   if (id==='dashboard') loadDashboard();
+  if (id==='returns')   { initReturnIfEmpty(); renderReturnsList(); retFocusScanner(); }
 }
 
 
@@ -1869,21 +2142,107 @@ function renderTotals() {
 }
 
 /* ---- Confirm & save invoice ---- */
+/* ============================================================
+   PHASE 6 — VALIDATION
+   ============================================================ */
+
+/**
+ * validateSelect(selectId, errorId)
+ * Returns true if a value is selected, false otherwise.
+ * Shows/hides error message and applies shake + red border.
+ */
+function validateSelect(selectId, errorId) {
+  var sel   = document.getElementById(selectId);
+  var errEl = document.getElementById(errorId);
+  if (!sel) return true;
+
+  if (!sel.value) {
+    /* Show error state */
+    sel.classList.add('input-error');
+    sel.classList.remove('shake');
+    /* Trigger reflow to restart animation */
+    void sel.offsetWidth;
+    sel.classList.add('shake');
+    if (errEl) errEl.style.display = 'block';
+    sel.focus();
+    return false;
+  }
+
+  /* Clear error state */
+  sel.classList.remove('input-error', 'shake');
+  if (errEl) errEl.style.display = 'none';
+  return true;
+}
+
+/* Clear validation state as soon as user picks a value */
+(function attachValidationListeners() {
+  function clearErr(selectId, errorId) {
+    var sel   = document.getElementById(selectId);
+    var errEl = document.getElementById(errorId);
+    if (!sel) return;
+    sel.addEventListener('change', function() {
+      if (sel.value) {
+        sel.classList.remove('input-error', 'shake');
+        if (errEl) errEl.style.display = 'none';
+      }
+    });
+  }
+  /* Run after DOM is ready */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      clearErr('invChannel', 'invChannelError');
+      clearErr('retChannel', 'retChannelError');
+    });
+  } else {
+    clearErr('invChannel', 'invChannelError');
+    clearErr('retChannel', 'retChannelError');
+  }
+})();
+
+
 async function confirmAndSaveInvoice() {
-  if (INV.items.length===0) { toast('⚠️ الفاتورة فارغة','err'); return; }
+  /* 1. Validate: client must be selected */
+  if (!validateSelect('invChannel', 'invChannelError')) return;
+
+  /* 2. Validate: invoice must have items */
+  if (INV.items.length === 0) { toast('⚠️ الفاتورة فارغة', 'err'); return; }
+
+  /* 3. Read form values */
   INV.channel = document.getElementById('invChannel').value;
   INV.notes   = document.getElementById('invNotes').value.trim();
 
-  var t   = calcTotals(INV.items);
-  var inv = { number:INV.number, date:INV.date, channel:INV.channel, notes:INV.notes,
-    totalGross:t.gross, totalDiscount:t.disc, netTotal:t.net };
+  /* 4. Calculate totals */
+  var t = calcTotals(INV.items);
 
+  /* 5. Build invoice object */
+  var inv = {
+    number       : INV.number,
+    date         : INV.date,
+    channel      : INV.channel,
+    notes        : INV.notes,
+    totalGross   : t.gross,
+    totalDiscount: t.disc,
+    netTotal     : t.net,
+  };
+
+  /* 6. Confirm then save */
   var isUpdate = !!editingInvoiceId;
-  var savedId  = await DB.saveInvoice(inv, INV.items, editingInvoiceId || null);
-
-  localStorage.removeItem(K.DRAFT);
-  toast(isUpdate ? '✅ تم تحديث الفاتورة: ' + INV.number : '✅ تم حفظ الفاتورة: ' + INV.number, 'ok');
-  initInvoice();
+  showConfirm(
+    (isUpdate ? 'تأكيد تعديل الفاتورة' : 'تأكيد حفظ الفاتورة') +
+    '<br><strong>' + escapeHtml(INV.number) + '</strong>' +
+    '<br>الصافي: <strong>' + fmt(t.net) + ' ج.م</strong>',
+    async function() {
+      await DB.saveInvoice(inv, INV.items, editingInvoiceId || null);
+      localStorage.removeItem(K.DRAFT);
+      toast(
+        isUpdate
+          ? '✅ تم تحديث الفاتورة: ' + INV.number
+          : '✅ تم حفظ الفاتورة: '  + INV.number,
+        'ok'
+      );
+      initInvoice();
+    }
+  );
 }
 
 /* ---- Draft ---- */
@@ -2369,8 +2728,19 @@ async function loadDashboard() {
   DASH.invoices = filteredInv;
   DASH.items    = filteredItems;
 
+  /* Fetch returns for same period */
+  var allReturns = await DB.getReturns();
+  var filteredReturns = allReturns.filter(function(r) {
+    var d = (r.date || r.createdAt || '').substring(0,10);
+    if (fFrom && d < fFrom) return false;
+    if (fTo   && d > fTo)   return false;
+    if (fCh && (r.channel||'') !== fCh) return false;
+    return true;
+  });
+  DASH.returns = filteredReturns;
+
   /* Render everything */
-  renderKPIs(filteredInv, filteredItems);
+  renderKPIs(filteredInv, filteredItems, filteredReturns);
   renderDailyChart(filteredInv);
   renderTopProducts(filteredItems);
   renderChannelBreakdown(filteredInv, filteredItems, itemsByInv);
@@ -2382,13 +2752,16 @@ async function loadDashboard() {
 }
 
 /* ---- KPI Cards ---- */
-function renderKPIs(invoices, items) {
-  var totalGross = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalGross)||0); },0);
-  var totalDisc  = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalDiscount)||0); },0);
-  var netTotal   = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.netTotal)||0); },0);
-  var count      = invoices.length;
-  var totalQty   = items.reduce(function(s,it){ return s+(parseFloat(it.qty)||0); },0);
-  var skus       = (function(){
+function renderKPIs(invoices, items, returns) {
+  returns = returns || [];
+  var totalGross   = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalGross)||0); },0);
+  var totalDisc    = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalDiscount)||0); },0);
+  var netTotal     = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.netTotal)||0); },0);
+  var totalReturns = returns.reduce(function(s,r){ return s+(parseFloat(r.totalReturn)||0); }, 0);
+  var trueNet      = netTotal - totalReturns;
+  var count        = invoices.length;
+  var totalQty     = items.reduce(function(s,it){ return s+(parseFloat(it.qty)||0); },0);
+  var skus         = (function(){
     var s={}; items.forEach(function(it){ s[it.barcode||it.name]=true; }); return Object.keys(s).length;
   })();
   var avg = count>0 ? netTotal/count : 0;
@@ -2400,14 +2773,16 @@ function renderKPIs(invoices, items) {
 
   setText('kpi_count', count);
   setText('kpi_count_sub', DASH.fromDate ? (DASH.fromDate+' → '+(DASH.toDate||'اليوم')) : 'كل الفترات');
-  setText('kpi_gross', fmt(totalGross));
-  setText('kpi_disc',  fmt(totalDisc));
-  setText('kpi_net',   fmt(netTotal));
-  setText('kpi_qty',   Math.round(totalQty).toLocaleString('ar-EG'));
-  setText('kpi_skus',  skus);
-  setText('kpi_avg',   fmt(avg));
+  setText('kpi_gross',   fmt(totalGross));
+  setText('kpi_disc',    fmt(totalDisc));
+  setText('kpi_net',     fmt(netTotal));
+  setText('kpi_qty',     Math.round(totalQty).toLocaleString('ar-EG'));
+  setText('kpi_skus',    skus);
+  setText('kpi_avg',     fmt(avg));
   setText('kpi_top_ch',  topCh ? topCh[0] : '—');
   setText('kpi_top_ch_val', topCh ? fmt(topCh[1])+' ج.م' : '');
+  setText('kpi_returns', fmt(totalReturns));
+  setText('kpi_true_net', fmt(trueNet));
 }
 
 function setText(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; }
@@ -2864,26 +3239,60 @@ function buildPrintHTML(iv, items) {
 
 
 /* ============================================================
-   P. PHASE 3 — CSV EXPORT MODULE
+   P. PHASE 5 — CSV EXPORT MODULE (fixed + returns)
    ============================================================ */
 
 function downloadCSV(filename, rows, headers) {
-  var bom = '\uFEFF'; /* UTF-8 BOM for Arabic in Excel */
-  var csv = bom + headers.join(',') + '\n' +
-    rows.map(function(r){ return r.map(function(c){
-      var s = String(c||'').replace(/"/g,'""');
-      return '"'+s+'"';
-    }).join(','); }).join('\n');
-  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  var url  = URL.createObjectURL(blob);
-  var a    = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+  /* Guard: empty data */
+  if (!rows || rows.length === 0) {
+    toast('⚠️ لا توجد بيانات للتصدير', 'err');
+    return;
+  }
+
+  try {
+    var bom = '\uFEFF'; /* UTF-8 BOM — required for Arabic in Excel */
+    var csvLines = [headers.join(',')];
+    rows.forEach(function(r) {
+      csvLines.push(r.map(function(c) {
+        var s = String(c == null ? '' : c).replace(/"/g, '""');
+        return '"' + s + '"';
+      }).join(','));
+    });
+    var csvStr = bom + csvLines.join('\n');
+
+    /* Method 1: Blob + anchor (modern browsers) */
+    var blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+
+    if (window.navigator && window.navigator.msSaveBlob) {
+      /* IE/Edge legacy */
+      window.navigator.msSaveBlob(blob, filename);
+      toast('✅ تم تصدير ' + filename, 'ok');
+      return;
+    }
+
+    var url = URL.createObjectURL(blob);
+    var a   = document.createElement('a');
+    a.href       = url;
+    a.download   = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function() {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+
+    toast('✅ تم تصدير ' + filename, 'ok');
+  } catch(e) {
+    console.error('downloadCSV error:', e);
+    toast('❌ فشل التصدير: ' + e.message, 'err');
+  }
 }
 
 function exportProductsCSV() {
-  var items  = DASH.items;
+  var items  = DASH.items || [];
+  if (items.length === 0) { toast('⚠️ لا توجد بيانات منتجات للتصدير','err'); return; }
   var prod   = {};
   items.forEach(function(it) {
     var k = it.barcode || it.name || '—';
@@ -2910,7 +3319,8 @@ function exportProductsCSV() {
 }
 
 function exportChannelsCSV() {
-  var invoices = DASH.invoices;
+  var invoices = DASH.invoices || [];
+  if (invoices.length === 0) { toast('⚠️ لا توجد بيانات عملاء للتصدير','err'); return; }
   var itemsByInv = {};
   DASH.items.forEach(function(it){
     if (!itemsByInv[it.invoiceId]) itemsByInv[it.invoiceId]=[];
@@ -2938,6 +3348,7 @@ function exportChannelsCSV() {
 }
 
 function exportInvoicesCSV() {
+  if (!DASH.invoices || DASH.invoices.length === 0) { toast('⚠️ لا توجد فواتير للتصدير','err'); return; }
   var rows = DASH.invoices.map(function(iv) {
     return [iv.number||'—', fmtDateStr(iv.date||iv.createdAt), iv.channel||'—', iv.notes||'',
       (parseFloat(iv.totalGross)||0).toFixed(2),
@@ -2952,6 +3363,7 @@ function exportInvoicesCSV() {
 }
 
 function exportDailyCSV() {
+  if (!DASH.invoices || DASH.invoices.length === 0) { toast('⚠️ لا توجد بيانات يومية للتصدير','err'); return; }
   var groups = {};
   DASH.invoices.forEach(function(iv) {
     var d = getInvDate(iv)||'—';
@@ -2978,6 +3390,376 @@ function exportSingleInvoiceCSV(iv, items) {
   );
   toast('✅ تم تصدير الفاتورة','ok');
 }
+
+/* ============================================================
+   Q. PHASE 5 — RETURNS MODULE
+   ============================================================ */
+
+/* ---- Generate return number ---- */
+function genRetNumber() {
+  var d = new Date();
+  return 'RET-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') +
+    String(d.getDate()).padStart(2,'0') + '-' + String(d.getHours()).padStart(2,'0') +
+    String(d.getMinutes()).padStart(2,'0');
+}
+
+/* ---- Init return (fresh state) ---- */
+function initReturn() {
+  RET.number  = genRetNumber();
+  RET.date    = fmtToday();
+  RET.channel = '';
+  RET.notes   = '';
+  RET.items   = [];
+  document.getElementById('retNumber').textContent = RET.number;
+  document.getElementById('retDate').textContent   = RET.date;
+  document.getElementById('retChannel').value      = '';
+  document.getElementById('retNotes').value        = '';
+  renderReturnTable();
+}
+
+function initReturnIfEmpty() {
+  if (!RET.number) initReturn();
+  /* Populate client dropdown */
+  var sel = document.getElementById('retChannel');
+  if (sel && sel.options.length <= 1) {
+    APP.channels.forEach(function(c) {
+      var o = document.createElement('option');
+      o.value = c.name; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  }
+}
+
+/* ---- Scanner for returns ---- */
+function retFocusScanner() {
+  var el = document.getElementById('retBarcodeInput');
+  if (el) setTimeout(function(){ el.focus(); }, 100);
+}
+
+(function() {
+  /* Wire returns barcode input */
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('retBarcodeInput');
+    if (!input) return;
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); processRetBarcode(input.value.trim()); }
+    });
+    input.addEventListener('input', function() {
+      clearTimeout(retScannerDebounce);
+      retScannerDebounce = setTimeout(function() {
+        var val = input.value.trim();
+        if (val.length >= 4 && !/\s/.test(val)) processRetBarcode(val);
+      }, 120);
+    });
+  });
+})();
+
+function processRetBarcode(barcode) {
+  if (!barcode) return;
+  clearTimeout(retScannerDebounce);
+  var product = APP.products.find(function(p){
+    return p.barcode.toLowerCase() === barcode.toLowerCase();
+  });
+  var input = document.getElementById('retBarcodeInput');
+  var status = document.getElementById('retScannerStatus');
+  if (product) {
+    addReturnItemFromProduct(product);
+    status.className = 'scanner-status ok';
+    status.textContent = '✅ تم إضافة: ' + product.name;
+    setTimeout(function(){ status.textContent='جاهز للمسح ...'; status.className='scanner-status'; }, 3000);
+    var wrap = document.getElementById('retScannerWrap');
+    wrap.classList.add('flash');
+    setTimeout(function(){ wrap.classList.remove('flash'); }, 800);
+  } else {
+    status.className = 'scanner-status err';
+    status.textContent = '❌ الباركود غير موجود: ' + barcode;
+    setTimeout(function(){ status.textContent='جاهز للمسح ...'; status.className='scanner-status'; }, 3000);
+    var wrap2 = document.getElementById('retScannerWrap');
+    wrap2.classList.add('error');
+    setTimeout(function(){ wrap2.classList.remove('error'); }, 800);
+  }
+  input.value = '';
+}
+
+function addReturnItemFromProduct(product) {
+  var existing = RET.items.find(function(it){
+    return it.barcode.toLowerCase() === product.barcode.toLowerCase();
+  });
+  if (existing) {
+    existing.qty += 1;
+    existing.total = parseFloat((existing.qty * existing.price).toFixed(2));
+  } else {
+    RET.items.push({
+      id     : uid(),
+      barcode: product.barcode,
+      name   : product.name,
+      qty    : 1,
+      price  : product.price,
+      total  : product.price,
+    });
+  }
+  renderReturnTable();
+}
+
+function addReturnRow() {
+  RET.items.push({ id:uid(), barcode:'', name:'', qty:1, price:0, total:0 });
+  renderReturnTable();
+}
+
+function deleteReturnRow(id) {
+  RET.items = RET.items.filter(function(it){ return it.id !== id; });
+  renderReturnTable();
+}
+
+function updateReturnItem(id, field, value) {
+  var item = RET.items.find(function(it){ return it.id===id; });
+  if (!item) return;
+  if (field==='name' || field==='barcode') { item[field] = value; }
+  else {
+    item[field] = parseFloat(value) || 0;
+    /* Recalculate total */
+    item.total = parseFloat(((item.qty||0) * (item.price||0)).toFixed(2));
+  }
+  renderReturnTable();
+}
+
+function renderReturnTable() {
+  var tbody = document.getElementById('retBody');
+  var empty = document.getElementById('retEmpty');
+  if (!tbody) return;
+
+  if (RET.items.length === 0) {
+    tbody.innerHTML = ''; empty.style.display = 'block';
+    document.getElementById('retTotal').textContent = '0.00';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = RET.items.map(function(it, i) {
+    var id = escapeHtml(it.id);
+    return '<tr>' +
+      '<td class="muted">'+(i+1)+'</td>' +
+      '<td><input class="cell-input num" value="'+escapeHtml(it.barcode)+'"' +
+          ' onchange="updateReturnItem(\''+id+'\',\'barcode\',this.value)"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+      '<td><input class="cell-input" style="width:150px" value="'+escapeHtml(it.name)+'"' +
+          ' onchange="updateReturnItem(\''+id+'\',\'name\',this.value)"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+      '<td><input class="cell-input num" type="number" min="0.001" step="0.001" value="'+(it.qty||1)+'"' +
+          ' oninput="updateReturnItem(\''+id+'\',\'qty\',this.value)"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+      '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.price||0)+'"' +
+          ' oninput="updateReturnItem(\''+id+'\',\'price\',this.value)"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+      '<td class="num" style="color:var(--red);font-weight:600;">'+fmt(it.total)+'</td>' +
+      '<td><button class="btn btn-danger btn-icon" onclick="deleteReturnRow(\''+id+'\')">🗑</button></td>' +
+    '</tr>';
+  }).join('');
+
+  /* Update total */
+  var total = RET.items.reduce(function(s,it){ return s+(parseFloat(it.total)||0); }, 0);
+  document.getElementById('retTotal').textContent = fmt(total);
+}
+
+async function confirmSaveReturn() {
+  /* 1. Validate: client must be selected */
+  if (!validateSelect('retChannel', 'retChannelError')) return;
+
+  /* 2. Validate: return must have items */
+  if (RET.items.length === 0) { toast('⚠️ المرتجع فارغ', 'err'); return; }
+
+  /* 3. Validate: no item without name or barcode */
+  var hasEmpty = RET.items.some(function(it){ return !it.name && !it.barcode; });
+  if (hasEmpty) { toast('⚠️ يوجد صنف بدون اسم أو باركود', 'err'); return; }
+
+  /* 4. Read form values */
+  RET.channel = document.getElementById('retChannel').value;
+  RET.notes   = (document.getElementById('retNotes').value || '').trim();
+
+  /* 5. Calculate total */
+  var total = RET.items.reduce(function(s, it){ return s + (parseFloat(it.total)||0); }, 0);
+  RET.totalReturn = parseFloat(total.toFixed(2));
+
+  /* 6. Build return objects */
+  var ret = {
+    number     : RET.number,
+    date       : RET.date,
+    channel    : RET.channel,
+    notes      : RET.notes,
+    totalReturn: RET.totalReturn,
+  };
+  var items = RET.items.map(function(it) {
+    return { barcode: it.barcode, name: it.name, qty: it.qty, price: it.price, total: it.total };
+  });
+
+  /* 7. Confirm then save */
+  showConfirm(
+    'تأكيد حفظ المرتجع' +
+    '<br><strong>' + escapeHtml(RET.number) + '</strong>' +
+    '<br>إجمالي المرتجع: <strong>' + fmt(RET.totalReturn) + ' ج.م</strong>',
+    async function() {
+      await DB.saveReturn(ret, items);
+      toast('✅ تم حفظ المرتجع: ' + RET.number + ' — إجمالي: ' + fmt(RET.totalReturn) + ' ج.م', 'ok');
+      initReturn();
+      renderReturnsList();
+    }
+  );
+}
+
+function clearReturn() {
+  showConfirm('هل تريد مسح المرتجع الحالي؟', function() {
+    initReturn();
+    toast('🗑 تم مسح المرتجع','ok');
+  });
+}
+
+/* ---- Returns list ---- */
+async function renderReturnsList() {
+  var wrap  = document.getElementById('retListWrap');
+  var empty = document.getElementById('retListEmpty');
+  var count = document.getElementById('retListCount');
+  if (!wrap) return;
+
+  wrap.innerHTML = '<div style="padding:20px;color:var(--w60);font-size:13px;text-align:center;">⏳ جاري التحميل...</div>';
+
+  var returns = await DB.getReturns();
+  var query   = ((document.getElementById('retSearch')||{}).value||'').trim().toLowerCase();
+
+  if (query) {
+    returns = returns.filter(function(r) {
+      return (r.number||'').toLowerCase().includes(query) ||
+             (r.channel||'').toLowerCase().includes(query);
+    });
+  }
+
+  if (count) count.textContent = returns.length + ' مرتجع';
+
+  if (returns.length === 0) {
+    wrap.innerHTML = ''; empty.style.display = 'block'; return;
+  }
+  empty.style.display = 'none';
+
+  wrap.innerHTML = returns.map(function(r) {
+    var esc = escapeHtml(r.id);
+    return '<div class="inv-list-item">' +
+      '<div class="inv-list-meta">' +
+        '<div class="inv-list-num" style="color:var(--red);">'+escapeHtml(r.number||'—')+'</div>' +
+        '<div class="inv-list-date">'+fmtDateStr(r.date||r.createdAt)+'</div>' +
+        (r.channel ? '<div style="margin-top:4px;"><span class="badge badge-red">'+escapeHtml(r.channel)+'</span></div>' : '') +
+      '</div>' +
+      '<div class="inv-list-amounts">' +
+        '<div><div style="font-size:10px;color:var(--w30);margin-bottom:2px;">إجمالي المرتجع</div>' +
+        '<div class="num" style="font-size:18px;font-weight:700;color:var(--red);">'+fmt(r.totalReturn)+' ج.م</div></div>' +
+      '</div>' +
+      '<div class="inv-list-actions">' +
+        '<button class="btn btn-outline btn-sm" onclick="openReturnDetail(\''+esc+'\')">👁 تفاصيل</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="confirmDeleteReturn(\''+esc+'\')">🗑</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function openReturnDetail(id) {
+  var returns = await DB.getReturns();
+  var r = returns.find(function(x){ return x.id===id; });
+  if (!r) return;
+  var items = await DB.getReturnItems(id);
+  var total = items.reduce(function(s,it){ return s+(parseFloat(it.total)||0); }, 0);
+
+  var html = '<div style="margin-bottom:14px;">' +
+    '<span class="muted small">التاريخ: </span><strong>'+fmtDateStr(r.date||r.createdAt)+'</strong>' +
+    (r.channel ? '  <span class="badge badge-red" style="margin-right:8px;">'+escapeHtml(r.channel)+'</span>' : '') +
+    (r.notes ? '<div class="muted small" style="margin-top:4px;">'+escapeHtml(r.notes)+'</div>' : '') +
+  '</div>';
+
+  if (items.length > 0) {
+    html += '<div style="overflow-x:auto;"><table>' +
+      '<thead><tr><th>#</th><th>المنتج</th><th>الباركود</th><th>الكمية</th><th>السعر</th><th>القيمة</th></tr></thead>' +
+      '<tbody>' + items.map(function(it,i) {
+        return '<tr><td class="muted">'+(i+1)+'</td><td>'+escapeHtml(it.name||'—')+'</td>' +
+          '<td class="num">'+escapeHtml(it.barcode||'—')+'</td>' +
+          '<td class="num">'+it.qty+'</td>' +
+          '<td class="num">'+fmt(it.price)+'</td>' +
+          '<td class="num" style="color:var(--red);font-weight:700;">'+fmt(it.total)+'</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  html += '<div class="inv-totals" style="margin-top:14px;">' +
+    '<div class="tot-item"><div class="tot-label">إجمالي المرتجع</div>' +
+    '<div class="tot-value red num">'+fmt(r.totalReturn||total)+'</div></div>' +
+  '</div>';
+
+  document.getElementById('invDetailTitle').textContent = 'مرتجع: ' + (r.number||'—');
+  document.getElementById('invDetailBody').innerHTML   = html;
+  document.getElementById('invDetailDeleteBtn').onclick = function() {
+    closeModal('invDetailModal'); confirmDeleteReturn(id);
+  };
+  document.getElementById('invDetailEditBtn').style.display   = 'none';
+  document.getElementById('invDetailCopyBtn').style.display   = 'none';
+  document.getElementById('invDetailPrintBtn').style.display  = 'none';
+  document.getElementById('invDetailExportBtn').onclick = function() { exportSingleReturnCSV(r, items); };
+  openModal('invDetailModal');
+
+  /* Restore buttons on close */
+  document.querySelector('#invDetailModal .btn-outline[onclick]').onclick = function() {
+    closeModal('invDetailModal');
+    document.getElementById('invDetailEditBtn').style.display  = '';
+    document.getElementById('invDetailCopyBtn').style.display  = '';
+    document.getElementById('invDetailPrintBtn').style.display = '';
+  };
+}
+
+function confirmDeleteReturn(id) {
+  showConfirm('هل أنت متأكد من حذف هذا المرتجع؟<br>لا يمكن التراجع.', async function() {
+    await DB.deleteReturn(id);
+    toast('🗑 تم حذف المرتجع','ok');
+    renderReturnsList();
+  });
+}
+
+/* ---- Export returns CSV ---- */
+async function exportReturnsCSV() {
+  var returns  = await DB.getReturns();
+  var allItems = await DB.getAllReturnItems();
+
+  if (!returns || returns.length === 0) {
+    toast('⚠️ لا توجد مرتجعات للتصدير','err'); return;
+  }
+
+  /* Apply dashboard filters if available */
+  var fFrom = (DASH && DASH.fromDate) ? DASH.fromDate : '';
+  var fTo   = (DASH && DASH.toDate)   ? DASH.toDate   : '';
+  var fCh   = (DASH && DASH.channel)  ? DASH.channel  : '';
+
+  if (fFrom || fTo || fCh) {
+    returns = returns.filter(function(r) {
+      var d = (r.date||r.createdAt||'').substring(0,10);
+      if (fFrom && d < fFrom) return false;
+      if (fTo   && d > fTo)   return false;
+      if (fCh   && r.channel !== fCh) return false;
+      return true;
+    });
+  }
+
+  var rows = returns.map(function(r) {
+    return [r.number||'—', fmtDateStr(r.date||r.createdAt), r.channel||'—', r.notes||'',
+      (parseFloat(r.totalReturn)||0).toFixed(2)];
+  });
+  downloadCSV('marinette-returns-' + isoDate(new Date()) + '.csv', rows,
+    ['رقم المرتجع','التاريخ','العميل','ملاحظات','إجمالي المرتجع']);
+}
+
+function exportSingleReturnCSV(r, items) {
+  var rows = items.map(function(it, i) {
+    return [i+1, it.name||'—', it.barcode||'—', it.qty, it.price, it.total];
+  });
+  downloadCSV('return-'+(r.number||'export')+'-'+isoDate(new Date())+'.csv', rows,
+    ['#','المنتج','الباركود','الكمية','السعر','القيمة']);
+}
+
+/* also add a today() helper that uses isoDate */
+function today() { return isoDate(new Date()); }
+
 
 /* ============================================================
    M. INIT — entry point

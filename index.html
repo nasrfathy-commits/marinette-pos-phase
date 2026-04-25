@@ -1312,21 +1312,20 @@ var DB = {
           savedId = res.data.id;
         }
 
-        var itemRows = items.map(function(it) {
-          var gross = (it.qty||0) * (it.price||0);
-          var net   = gross - (it.discount||0);
-          return {
-            invoice_id           : savedId,
-            barcode              : it.barcode,
-            product_name_snapshot: it.name,
-            quantity             : it.qty,
-            price                : it.price,
-            discount             : it.discount,
-            total_before_discount: gross,
-            return_amount        : 0,
-            net_total            : net,
-          };
-        });
+       var itemRows = items.map(function(it) {
+  var gross = (it.qty || 0) * (it.price || 0);
+  var net = gross - (it.discount || 0);
+
+  return {
+    invoice_id: savedId,
+    barcode: it.barcode,
+    product_name_snapshot: it.name,
+    quantity: it.qty,
+    price: it.price,
+    discount_value: it.discount || 0,
+    total: net
+  };
+});
         if (itemRows.length > 0) {
           var itemRes = await APP.sb.from('invoice_items').insert(itemRows);
           if (itemRes.error) console.warn('items insert:', itemRes.error);

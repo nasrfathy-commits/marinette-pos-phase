@@ -3183,10 +3183,21 @@ function buildPrintHTML(iv, items) {
 
   /* ── PRINT ── */
   '@media print{' +
-  '  body{font-size:11px;}' +
-  '  .page-wrap{padding:0;}' +
-  '  @page{margin:10mm 14mm;}' +
-  '}' +
+'body{font-size:11px;}' +
+'.page-wrap{padding:0;}' +
+
+'table, tbody, tr, td, th{' +
+'page-break-inside:auto !important;' +
+'break-inside:auto !important;' +
+'}' +
+
+'.totals, .tot-grid, .footer{' +
+'page-break-inside:avoid !important;' +
+'break-inside:avoid !important;' +
+'}' +
+
+'@page{margin:10mm 14mm;}' +
+'}' +
   '</style></head><body>' +
   '<div class="page-wrap">' +
 

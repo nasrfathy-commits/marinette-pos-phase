@@ -3094,6 +3094,7 @@ function printInvoice(iv, items) {
   /* Wait for font load then print */
   setTimeout(function() {
     iframe.contentWindow.focus();
+    iframe.contentWindow.document.body.style.zoom = "0.75";
     iframe.contentWindow.print();
     setTimeout(function(){ iframe.style.display='none'; }, 1200);
   }, 750);

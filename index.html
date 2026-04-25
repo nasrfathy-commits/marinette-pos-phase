@@ -3181,11 +3181,11 @@ function buildPrintHTML(iv, items) {
   '.footer-sub{font-size:8.5px;color:#ccc;letter-spacing:1px;}' +
 
   /* ── PRINT ── */
- @media print{
-  body{font-size:11px;}
-  .page-wrap{padding:0;}
-  @page{margin:10mm 14mm;}
-}
+  '@media print{' +
+  '  body{font-size:11px;}' +
+  '  .page-wrap{padding:0;}' +
+  '  @page{margin:10mm 14mm;}' +
+  '}' +
   '</style></head><body>' +
   '<div class="page-wrap">' +
 

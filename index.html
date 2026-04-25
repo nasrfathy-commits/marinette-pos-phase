@@ -1249,26 +1249,35 @@ var DB = {
   },
 
   getInvoiceItems: async function(invoiceId) {
-    if (APP.mode === 'live') {
-      try {
-        var res = await APP.sb.from('invoice_items').select('*').eq('invoice_id', invoiceId).order('created_at');
-        if (res.error) throw res.error;
-        return (res.data || []).map(function(r) {
-          return {
-            id      : r.id,
-            barcode : r.barcode,
-            name    : r.product_name_snapshot,
-            qty     : r.quantity,
-            price   : r.price,
-            discount: r.discount,
-            /* return_amount kept in DB for Phase 3 — not surfaced in invoice UI */
-          };
-        });
-      } catch(e) { return []; }
+  if (APP.mode === 'live') {
+    try {
+      var res = await APP.sb
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', invoiceId);
+
+      if (res.error) throw res.error;
+
+      return (res.data || []).map(function(r) {
+        return {
+          id: r.id,
+          barcode: r.barcode,
+          name: r.product_name_snapshot,
+          qty: parseFloat(r.quantity) || 0,
+          price: parseFloat(r.price) || 0,
+          discount: parseFloat(r.discount_value) || 0,
+          discountValue: parseFloat(r.discount_value) || 0
+        };
+      });
+    } catch(e) {
+      console.warn('DB.getInvoiceItems:', e);
+      return [];
     }
-    var items = localGet(K.INV_ITEMS);
-    return items.filter(function(it){ return it.invoiceId === invoiceId; });
-  },
+  }
+
+  var items = localGet(K.INV_ITEMS);
+  return items.filter(function(it){ return it.invoiceId === invoiceId; });
+},
 
   saveInvoice: async function(inv, items, existingId) {
     /*

@@ -2719,7 +2719,7 @@ async function loadDashboard() {
 
   var filteredItems = allItems.filter(function(it) {
     if (!filteredInvIds[it.invoiceId]) return false;
-    if (fProd && !(it.name||'').toLowerCase().includes(fProd)) return false;
+   if (fProd && !String(it.name || it.product_name_snapshot || '').toLowerCase().includes(fProd)) return false;
     return true;
   });
 

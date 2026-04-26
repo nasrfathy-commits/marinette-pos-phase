@@ -2720,8 +2720,8 @@ async function loadDashboard() {
   var filteredItems = allItems.filter(function(it) {
    var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
 if (!filteredInvIds[itemInvId]) return false;
-   var itemName = String(it.name || it.product_name_snapshot || it.productName || it.product_name || it.product || '').toLowerCase();
-if (fProd && !itemName.includes(fProd.toLowerCase())) return false;    return true;
+   if (fProd && !String(it.name || '').toLowerCase().includes(fProd.toLowerCase())) return false;
+    return true;
   });
 
   /* If product filter active — restrict invoices to those that contain filtered items */

@@ -2718,15 +2718,19 @@ async function loadDashboard() {
   filteredInv.forEach(function(iv){ filteredInvIds[iv.id]=true; });
 
   var filteredItems = allItems.filter(function(it) {
-   if (!filteredInvIds[it.invoiceId || it.invoice_id]) return false;
-   if (fProd && !String(it.name || it.product_name_snapshot || '').toLowerCase().includes(fProd)) return false;
-    return true;
+   var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
+if (!filteredInvIds[itemInvId]) return false;
+   var itemName = String(it.name || it.product_name_snapshot || it.productName || it.product_name || it.product || '').toLowerCase();
+if (fProd && !itemName.includes(fProd.toLowerCase())) return false;    return true;
   });
 
   /* If product filter active — restrict invoices to those that contain filtered items */
   if (fProd) {
     var invWithProduct = {};
-   filteredItems.forEach(function(it){ invWithProduct[it.invoiceId || it.invoice_id]=true; });
+   filteredItems.forEach(function(it){
+  var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
+  invWithProduct[itemInvId] = true;
+});
     filteredInv = filteredInv.filter(function(iv){ return invWithProduct[iv.id]; });
   }
 

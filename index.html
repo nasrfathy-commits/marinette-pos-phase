@@ -2718,7 +2718,7 @@ async function loadDashboard() {
   filteredInv.forEach(function(iv){ filteredInvIds[iv.id]=true; });
 
   var filteredItems = allItems.filter(function(it) {
-    if (!filteredInvIds[it.invoiceId]) return false;
+   if (!filteredInvIds[it.invoiceId || it.invoice_id]) return false;
    if (fProd && !String(it.name || it.product_name_snapshot || '').toLowerCase().includes(fProd)) return false;
     return true;
   });
@@ -2726,7 +2726,7 @@ async function loadDashboard() {
   /* If product filter active — restrict invoices to those that contain filtered items */
   if (fProd) {
     var invWithProduct = {};
-    filteredItems.forEach(function(it){ invWithProduct[it.invoiceId]=true; });
+   filteredItems.forEach(function(it){ invWithProduct[it.invoiceId || it.invoice_id]=true; });
     filteredInv = filteredInv.filter(function(iv){ return invWithProduct[iv.id]; });
   }
 

@@ -2686,7 +2686,10 @@ async function loadDashboard() {
   var fTo   = (document.getElementById('flt_to')||{}).value   || DASH.toDate   || '';
   var fCh   = (document.getElementById('flt_channel')||{}).value || DASH.channel || '';
   var fProd = ((document.getElementById('flt_product')||{}).value||'').trim().toLowerCase();
-
+DASH.fromDate = fFrom;
+DASH.toDate = fTo;
+DASH.channel = fCh;
+DASH.product = fProd;
   /* Populate channel filter select */
   populateDashChannelSelect(fCh);
 

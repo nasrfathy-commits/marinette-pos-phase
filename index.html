@@ -1412,7 +1412,7 @@ var DB = {
             name       : r.product_name_snapshot,
             qty        : parseFloat(r.quantity)  || 0,
             price      : parseFloat(r.price)     || 0,
-            discount   : parseFloat(r.discount)  || 0,
+           discount : parseFloat(r.discount_value) || 0,
                       };
         });
       } catch(e) { console.warn('DB.getAllInvoiceItems:', e); return localGet(K.INV_ITEMS); }

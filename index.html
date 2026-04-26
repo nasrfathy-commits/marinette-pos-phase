@@ -2704,9 +2704,12 @@ async function loadDashboard() {
 
   /* Filter invoices by date range and channel */
   var filteredInv = allInvoices.filter(function(iv) {
-    var d = getInvDate(iv).substring(0,10);
-    if (fFrom && d < fFrom) return false;
-    if (fTo   && d > fTo)   return false;
+    var d = new Date(getInvDate(iv));
+var from = fFrom ? new Date(fFrom) : null;
+var to = fTo ? new Date(fTo) : null;
+
+if (from && d < from) return false;
+if (to && d > to) return false;
     if (fCh && (iv.channel||'') !== fCh) return false;
     return true;
   });

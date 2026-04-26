@@ -2720,7 +2720,9 @@ async function loadDashboard() {
 if (!filteredInvIds[itemInvId]) return false;
    var itemName = String(it.name || it.product_name_snapshot || it.productName || it.product_name || '').toLowerCase();
 
-if (fProd && !itemName.includes(fProd.toLowerCase())) return false;
+var search = String(fProd || '').trim().toLowerCase();
+
+if (search && !itemName.includes(search)) return false;
     return true;
   });
 

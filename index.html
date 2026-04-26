@@ -2668,14 +2668,15 @@ function isoDate(d) {
 }
 
 function getInvDate(iv) {
-  /* Returns YYYY-MM-DD string regardless of storage format */
- var raw = iv.createdAt || iv
+  var raw = iv.invoice_date || iv.createdAt || iv.created_at || iv.date || '';
+
   if (!raw) return '';
-  /* If it's an ISO timestamp or locale Arabic string */
+
   try {
     var d = new Date(raw);
     if (!isNaN(d)) return isoDate(d);
   } catch(e) {}
+
   return raw.substring(0,10);
 }
 

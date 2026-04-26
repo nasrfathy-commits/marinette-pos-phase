@@ -2669,7 +2669,7 @@ function isoDate(d) {
 
 function getInvDate(iv) {
   /* Returns YYYY-MM-DD string regardless of storage format */
- var raw = iv.date || iv.invoice_date || iv.createdAt || iv.created_at || '';
+ var raw = iv.createdAt || iv
   if (!raw) return '';
   /* If it's an ISO timestamp or locale Arabic string */
   try {

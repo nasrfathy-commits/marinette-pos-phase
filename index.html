@@ -2704,14 +2704,14 @@ async function loadDashboard() {
 
   /* Filter invoices by date range and channel */
   var filteredInv = allInvoices.filter(function(iv) {
-    var d = new Date(getInvDate(iv));
-var from = fFrom ? new Date(fFrom) : null;
-var to = fTo ? new Date(fTo) : null;
+   var d = getInvDate(iv).substring(0,10);
+var from = fFrom || '';
+var to = fTo || '';
 
 if (from && d < from) return false;
 if (to && d > to) return false;
-    if (fCh && (iv.channel||'') !== fCh) return false;
-    return true;
+if (fCh && (iv.channel||'') !== fCh) return false;
+return true;
   });
 
   /* Filter items: only from filtered invoices AND matching product search */

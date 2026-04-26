@@ -2704,7 +2704,7 @@ async function loadDashboard() {
 
   /* Filter invoices by date range and channel */
   var filteredInv = allInvoices.filter(function(iv) {
-    var d = getInvDate(iv);
+    var d = getInvDate(iv).substring(0,10);
     if (fFrom && d < fFrom) return false;
     if (fTo   && d > fTo)   return false;
     if (fCh && (iv.channel||'') !== fCh) return false;
@@ -2718,7 +2718,9 @@ async function loadDashboard() {
   var filteredItems = allItems.filter(function(it) {
    var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
 if (!filteredInvIds[itemInvId]) return false;
-   if (fProd && !String(it.name || '').toLowerCase().includes(fProd.toLowerCase())) return false;
+   var itemName = String(it.name || it.product_name_snapshot || it.productName || it.product_name || '').toLowerCase();
+
+if (fProd && !itemName.includes(fProd.toLowerCase())) return false;
     return true;
   });
 

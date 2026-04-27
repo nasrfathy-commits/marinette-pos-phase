@@ -3583,7 +3583,7 @@ function renderReturnTable() {
       '<td><input class="cell-input" style="width:150px" value="'+escapeHtml(it.name)+'"' +
           ' onchange="updateReturnItem(\''+id+'\',\'name\',this.value)"' +
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      '<td><input class="cell-input num" type="number" min="0.001" step="0.001" value="'+(it.qty||1)+'"' +
+      '<td><input class="cell-input num" type="number" min="1" step="1"" value="'+(it.qty||1)+'"' +
           ' oninput="updateReturnItem(\''+id+'\',\'qty\',this.value)"' +
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
       '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.price||0)+'"' +

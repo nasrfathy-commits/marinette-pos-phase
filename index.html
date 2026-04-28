@@ -510,6 +510,7 @@ tr.editing td{background:var(--gold-dim)!important;}
   <button class="tab-btn"        onclick="showPage('invoices')"  data-page="invoices">📋 الفواتير</button>
   <button class="tab-btn"        onclick="showPage('dashboard')" data-page="dashboard">📊 لوحة التحكم</button>
   <button class="tab-btn"        onclick="showPage('returns')"   data-page="returns">↩️ المرتجعات</button>
+  <button class="tab-btn"        onclick="showPage('statement')" data-page="statement">📄 كشف الحساب</button>
   <button class="tab-btn"        onclick="showPage('products')"  data-page="products">📦 المنتجات</button>
   <button class="tab-btn"        onclick="showPage('channels')"  data-page="channels">🏪 العملاء</button>
 </nav>
@@ -537,7 +538,11 @@ tr.editing td{background:var(--gold-dim)!important;}
         </div>
         <div class="inv-field">
           <label>التاريخ</label>
-          <span id="invDate" class="num">—</span>
+          <input type="date" id="inv_date" class="cell-input num"
+                 style="background:transparent;border:1px solid var(--gold-border);
+                        border-radius:4px;color:var(--gold-light);padding:4px 8px;font-size:13px;width:auto;"
+                 onchange="INV.date=this.value;">
+          <span id="invDate" class="num" style="display:none;">—</span>
         </div>
         <div class="form-group" style="min-width:200px;">
           <label style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">العميل</label>
@@ -850,7 +855,11 @@ tr.editing td{background:var(--gold-dim)!important;}
         </div>
         <div class="inv-field">
           <label>التاريخ</label>
-          <span id="retDate" class="num">—</span>
+          <input type="date" id="ret_date" class="cell-input num"
+                 style="background:transparent;border:1px solid var(--gold-border);
+                        border-radius:4px;color:var(--gold-light);padding:4px 8px;font-size:13px;width:auto;"
+                 onchange="RET.date=this.value;">
+          <span id="retDate" class="num" style="display:none;">—</span>
         </div>
         <div class="form-group" style="min-width:200px;">
           <label style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">العميل</label>
@@ -878,7 +887,7 @@ tr.editing td{background:var(--gold-dim)!important;}
         <thead>
           <tr>
             <th>#</th><th>باركود</th><th>اسم المنتج</th>
-            <th>الكمية المرتجعة</th><th>السعر</th><th>قيمة المرتجع</th><th>حذف</th>
+            <th>الكمية المرتجعة</th><th>السعر</th><th>خصم القطعة</th><th>قيمة المرتجع</th><th>حذف</th>
           </tr>
         </thead>
         <tbody id="retBody"></tbody>
@@ -926,6 +935,130 @@ tr.editing td{background:var(--gold-dim)!important;}
       </div>
     </div>
   </div><!-- /page-returns -->
+
+
+  <!-- =================== PAGE: STATEMENT =================== -->
+  <div class="page" id="page-statement">
+    <div class="main" style="max-width:1100px;margin:0 auto;padding:28px;">
+
+      <div class="sec-title">
+        <div class="icon-badge">📄</div>
+        <h2>كشف حساب العميل</h2>
+        <div class="gold-line"></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card card-gold" style="margin-bottom:20px;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="form-group" style="min-width:180px;">
+            <label>العميل</label>
+            <select id="stmt_channel">
+              <option value="">— اختر العميل —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>من تاريخ</label>
+            <input type="date" id="stmt_from">
+          </div>
+          <div class="form-group">
+            <label>إلى تاريخ</label>
+            <input type="date" id="stmt_to">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:2px;">
+            <button class="btn btn-outline btn-sm" onclick="stmtSetPeriod('today')">اليوم</button>
+            <button class="btn btn-outline btn-sm" onclick="stmtSetPeriod('week')">هذا الأسبوع</button>
+            <button class="btn btn-outline btn-sm" onclick="stmtSetPeriod('month')">هذا الشهر</button>
+            <button class="btn btn-primary btn-sm" onclick="loadStatement()">🔍 عرض</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div id="stmtActions" style="display:none;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="stmtPreview()">👁 معاينة</button>
+        <button class="btn btn-print btn-sm"   onclick="stmtPrint()">🖨️ طباعة</button>
+        <button class="btn btn-export btn-sm"  onclick="stmtDownloadPDF()">⬇️ تحميل PDF</button>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="stmtKPIs" style="display:none;">
+        <div class="kpi-card">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-label">إجمالي المبيعات</div>
+          <div class="kpi-value" id="stmt_gross">—</div>
+          <div class="kpi-sub">ج.م قبل الخصم</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🏷️</div>
+          <div class="kpi-label">الخصومات</div>
+          <div class="kpi-value" id="stmt_disc" style="color:var(--red);">—</div>
+          <div class="kpi-sub">ج.م</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">↩️</div>
+          <div class="kpi-label">المرتجعات</div>
+          <div class="kpi-value" id="stmt_ret" style="color:var(--red);">—</div>
+          <div class="kpi-sub">ج.م</div>
+        </div>
+        <div class="kpi-card kpi-highlight">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-label">الصافي النهائي</div>
+          <div class="kpi-value" id="stmt_net" style="color:var(--green);">—</div>
+          <div class="kpi-sub">المبيعات - الخصومات - المرتجعات</div>
+        </div>
+      </div>
+
+      <!-- Sales table -->
+      <div id="stmtSalesWrap" style="display:none;margin-top:20px;">
+        <div class="chart-title" style="margin-bottom:10px;">🧾 فواتير المبيعات</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>رقم الفاتورة</th><th>التاريخ</th>
+                <th>الإجمالي</th><th>الخصم</th><th>الصافي</th>
+              </tr>
+            </thead>
+            <tbody id="stmtSalesBody"></tbody>
+            <tfoot>
+              <tr style="font-weight:700;color:var(--gold);">
+                <td colspan="3">الإجمالي</td>
+                <td class="num" id="stmtSalesFootGross"></td>
+                <td class="num" id="stmtSalesFootDisc"></td>
+                <td class="num" id="stmtSalesFootNet"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Returns table -->
+      <div id="stmtRetWrap" style="display:none;margin-top:20px;">
+        <div class="chart-title" style="margin-bottom:10px;">↩️ المرتجعات</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>رقم المرتجع</th><th>التاريخ</th><th>إجمالي المرتجع</th></tr>
+            </thead>
+            <tbody id="stmtRetBody"></tbody>
+            <tfoot>
+              <tr style="font-weight:700;color:var(--red);">
+                <td colspan="3">الإجمالي</td>
+                <td class="num" id="stmtRetFoot"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="stmtEmpty" class="empty" style="display:none;">
+        <div class="empty-icon">📄</div>
+        <p>اختر عميلاً وفترة زمنية ثم اضغط عرض</p>
+      </div>
+
+    </div>
+  </div><!-- /page-statement -->
 
 
 </main><!-- /main -->
@@ -1515,6 +1648,7 @@ var DB = {
             product_name_snapshot: it.name,
             quantity             : it.qty,
             price                : it.price,
+            return_discount      : it.discount || 0,
             line_total           : it.total,
           };
         });
@@ -1822,6 +1956,7 @@ function showPage(id) {
   if (id==='channels')  renderChannelsList();
   if (id==='dashboard') loadDashboard();
   if (id==='returns')   { initReturnIfEmpty(); renderReturnsList(); retFocusScanner(); }
+  if (id==='statement') { initStatementPage(); }
 }
 
 
@@ -2006,6 +2141,8 @@ function initInvoice() {
   INV.items   = [];
   document.getElementById('invNumber').textContent = INV.number;
   document.getElementById('invDate').textContent   = INV.date;
+  var _invDateEl = document.getElementById('inv_date');
+  if (_invDateEl) _invDateEl.value = INV.date;
   document.getElementById('invChannel').value      = '';
   document.getElementById('invNotes').value        = '';
   /* Hide editing banner, restore button label */
@@ -2315,6 +2452,8 @@ async function editInvoice(id) {
   /* Update UI */
   document.getElementById('invNumber').textContent = INV.number;
   document.getElementById('invDate').textContent   = INV.date;
+  var _eInvDate = document.getElementById('inv_date');
+  if (_eInvDate) _eInvDate.value = INV.date;
   document.getElementById('invChannel').value      = INV.channel;
   document.getElementById('invNotes').value        = INV.notes;
 
@@ -2668,16 +2807,49 @@ function isoDate(d) {
 }
 
 function getInvDate(iv) {
-  var raw = iv.invoice_date || iv.createdAt || iv.created_at || iv.date || '';
-
-  if (!raw) return '';
-
-  try {
-    var d = new Date(raw);
-    if (!isNaN(d)) return isoDate(d);
-  } catch(e) {}
-
-  return raw.substring(0,10);
+  /* Priority: invoice_date → created_at → createdAt → date (Arabic fallback) */
+  var candidates = [iv.invoice_date, iv.created_at, iv.createdAt];
+  for (var i = 0; i < candidates.length; i++) {
+    var raw = candidates[i];
+    if (!raw) continue;
+    /* If it's already YYYY-MM-DD or starts with ISO, extract first 10 chars */
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.substring(0, 10);
+    /* Try parsing as a JS Date (handles ISO with timezone offset) */
+    try {
+      var d = new Date(raw);
+      if (!isNaN(d)) return isoDate(d);
+    } catch(e) {}
+  }
+  /* Last resort: Arabic date string stored in iv.date */
+  var arabicRaw = iv.date || '';
+  if (arabicRaw) {
+    /* Try JS Date parse — may work for some locales */
+    try {
+      var ad = new Date(arabicRaw);
+      if (!isNaN(ad)) return isoDate(ad);
+    } catch(e) {}
+    /* Manual Arabic month map */
+    var arMonths = {
+      'يناير':'01','فبراير':'02','مارس':'03','أبريل':'04','إبريل':'04',
+      'مايو':'05','يونيو':'06','يوليو':'07','أغسطس':'08',
+      'سبتمبر':'09','أكتوبر':'10','نوفمبر':'11','ديسمبر':'12'
+    };
+    var normalized = arabicRaw
+      .replace(/[\u0660-\u0669]/g, function(c){ return c.charCodeAt(0) - 0x0660; })
+      .replace(/[\u06F0-\u06F9]/g, function(c){ return c.charCodeAt(0) - 0x06F0; });
+    for (var m in arMonths) {
+      if (normalized.indexOf(m) !== -1) {
+        var parts = normalized.replace(m, arMonths[m]).trim().split(/\s+/);
+        if (parts.length === 3) {
+          var day   = parts[0].length === 1 ? '0' + parts[0] : parts[0];
+          var month = parts[1];
+          var year  = parts[2];
+          return year + '-' + month + '-' + day;
+        }
+      }
+    }
+  }
+  return '';
 }
 
 /* ---- Load dashboard ---- */
@@ -3450,6 +3622,8 @@ function initReturn() {
   RET.items   = [];
   document.getElementById('retNumber').textContent = RET.number;
   document.getElementById('retDate').textContent   = RET.date;
+  var _retDateEl = document.getElementById('ret_date');
+  if (_retDateEl) _retDateEl.value = RET.date;
   document.getElementById('retChannel').value      = '';
   document.getElementById('retNotes').value        = '';
   renderReturnTable();
@@ -3528,19 +3702,20 @@ function addReturnItemFromProduct(product) {
     existing.total = parseFloat((existing.qty * existing.price).toFixed(2));
   } else {
     RET.items.push({
-      id     : uid(),
-      barcode: product.barcode,
-      name   : product.name,
-      qty    : 1,
-      price  : product.price,
-      total  : product.price,
+      id      : uid(),
+      barcode : product.barcode,
+      name    : product.name,
+      qty     : 1,
+      price   : product.price,
+      discount: product.discountValue || 0,
+      total   : Math.max(0, product.price - (product.discountValue || 0)),
     });
   }
   renderReturnTable();
 }
 
 function addReturnRow() {
-  RET.items.push({ id:uid(), barcode:'', name:'', qty:1, price:0, total:0 });
+  RET.items.push({ id:uid(), barcode:'', name:'', qty:1, price:0, discount:0, total:0 });
   renderReturnTable();
 }
 
@@ -3552,11 +3727,14 @@ function deleteReturnRow(id) {
 function updateReturnItem(id, field, value) {
   var item = RET.items.find(function(it){ return it.id===id; });
   if (!item) return;
-  if (field==='name' || field==='barcode') { item[field] = value; }
-  else {
-    item[field] = parseFloat(value) || 0;
-    /* Recalculate total */
-    item.total = parseFloat(((item.qty||0) * (item.price||0)).toFixed(2));
+  if (field==='name' || field==='barcode') {
+    item[field] = value;
+  } else {
+    var parsed = parseFloat(value) || 0;
+    if (field === 'discount') parsed = Math.min(parsed, item.price || 0);
+    item[field] = parsed;
+    /* total = qty * (price - discount) */
+    item.total = parseFloat(((item.qty||0) * Math.max(0,(item.price||0)-(item.discount||0))).toFixed(2));
   }
   renderReturnTable();
 }
@@ -3588,6 +3766,9 @@ function renderReturnTable() {
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
       '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.price||0)+'"' +
           ' oninput="updateReturnItem(\''+id+'\',\'price\',this.value)"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+      '<td><input class="cell-input num" type="number" min="0" step="1" value="'+(it.discount||0)+'"' +
+          ' oninput="updateReturnItem(\''+id+'\',\'discount\',this.value)"' +
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
       '<td class="num" style="color:var(--red);font-weight:600;">'+fmt(it.total)+'</td>' +
       '<td><button class="btn btn-danger btn-icon" onclick="deleteReturnRow(\''+id+'\')">🗑</button></td>' +
@@ -3627,7 +3808,14 @@ async function confirmSaveReturn() {
     totalReturn: RET.totalReturn,
   };
   var items = RET.items.map(function(it) {
-    return { barcode: it.barcode, name: it.name, qty: it.qty, price: it.price, total: it.total };
+    return {
+      barcode : it.barcode,
+      name    : it.name,
+      qty     : it.qty,
+      price   : it.price,
+      discount: it.discount || 0,
+      total   : it.total,
+    };
   });
 
   /* 7. Confirm then save */
@@ -3798,6 +3986,304 @@ function exportSingleReturnCSV(r, items) {
 /* also add a today() helper that uses isoDate */
 function today() { return isoDate(new Date()); }
 
+
+
+/* ============================================================
+   STATEMENT MODULE — كشف حساب العميل (Phase 7)
+   ============================================================ */
+
+function initStatementPage() {
+  var sel = document.getElementById('stmt_channel');
+  if (!sel || sel.options.length > 1) return;
+  APP.channels.forEach(function(c) {
+    var o = document.createElement('option');
+    o.value = c.name; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+  /* Default: this month */
+  var now = new Date();
+  document.getElementById('stmt_from').value = isoDate(new Date(now.getFullYear(), now.getMonth(), 1));
+  document.getElementById('stmt_to').value   = isoDate(now);
+}
+
+function stmtSetPeriod(p) {
+  var now = new Date();
+  var from, to = isoDate(now);
+  if (p === 'today') {
+    from = isoDate(now);
+  } else if (p === 'week') {
+    var day = now.getDay();
+    var monday = new Date(now);
+    monday.setDate(now.getDate() - day + (day === 0 ? -6 : 1));
+    from = isoDate(monday);
+  } else if (p === 'month') {
+    from = isoDate(new Date(now.getFullYear(), now.getMonth(), 1));
+  }
+  document.getElementById('stmt_from').value = from;
+  document.getElementById('stmt_to').value   = to;
+}
+
+async function loadStatement() {
+  var channel = document.getElementById('stmt_channel').value;
+  var from    = document.getElementById('stmt_from').value;
+  var to      = document.getElementById('stmt_to').value;
+
+  if (!channel) { toast('⚠️ اختر عميلاً أولاً', 'err'); return; }
+
+  var allInvoices = await DB.getInvoices();
+  var allReturns  = await DB.getReturns();
+
+  function inRange(dateStr) {
+    var d = (dateStr || '').substring(0, 10);
+    if (from && d < from) return false;
+    if (to   && d > to)   return false;
+    return true;
+  }
+
+  var invoices = allInvoices.filter(function(iv) {
+    return (iv.channel || '') === channel && inRange(getInvDate(iv));
+  });
+  var returns = allReturns.filter(function(r) {
+    return (r.channel || '') === channel && inRange(r.date || r.createdAt || '');
+  });
+
+  var totalGross = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalGross)||0); }, 0);
+  var totalDisc  = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalDiscount)||0); }, 0);
+  var totalNet   = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.netTotal)||0); }, 0);
+  var totalRet   = returns.reduce(function(s,r){   return s+(parseFloat(r.totalReturn)||0); }, 0);
+  var trueNet    = totalNet - totalRet;
+
+  /* Store for PDF/Print */
+  window._STMT = { channel:channel, from:from, to:to, invoices:invoices, returns:returns,
+    totalGross:totalGross, totalDisc:totalDisc, totalNet:totalNet, totalRet:totalRet, trueNet:trueNet };
+
+  /* KPIs */
+  document.getElementById('stmt_gross').textContent = fmt(totalGross) + ' ج.م';
+  document.getElementById('stmt_disc').textContent  = fmt(totalDisc)  + ' ج.م';
+  document.getElementById('stmt_ret').textContent   = fmt(totalRet)   + ' ج.م';
+  document.getElementById('stmt_net').textContent   = fmt(trueNet)    + ' ج.م';
+  document.getElementById('stmtKPIs').style.display    = 'grid';
+  document.getElementById('stmtActions').style.display = 'flex';
+
+  /* Sales table */
+  if (invoices.length > 0) {
+    document.getElementById('stmtSalesWrap').style.display = 'block';
+    document.getElementById('stmtSalesBody').innerHTML = invoices.map(function(iv, i) {
+      return '<tr>' +
+        '<td class="muted">'+(i+1)+'</td>' +
+        '<td class="num">'+escapeHtml(iv.number||'—')+'</td>' +
+        '<td>'+fmtDateStr(getInvDate(iv))+'</td>' +
+        '<td class="num">'+fmt(iv.totalGross)+'</td>' +
+        '<td class="num" style="color:var(--red);">'+fmt(iv.totalDiscount)+'</td>' +
+        '<td class="num" style="color:var(--green);font-weight:700;">'+fmt(iv.netTotal)+'</td>' +
+      '</tr>';
+    }).join('');
+    document.getElementById('stmtSalesFootGross').textContent = fmt(totalGross) + ' ج.م';
+    document.getElementById('stmtSalesFootDisc').textContent  = fmt(totalDisc)  + ' ج.م';
+    document.getElementById('stmtSalesFootNet').textContent   = fmt(totalNet)   + ' ج.م';
+  } else {
+    document.getElementById('stmtSalesWrap').style.display = 'none';
+  }
+
+  /* Returns table */
+  if (returns.length > 0) {
+    document.getElementById('stmtRetWrap').style.display = 'block';
+    document.getElementById('stmtRetBody').innerHTML = returns.map(function(r, i) {
+      return '<tr>' +
+        '<td class="muted">'+(i+1)+'</td>' +
+        '<td class="num">'+escapeHtml(r.number||'—')+'</td>' +
+        '<td>'+fmtDateStr(r.date||r.createdAt||'')+'</td>' +
+        '<td class="num" style="color:var(--red);font-weight:700;">'+fmt(r.totalReturn)+'</td>' +
+      '</tr>';
+    }).join('');
+    document.getElementById('stmtRetFoot').textContent = fmt(totalRet) + ' ج.م';
+  } else {
+    document.getElementById('stmtRetWrap').style.display = 'none';
+  }
+
+  document.getElementById('stmtEmpty').style.display =
+    (invoices.length === 0 && returns.length === 0) ? 'block' : 'none';
+}
+
+/* ---- Build HTML for print/PDF ---- */
+function buildStatementHTML() {
+  var s = window._STMT;
+  if (!s) return '';
+
+  var salesRows = s.invoices.map(function(iv, i) {
+    return '<tr>' +
+      '<td>'+(i+1)+'</td>' +
+      '<td>'+escapeHtml(iv.number||'—')+'</td>' +
+      '<td>'+fmtDateStr(getInvDate(iv))+'</td>' +
+      '<td>'+fmt(iv.totalGross)+'</td>' +
+      '<td>'+fmt(iv.totalDiscount)+'</td>' +
+      '<td><strong>'+fmt(iv.netTotal)+'</strong></td>' +
+    '</tr>';
+  }).join('');
+
+  var retRows = s.returns.map(function(r, i) {
+    return '<tr>' +
+      '<td>'+(i+1)+'</td>' +
+      '<td>'+escapeHtml(r.number||'—')+'</td>' +
+      '<td>'+fmtDateStr(r.date||r.createdAt||'')+'</td>' +
+      '<td><strong>'+fmt(r.totalReturn)+'</strong></td>' +
+    '</tr>';
+  }).join('');
+
+  return '<!DOCTYPE html><html lang="ar" dir="rtl"><head>' +
+  '<meta charset="UTF-8">' +
+  '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">' +
+  '<title>كشف حساب — '+escapeHtml(s.channel)+'</title>' +
+  '<style>' +
+  '@page{size:A4;margin:14mm 18mm;}' +
+  '*{margin:0;padding:0;box-sizing:border-box;}' +
+  'body{font-family:Cairo,Arial,sans-serif;font-size:12px;color:#111;background:#fff;direction:rtl;}' +
+  '.wrap{max-width:720px;margin:0 auto;padding:20px 0;}' +
+  '.hdr{display:flex;justify-content:space-between;align-items:flex-start;' +
+       'border-bottom:2.5px solid #C9A84C;padding-bottom:14px;margin-bottom:18px;}' +
+  '.brand-logo{font-size:26px;font-weight:700;color:#9B7C2E;line-height:1;}' +
+  '.brand-divider{width:36px;height:2px;background:#C9A84C;margin:5px 0;}' +
+  '.brand-sub{font-size:8px;color:#aaa;letter-spacing:3px;text-transform:uppercase;}' +
+  '.hdr-info{text-align:left;}' +
+  '.hdr-title{font-size:16px;font-weight:700;color:#9B7C2E;}' +
+  '.hdr-sub{font-size:11px;color:#666;margin-top:4px;}' +
+  '.meta{display:flex;border:1px solid #e8e0cc;border-radius:6px;overflow:hidden;margin-bottom:18px;}' +
+  '.meta-cell{flex:1;padding:10px 14px;border-left:1px solid #e8e0cc;}' +
+  '.meta-cell:first-child{border-left:none;}' +
+  '.meta-lbl{font-size:8px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}' +
+  '.meta-val{font-size:12px;font-weight:600;color:#222;}' +
+  '.summary{display:flex;border:1.5px solid #C9A84C;border-radius:8px;overflow:hidden;margin-bottom:20px;background:#fffdf5;}' +
+  '.sum-cell{flex:1;padding:12px 16px;text-align:center;border-left:1px solid #e8d89c;}' +
+  '.sum-cell:first-child{border-left:none;}' +
+  '.sum-lbl{font-size:8px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}' +
+  '.sum-val{font-size:18px;font-weight:700;color:#9B7C2E;}' +
+  '.sum-val.red{color:#c04040;}.sum-val.grn{color:#1a7a4a;}' +
+  '.section-title{font-size:12px;font-weight:700;color:#9B7C2E;margin:16px 0 8px;' +
+    'padding-bottom:5px;border-bottom:1px solid #e8d89c;}' +
+  'table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px;}' +
+  'thead th{background:#f7f2e6;padding:7px 10px;font-size:9px;font-weight:700;' +
+    'color:#9B7C2E;text-transform:uppercase;text-align:right;border-bottom:2px solid #C9A84C;}' +
+  'tbody td{padding:6px 10px;border-bottom:1px solid #f0ebe0;color:#333;text-align:right;}' +
+  'tbody tr:nth-child(even){background:#fdfaf4;}' +
+  'tfoot td{padding:8px 10px;font-weight:700;color:#9B7C2E;border-top:2px solid #C9A84C;text-align:right;}' +
+  '.footer{margin-top:20px;padding-top:10px;border-top:1px solid #eee;' +
+    'display:flex;justify-content:space-between;font-size:9px;color:#ccc;}' +
+  '@media print{.wrap{padding:0;}}' +
+  '</style></head><body><div class="wrap">' +
+
+  '<div class="hdr">' +
+    '<div><div class="brand-logo">Marinette</div><div class="brand-divider"></div>' +
+    '<div class="brand-sub">French Bakery</div></div>' +
+    '<div class="hdr-info"><div class="hdr-title">كشف حساب عميل</div>' +
+    '<div class="hdr-sub">'+escapeHtml(s.channel)+'</div></div>' +
+  '</div>' +
+
+  '<div class="meta">' +
+    '<div class="meta-cell"><div class="meta-lbl">العميل</div><div class="meta-val">'+escapeHtml(s.channel)+'</div></div>' +
+    '<div class="meta-cell"><div class="meta-lbl">من</div><div class="meta-val">'+(s.from||'—')+'</div></div>' +
+    '<div class="meta-cell"><div class="meta-lbl">إلى</div><div class="meta-val">'+(s.to||'—')+'</div></div>' +
+    '<div class="meta-cell"><div class="meta-lbl">عدد الفواتير</div><div class="meta-val">'+s.invoices.length+'</div></div>' +
+  '</div>' +
+
+  '<div class="summary">' +
+    '<div class="sum-cell"><div class="sum-lbl">إجمالي المبيعات</div><div class="sum-val">'+fmt(s.totalGross)+'</div></div>' +
+    '<div class="sum-cell"><div class="sum-lbl">الخصومات</div><div class="sum-val red">'+fmt(s.totalDisc)+'</div></div>' +
+    '<div class="sum-cell"><div class="sum-lbl">المرتجعات</div><div class="sum-val red">'+fmt(s.totalRet)+'</div></div>' +
+    '<div class="sum-cell"><div class="sum-lbl">الصافي النهائي</div><div class="sum-val grn">'+fmt(s.trueNet)+'</div></div>' +
+  '</div>' +
+
+  (s.invoices.length > 0 ?
+    '<div class="section-title">🧾 فواتير المبيعات</div>' +
+    '<table><thead><tr><th>#</th><th>رقم الفاتورة</th><th>التاريخ</th>' +
+    '<th>الإجمالي</th><th>الخصم</th><th>الصافي</th></tr></thead>' +
+    '<tbody>'+salesRows+'</tbody>' +
+    '<tfoot><tr><td colspan="3">الإجمالي</td><td>'+fmt(s.totalGross)+'</td>' +
+    '<td>'+fmt(s.totalDisc)+'</td><td>'+fmt(s.totalNet)+'</td></tr></tfoot></table>'
+  : '') +
+
+  (s.returns.length > 0 ?
+    '<div class="section-title">↩️ المرتجعات</div>' +
+    '<table><thead><tr><th>#</th><th>رقم المرتجع</th><th>التاريخ</th>' +
+    '<th>إجمالي المرتجع</th></tr></thead>' +
+    '<tbody>'+retRows+'</tbody>' +
+    '<tfoot><tr><td colspan="3">الإجمالي</td><td>'+fmt(s.totalRet)+'</td></tr></tfoot></table>'
+  : '') +
+
+  '<div class="footer"><span>Marinette POS v7</span><span>'+isoDate(new Date())+'</span></div>' +
+  '</div></body></html>';
+}
+
+function stmtPreview() {
+  if (!window._STMT) { toast('⚠️ اضغط عرض أولاً', 'err'); return; }
+  var w = window.open('', '_blank');
+  if (w) { w.document.write(buildStatementHTML()); w.document.close(); }
+}
+
+function stmtPrint() {
+  if (!window._STMT) { toast('⚠️ اضغط عرض أولاً', 'err'); return; }
+  var iframe = document.getElementById('printFrame');
+  if (!iframe) return;
+  iframe.style.cssText = 'display:block;position:fixed;inset:0;width:100%;height:100%;border:none;z-index:99999;background:#fff;';
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(buildStatementHTML()); doc.close();
+  setTimeout(function() {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(function(){ iframe.style.display='none'; }, 1200);
+  }, 750);
+}
+
+function stmtDownloadPDF() {
+  stmtPrint();
+}
+
+function _doStmtPDF() {
+  var s = window._STMT;
+  if (!s) { toast('⚠️ اضغط عرض أولاً', 'err'); return; }
+
+  var fullHtml = buildStatementHTML();
+
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(fullHtml, 'text/html');
+
+  var wrap = document.createElement('div');
+  wrap.style.cssText =
+    'position:fixed;' +
+    'top:0;' +
+    'left:0;' +
+    'width:794px;' +
+    'background:#ffffff;' +
+    'color:#111;' +
+    'z-index:99999;' +
+    'padding:20px;' +
+    'direction:rtl;' +
+    'font-family:Cairo, Arial, sans-serif;';
+
+  wrap.innerHTML = doc.body.innerHTML;
+  document.body.appendChild(wrap);
+
+  var filename = 'كشف-حساب-' + s.channel + '-' + (s.from || '') + '-' + (s.to || '') + '.pdf';
+
+  setTimeout(function () {
+    html2pdf().set({
+      margin: 8,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(wrap).save().then(function () {
+      document.body.removeChild(wrap);
+      toast('✅ تم تحميل PDF: ' + filename, 'ok');
+    }).catch(function (e) {
+      document.body.removeChild(wrap);
+      toast('❌ خطأ في PDF: ' + e.message, 'err');
+    });
+  }, 500);
+}
 
 /* ============================================================
    M. INIT — entry point

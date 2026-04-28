@@ -2444,7 +2444,7 @@ async function editInvoice(id) {
       name         : it.name     || '',
       qty          : parseFloat(it.qty)   || 1,
       price        : parseFloat(it.price) || 0,
-      discountValue: parseFloat(it.discountValue || (it.qty>0 ? (it.discount/it.qty) : 0)) || 0,
+      discountValue: parseFloat(it.discountValue) || 0,
       discount     : parseFloat(it.discount) || 0,
     };
   });
@@ -2504,7 +2504,7 @@ async function copyInvoice(id) {
       name         : it.name     || '',
       qty          : parseFloat(it.qty)   || 1,
       price        : parseFloat(it.price) || 0,
-      discountValue: parseFloat(it.discountValue || (it.qty>0 ? (it.discount/it.qty) : 0)) || 0,
+      discountValue: parseFloat(it.discountValue) || 0,
       discount     : parseFloat(it.discount) || 0,
     };
   });

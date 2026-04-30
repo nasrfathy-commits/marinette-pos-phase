@@ -472,9 +472,129 @@ tr.editing td{background:var(--gold-dim)!important;}
 }
 .shake{animation:shakeX 0.5s ease;}
 
-@media print{
-  body>*:not(#printFrame){display:none!important;}
-  #printFrame{display:block!important;position:fixed;inset:0;width:100%;height:100%;border:none;z-index:99999;}
+/* ── Hide number input spinners everywhere ── */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── Row highlight on add/increment ── */
+@keyframes rowFlash {
+  0%   { background: rgba(82,183,136,0.35); }
+  100% { background: transparent; }
+}
+@keyframes rowFlashRed {
+  0%   { background: rgba(224,82,82,0.35); }
+  100% { background: transparent; }
+}
+tr.row-added   { animation: rowFlash    0.9s ease-out forwards; }
+tr.row-changed { animation: rowFlash    0.9s ease-out forwards; }
+tr.row-repriced{ animation: rowFlashRed 1.1s ease-out forwards; }
+
+/* ── Locked price cell ── */
+.price-locked  { pointer-events:none; opacity:0.65; }
+.manual-badge  { display:inline-block; font-size:9px; background:rgba(201,168,76,0.2);
+                 color:var(--gold); border:1px solid var(--gold-border);
+                 border-radius:3px; padding:1px 5px; margin-right:4px; vertical-align:middle; }
+
+/* ── Exact-match toggle ── */
+.toggle-exact  { display:inline-flex; align-items:center; gap:6px;
+                 font-size:12px; color:var(--w60); cursor:pointer; }
+.toggle-exact input { width:16px; height:16px; cursor:pointer; accent-color:var(--gold); }
+
+/* ── Per-row save button in pricing table ── */
+.btn-save-row  { font-size:11px; padding:3px 8px; height:auto; line-height:1.4; }
+
+/* ============================================================
+   LIGHT MODE — same brand identity, cream/white + gold + dark text
+   ============================================================ */
+body.light-mode {
+  --black:       #F5F0E8;
+  --black-2:     #EDE8DC;
+  --black-3:     #FAF7F2;
+  --black-4:     #E8E2D6;
+  --black-5:     #DDD8CC;
+  --gold:        #B8933A;
+  --gold-light:  #9B7C2E;
+  --gold-dark:   #7A6020;
+  --gold-dim:    rgba(184,147,58,0.12);
+  --gold-border: rgba(184,147,58,0.35);
+  --white:       #1A1208;
+  --w90:         rgba(26,18,8,0.90);
+  --w60:         rgba(26,18,8,0.60);
+  --w30:         rgba(26,18,8,0.30);
+  --w08:         rgba(26,18,8,0.06);
+  --red:         #C0392B;
+  --red-dim:     rgba(192,57,43,0.12);
+  --green:       #27754A;
+  --green-dim:   rgba(39,117,74,0.12);
+  --shadow:      0 8px 32px rgba(0,0,0,0.15);
+  --shadow-gold: 0 0 24px rgba(184,147,58,0.20);
+}
+body.light-mode { background: var(--black); color: var(--white); }
+body.light-mode body::before { display: none; }
+body.light-mode select option { background: var(--black-4); color: var(--white); }
+body.light-mode .cell-input { background: var(--black-4); color: var(--white); }
+body.light-mode input[type="text"],
+body.light-mode input[type="number"],
+body.light-mode input[type="email"],
+body.light-mode input[type="password"],
+body.light-mode select {
+  background: var(--black-4);
+  border-color: rgba(26,18,8,0.15);
+  color: var(--white);
+}
+body.light-mode .modal-overlay { background: rgba(0,0,0,0.55); }
+body.light-mode thead { background: var(--black-4); }
+body.light-mode .tbl-wrap { border-color: rgba(26,18,8,0.12); }
+body.light-mode tbody tr { border-bottom-color: rgba(26,18,8,0.07); }
+body.light-mode .nav-tabs { border-bottom-color: rgba(26,18,8,0.1); }
+body.light-mode .tab-btn { color: var(--w60); }
+body.light-mode .tab-btn.active { color: var(--gold); }
+body.light-mode .tab-btn:hover { color: var(--w90); }
+body.light-mode .toast { background: var(--black-3); }
+body.light-mode .inv-list-item { background: var(--black-3); }
+body.light-mode .kpi-card { background: var(--black-3); }
+body.light-mode .chart-wrap { background: var(--black-3); }
+body.light-mode .report-tab.active { background: var(--gold-dim); }
+body.light-mode .filters-bar { background: var(--black-3); }
+body.light-mode .editing-banner { background: linear-gradient(135deg,rgba(184,147,58,0.12),rgba(184,147,58,0.04)); }
+body.light-mode .period-pill { background: var(--black-4); }
+body.light-mode .period-pill.active, body.light-mode .period-pill:hover { background: var(--gold-dim); }
+body.light-mode .modal { background: var(--black-3); }
+body.light-mode .login-card { background: var(--black-3); }
+body.light-mode ::-webkit-scrollbar-track { background: var(--black-2); }
+body.light-mode ::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+body.light-mode .bar-col .ch-bar-bg { background: var(--black-4); }
+body.light-mode .scanner-wrap { background: linear-gradient(135deg,var(--black-3),var(--black-4)); }
+
+/* Theme toggle button */
+.theme-toggle {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 12px; border-radius: 20px; border: 1px solid var(--gold-border);
+  background: var(--gold-dim); cursor: pointer; font-size: 12px; font-weight: 600;
+  color: var(--gold); font-family: 'Cairo', sans-serif; transition: all 0.2s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.theme-toggle:hover { background: var(--gold-dim); border-color: var(--gold); }
+.theme-toggle-track {
+  width: 32px; height: 17px; border-radius: 9px; background: var(--black-5);
+  position: relative; transition: background 0.2s; flex-shrink: 0;
+  border: 1px solid var(--gold-border);
+}
+.theme-toggle-thumb {
+  position: absolute; top: 2px; right: 2px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--gold); transition: transform 0.2s;
+}
+body.light-mode .theme-toggle-track { background: var(--gold-dim); }
+body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
+
+@media print {
+  body > *:not(#printFrame) { display: none !important; }
+  #printFrame { display: block !important; position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 99999; }
 }
 </style>
 </head>
@@ -492,6 +612,10 @@ tr.editing td{background:var(--gold-dim)!important;}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
+    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="تبديل الثيم">
+      <span id="themeToggleLabel">🌙 داكن</span>
+      <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+    </button>
     <div class="db-status connecting" id="dbStatus">
       <div class="dot"></div>
       <span id="dbStatusText">Connecting</span>
@@ -512,6 +636,7 @@ tr.editing td{background:var(--gold-dim)!important;}
   <button class="tab-btn"        onclick="showPage('returns')"   data-page="returns">↩️ المرتجعات</button>
   <button class="tab-btn"        onclick="showPage('statement')" data-page="statement">📄 كشف الحساب</button>
   <button class="tab-btn"        onclick="showPage('products')"  data-page="products">📦 المنتجات</button>
+  <button class="tab-btn"        onclick="showPage('pricing')"   data-page="pricing">💰 أسعار العملاء</button>
   <button class="tab-btn"        onclick="showPage('channels')"  data-page="channels">🏪 العملاء</button>
 </nav>
 
@@ -526,7 +651,7 @@ tr.editing td{background:var(--gold-dim)!important;}
     <div class="scanner-wrap" id="scannerWrap">
       <div class="scanner-icon">📷</div>
       <div class="scanner-label"><p>Scan Barcode</p></div>
-      <input type="text" id="barcodeInput" placeholder="امسح الباركود أو اكتبه..." autocomplete="off" autofocus>
+      <input type="text" id="barcodeInput" placeholder="اختر العميل أولاً ثم امسح الباركود..." autocomplete="off" autofocus>
       <div class="scanner-status" id="scannerStatus">جاهز للمسح ...</div>
     </div>
 
@@ -546,7 +671,7 @@ tr.editing td{background:var(--gold-dim)!important;}
         </div>
         <div class="form-group" style="min-width:200px;">
           <label style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">العميل</label>
-          <select id="invChannel">
+          <select id="invChannel" onchange="onChannelChange(this)">
             <option value="">— اختر العميل —</option>
           </select>
           <div class="error-text" id="invChannelError">لازم تختار عميل</div>
@@ -594,7 +719,7 @@ tr.editing td{background:var(--gold-dim)!important;}
 
     <div class="inv-actions">
       <button class="btn btn-danger btn-sm" onclick="clearInvoice()">🗑 مسح</button>
-      <button class="btn btn-outline" id="draftBtn" onclick="saveInvoiceDraft()">💾 مسودة</button>
+      <button class="btn btn-outline" id="draftBtn" onclick="saveInvoiceDraft(false)">💾 مسودة</button>
       <button class="btn btn-primary" id="saveInvBtn" onclick="confirmAndSaveInvoice()">✅ تأكيد وحفظ الفاتورة</button>
     </div>
   </div><!-- /page-invoice -->
@@ -637,6 +762,7 @@ tr.editing td{background:var(--gold-dim)!important;}
         <div class="form-group"><label>اسم المنتج</label><input type="text" id="fp_name" placeholder="اسم المنتج..."></div>
         <div class="form-group"><label>السعر (ج.م)</label><input type="number" id="fp_price" placeholder="0.00" min="0" step="0.01"></div>
         <div class="form-group"><label>خصم القطعة (ج.م)</label><input type="number" id="fp_discount" placeholder="0" min="0" step="0.01"></div>
+        <div class="form-group"><label>سعر التكلفة (ج.م) <span style="color:var(--w30);font-size:10px;">اختياري — للربحية</span></label><input type="number" id="fp_cost" placeholder="0.00" min="0" step="0.01"></div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="saveProduct()">
@@ -654,7 +780,7 @@ tr.editing td{background:var(--gold-dim)!important;}
 
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>#</th><th>الباركود</th><th>اسم المنتج</th><th>السعر</th><th>خصم القطعة</th><th>إجراءات</th></tr></thead>
+        <thead><tr><th>#</th><th>الباركود / الكود</th><th>اسم المنتج</th><th>السعر</th><th>خصم القطعة</th><th>التكلفة</th><th>إجراءات</th></tr></thead>
         <tbody id="productsBody"></tbody>
       </table>
     </div>
@@ -908,9 +1034,13 @@ tr.editing td{background:var(--gold-dim)!important;}
     </div>
 
     <!-- Actions -->
+    <div class="editing-banner" id="retEditingBanner" style="display:none;">
+      <span>✏️ وضع التعديل — تعديل المرتجع: <strong id="retEditingBannerNum"></strong></span>
+      <button class="btn btn-danger btn-sm" onclick="cancelReturnEdit()">✕ إلغاء التعديل</button>
+    </div>
     <div class="inv-actions">
       <button class="btn btn-danger btn-sm" onclick="clearReturn()">🗑 مسح</button>
-      <button class="btn btn-primary" onclick="confirmSaveReturn()">✅ حفظ المرتجع</button>
+      <button class="btn btn-primary" id="retSaveBtn" onclick="confirmSaveReturn()">✅ حفظ المرتجع</button>
     </div>
 
     <!-- Returns history -->
@@ -1061,6 +1191,64 @@ tr.editing td{background:var(--gold-dim)!important;}
   </div><!-- /page-statement -->
 
 
+  <!-- =================== PAGE: PRICING =================== -->
+  <div class="page" id="page-pricing">
+    <div class="sec-title">
+      <div class="icon-badge">💰</div>
+      <h2>أسعار العملاء</h2>
+      <div class="gold-line"></div>
+    </div>
+
+    <div class="card card-gold" style="margin-bottom:20px;">
+      <div class="form-row" style="align-items:flex-end;">
+        <div class="form-group" style="min-width:220px;">
+          <label>اختر العميل</label>
+          <select id="pricing_channel" onchange="renderPricingTable()">
+            <option value="">— اختر العميل —</option>
+          </select>
+        </div>
+        <div class="form-group" style="min-width:220px;">
+          <label>بحث بالاسم أو الكود</label>
+          <input type="text" id="pricing_search" placeholder="🔍 ابحث..." oninput="renderPricingTable()">
+          <label class="toggle-exact" style="margin-top:6px;">
+            <input type="checkbox" id="pricing_exact" onchange="renderPricingTable()">
+            بحث مطابق للكود
+          </label>
+        </div>
+        <button id="pricingSaveBtn" class="btn btn-primary" onclick="saveAllPrices()" style="align-self:flex-end;">💾 حفظ الأسعار</button>
+      </div>
+    </div>
+
+    <div id="pricingTableWrap" style="display:none;">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الكود / الباركود</th>
+              <th>اسم المنتج</th>
+              <th>السعر للعميل (ج.م)</th>
+              <th>خصم القطعة (ج.م)</th>
+              <th>الحالة</th>
+              <th>حفظ</th>
+            </tr>
+          </thead>
+          <tbody id="pricingBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="pricingEmpty" class="empty" style="display:none;">
+      <div class="empty-icon">💰</div>
+      <p>اختر عميلاً لعرض وتعديل أسعاره</p>
+    </div>
+
+    <div id="pricingNoChannel" class="empty">
+      <div class="empty-icon">🏪</div>
+      <p>اختر عميلاً من القائمة أعلاه لعرض وتعديل أسعاره</p>
+    </div>
+  </div><!-- /page-pricing -->
+
 </main><!-- /main -->
 
 <!-- Print iframe (hidden, used by print module) -->
@@ -1111,10 +1299,10 @@ tr.editing td{background:var(--gold-dim)!important;}
     <div style="font-size:52px;margin-bottom:12px;">❌</div>
     <div class="modal-title" style="text-align:center;border:none;padding:0;margin-bottom:8px;">المنتج غير موجود</div>
     <p style="color:var(--w60);font-size:14px;margin-bottom:4px;">الباركود: <span id="notFoundBarcode" style="color:var(--gold-light);font-family:var(--font-num);"></span></p>
-    <p style="color:var(--w30);font-size:12px;margin-bottom:20px;">لم يتم العثور على هذا المنتج</p>
+    <p style="color:var(--w30);font-size:12px;margin-bottom:20px;">لم يتم العثور على هذا المنتج في قاعدة البيانات</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="closeModal('notFoundModal');showPage('products');">➕ إضافة الآن</button>
-      <button class="btn btn-outline" onclick="closeModal('notFoundModal')">حسناً</button>
+      <button class="btn btn-primary" onclick="addProductWithCode()">➕ إضافة منتج بهذا الكود</button>
+      <button class="btn btn-outline" onclick="closeModal('notFoundModal')">إغلاق</button>
     </div>
   </div>
 </div>
@@ -1172,6 +1360,7 @@ var K = {
   RET_ITEMS  : 'marinette_ret_items_v1',    /* Phase 5 */
   DRAFT      : 'marinette_inv_draft_v1',
   MODE       : 'marinette_mode_v2',
+  PRICES     : 'marinette_customer_prices_v1',  /* Phase 8: product-master pricing */
 };
 
 /* ---- App state ---- */
@@ -1181,6 +1370,7 @@ var APP = {
   user     : null,      /* current auth user */
   products : [],        /* in-memory cache */
   channels : [],
+  customerPrices: [],   /* Phase 8: [{product_code, channel_name, price, discount_value}] */
 };
 
 /* ---- Invoice state ---- */
@@ -1242,8 +1432,8 @@ var DB = {
         var res = await APP.sb.from('products').select('*').eq('is_active', true).order('product_name');
         if (res.error) throw res.error;
         return (res.data || []).map(function(p) {
-          return { id: p.id, barcode: p.barcode, name: p.product_name, price: p.price,
-                   discountValue: parseFloat(p.discount_value) || 0 };
+          return { id: p.id, product_code: p.barcode, barcode: p.barcode, name: p.product_name,
+                   price: p.price, discountValue: parseFloat(p.discount_value) || 0 };
         });
       } catch(e) { console.warn('DB.getProducts:', e); return localGet(K.PRODUCTS); }
     }
@@ -1261,12 +1451,13 @@ var DB = {
           : await APP.sb.from('products').insert(row).select().single();
         if (res.error) throw res.error;
         var p = res.data;
-        return { id: p.id, barcode: p.barcode, name: p.product_name, price: p.price,
-                 discountValue: parseFloat(p.discount_value) || 0 };
+        return { id: p.id, product_code: p.barcode, barcode: p.barcode, name: p.product_name,
+                 price: p.price, discountValue: parseFloat(p.discount_value) || 0 };
       } catch(e) { console.warn('DB.saveProduct:', e); toast('⚠️ خطأ في الاتصال — تم الحفظ محلياً', 'err'); }
     }
     /* Demo / fallback */
     var all = localGet(K.PRODUCTS);
+    if (!product.product_code) product.product_code = product.barcode;
     if (product.id) {
       var idx = all.findIndex(function(p){ return p.id === product.id; });
       if (idx > -1) { all[idx] = product; }
@@ -1289,6 +1480,69 @@ var DB = {
     localSet(K.PRODUCTS, localGet(K.PRODUCTS).filter(function(p){ return p.id !== id; }));
   },
 
+  /* ---- CUSTOMER PRICES (Phase 8) ---- */
+  /* Each record: { id, product_code, channel_name, price, discount_value } */
+  getCustomerPrices: async function() {
+    if (APP.mode === 'live') {
+      try {
+        var res = await APP.sb.from('customer_prices').select('*');
+        if (res.error) throw res.error;
+        return (res.data || []).map(function(r) {
+          return { id: r.id, product_code: r.product_code, channel_name: r.channel_name,
+                   price: parseFloat(r.price) || 0, discount_value: parseFloat(r.discount_value) || 0 };
+        });
+      } catch(e) { console.warn('DB.getCustomerPrices:', e); return localGet(K.PRICES); }
+    }
+    return localGet(K.PRICES);
+  },
+
+  saveCustomerPrice: async function(rec) {
+    /* rec: { id?, product_code, channel_name, price, discount_value } */
+    if (APP.mode === 'live') {
+      try {
+        var row = { product_code: rec.product_code, channel_name: rec.channel_name,
+                    price: rec.price, discount_value: rec.discount_value || 0 };
+        var res = rec.id
+          ? await APP.sb.from('customer_prices').update(row).eq('id', rec.id).select().single()
+          : await APP.sb.from('customer_prices').insert(row).select().single();
+        if (res.error) throw res.error;
+        var r = res.data;
+        return { id: r.id, product_code: r.product_code, channel_name: r.channel_name,
+                 price: parseFloat(r.price) || 0, discount_value: parseFloat(r.discount_value) || 0 };
+      } catch(e) { console.warn('DB.saveCustomerPrice:', e); toast('⚠️ خطأ — تم الحفظ محلياً', 'err'); }
+    }
+    var all = localGet(K.PRICES);
+    var existing = all.findIndex(function(x) {
+      return x.product_code === rec.product_code && x.channel_name === rec.channel_name;
+    });
+    if (existing > -1) {
+      all[existing] = Object.assign(all[existing], { price: rec.price, discount_value: rec.discount_value || 0 });
+    } else {
+      rec.id = uid();
+      all.push(rec);
+    }
+    localSet(K.PRICES, all);
+    return rec;
+  },
+
+  deleteCustomerPrice: async function(id) {
+    if (APP.mode === 'live') {
+      try {
+        await APP.sb.from('customer_prices').delete().eq('id', id);
+        return;
+      } catch(e) { console.warn('DB.deleteCustomerPrice:', e); }
+    }
+    localSet(K.PRICES, localGet(K.PRICES).filter(function(x){ return x.id !== id; }));
+  },
+
+  /* Lookup price for a specific product+channel — returns null if not found */
+  getPriceForChannel: function(productCode, channelName) {
+    var prices = APP.customerPrices;
+    return prices.find(function(r) {
+      return r.product_code === productCode && r.channel_name === channelName;
+    }) || null;
+  },
+
   getProductByBarcode: async function(barcode) {
     var bc = (barcode || '').trim().toLowerCase();
     if (APP.mode === 'live') {
@@ -1297,8 +1551,8 @@ var DB = {
         if (res.error) throw res.error;
         if (res.data && res.data.length > 0) {
           var p = res.data[0];
-          return { id: p.id, barcode: p.barcode, name: p.product_name, price: p.price,
-                   discountValue: parseFloat(p.discount_value) || 0 };
+          return { id: p.id, product_code: p.barcode, barcode: p.barcode, name: p.product_name,
+                   price: p.price, discountValue: parseFloat(p.discount_value) || 0 };
         }
         return null;
       } catch(e) {
@@ -1392,14 +1646,16 @@ var DB = {
       if (res.error) throw res.error;
 
       return (res.data || []).map(function(r) {
+        var qty          = parseFloat(r.quantity)      || 0;
+        var discPerPiece = parseFloat(r.discount_value) || 0;
         return {
-          id: r.id,
-          barcode: r.barcode,
-          name: r.product_name_snapshot,
-          qty: parseFloat(r.quantity) || 0,
-          price: parseFloat(r.price) || 0,
-          discount: parseFloat(r.discount_value) || 0,
-          discountValue: parseFloat(r.discount_value) || 0
+          id           : r.id,
+          barcode      : r.barcode,
+          name         : r.product_name_snapshot,
+          qty          : qty,
+          price        : parseFloat(r.price) || 0,
+          discountValue: discPerPiece,
+          discount     : parseFloat((discPerPiece * qty).toFixed(2)),
         };
       });
     } catch(e) {
@@ -1455,17 +1711,20 @@ var DB = {
         }
 
        var itemRows = items.map(function(it) {
-  var gross = (it.qty || 0) * (it.price || 0);
-  var net = gross - (it.discount || 0);
+  var qty          = it.qty || 0;
+  var discPerPiece = it.discountValue || 0;
+  var gross        = qty * (it.price || 0);
+  var lineDisc     = parseFloat((discPerPiece * qty).toFixed(2));
+  var net          = gross - lineDisc;
 
   return {
-    invoice_id: savedId,
-    barcode: it.barcode,
+    invoice_id           : savedId,
+    barcode              : it.barcode,
     product_name_snapshot: it.name,
-    quantity: it.qty,
-    price: it.price,
-    discount_value: it.discount || 0,
-    total: net
+    quantity             : qty,
+    price                : it.price,
+    discount_value       : discPerPiece,
+    total                : net,
   };
 });
         if (itemRows.length > 0) {
@@ -1495,25 +1754,29 @@ var DB = {
       /* Remove old items and re-insert */
       var allItems2 = localGet(K.INV_ITEMS).filter(function(x){ return x.invoiceId !== id; });
       items.forEach(function(it) {
+        var discPerPiece = it.discountValue || 0;
+        var lineDisc = discPerPiece * (it.qty || 0);
         var gross = (it.qty||0) * (it.price||0);
         allItems2.push({ id: uid(), invoiceId: id, barcode: it.barcode, name: it.name,
-          qty: it.qty, price: it.price, discount: it.discount,
-          totalGross: gross, netTotal: gross - (it.discount||0) });
+          qty: it.qty, price: it.price, discountValue: discPerPiece, discount: lineDisc,
+          totalGross: gross, netTotal: gross - lineDisc });
       });
       localSet(K.INVOICES, allInv);
       localSet(K.INV_ITEMS, allItems2);
     } else {
       allInv.unshift({ id: id, number: inv.number, date: inv.date, channel: inv.channel, notes: inv.notes,
         totalGross: inv.totalGross, totalDiscount: inv.totalDiscount,
-        totalReturns: 0, netTotal: inv.netTotal, createdAt: new Date().toISOString() });
-      localSet(K.INVOICES, allInv);
+        totalReturns: 0, netTotal: inv.netTotal, createdAt: localDateStr() });
       var allItems = localGet(K.INV_ITEMS);
       items.forEach(function(it) {
+        var discPerPiece = it.discountValue || 0;
+        var lineDisc = discPerPiece * (it.qty || 0);
         var gross = (it.qty||0) * (it.price||0);
         allItems.push({ id: uid(), invoiceId: id, barcode: it.barcode, name: it.name,
-          qty: it.qty, price: it.price, discount: it.discount,
-          totalGross: gross, netTotal: gross - (it.discount||0) });
+          qty: it.qty, price: it.price, discountValue: discPerPiece, discount: lineDisc,
+          totalGross: gross, netTotal: gross - lineDisc });
       });
+      localSet(K.INVOICES, allInv);
       localSet(K.INV_ITEMS, allItems);
     }
     return id;
@@ -1538,15 +1801,18 @@ var DB = {
         var res = await APP.sb.from('invoice_items').select('*')
         if (res.error) throw res.error;
         return (res.data || []).map(function(r) {
+          var qty          = parseFloat(r.quantity)      || 0;
+          var discPerPiece = parseFloat(r.discount_value) || 0;
           return {
-            id         : r.id,
-            invoiceId  : r.invoice_id,
-            barcode    : r.barcode,
-            name       : r.product_name_snapshot,
-            qty        : parseFloat(r.quantity)  || 0,
-            price      : parseFloat(r.price)     || 0,
-           discount : parseFloat(r.discount_value) || 0,
-                      };
+            id           : r.id,
+            invoiceId    : r.invoice_id,
+            barcode      : r.barcode,
+            name         : r.product_name_snapshot,
+            qty          : qty,
+            price        : parseFloat(r.price) || 0,
+            discountValue: discPerPiece,
+            discount     : parseFloat((discPerPiece * qty).toFixed(2)),
+          };
         });
       } catch(e) { console.warn('DB.getAllInvoiceItems:', e); return localGet(K.INV_ITEMS); }
     }
@@ -1666,12 +1932,12 @@ var DB = {
     var id = uid();
     var allRet = localGet(K.RETURNS);
     allRet.unshift({ id:id, number:ret.number, date:ret.date, channel:ret.channel,
-      notes:ret.notes, totalReturn:ret.totalReturn, createdAt:new Date().toISOString() });
+      notes:ret.notes, totalReturn:ret.totalReturn, createdAt:localDateStr() });
     localSet(K.RETURNS, allRet);
     var allRI = localGet(K.RET_ITEMS);
     items.forEach(function(it) {
       allRI.push({ id:uid(), returnId:id, barcode:it.barcode, name:it.name,
-        qty:it.qty, price:it.price, total:it.total });
+        qty:it.qty, price:it.price, discount_value:it.discount||0, total:it.total });
     });
     localSet(K.RET_ITEMS, allRI);
     return id;
@@ -1794,12 +2060,16 @@ function setDbStatus(state, label) {
    ============================================================ */
 
 async function bootstrap() {
+  /* 0. Apply saved theme immediately */
+  applyTheme(localStorage.getItem('marinette_theme') || 'dark');
+
   /* 1. Show UI immediately in demo mode — never wait for network */
   setDbStatus('demo');
   await loadInitialData();
   populateChannelSelect();
   initScanner();
   if (!loadDraftIfExists()) initInvoice();
+  setTimeout(offerDraftRestore, 600);
   setTimeout(refocusScanner, 300);
 
   /* 2. Try Supabase in background */
@@ -1864,6 +2134,7 @@ async function activateLiveMode() {
 async function loadInitialData() {
   APP.products = await DB.getProducts();
   APP.channels = await DB.getChannels();
+  APP.customerPrices = await DB.getCustomerPrices();
 }
 
 
@@ -1880,17 +2151,36 @@ function fmt(n) {
   return (parseFloat(n) || 0).toLocaleString('ar-EG', { minimumFractionDigits:2, maximumFractionDigits:2 });
 }
 
+function localDateStr() {
+  /* Returns YYYY-MM-DD in local time — never uses UTC */
+  var d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
 function fmtToday() {
-  return new Date().toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
+  /* Returns YYYY-MM-DD for the date input — no UTC shift */
+  return localDateStr();
 }
 
 function fmtDateStr(str) {
-  /* Accepts ISO string or locale string, returns locale */
+  /* Accepts YYYY-MM-DD or ISO string or locale string, returns Arabic display string */
   if (!str) return '—';
   try {
-    var d = new Date(str);
-    if (isNaN(d)) return str;
-    return d.toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
+    /* If already YYYY-MM-DD, parse via parts to avoid UTC shift */
+    var m = String(str).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+      var d = new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+      return d.toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
+    }
+    /* ISO with time: extract date part and re-parse locally */
+    var mi = String(str).match(/^(\d{4})-(\d{2})-(\d{2})T/);
+    if (mi) {
+      var d2 = new Date(parseInt(mi[1],10), parseInt(mi[2],10)-1, parseInt(mi[3],10));
+      return d2.toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
+    }
+    return str;
   } catch(e) { return str; }
 }
 
@@ -1908,15 +2198,33 @@ function escapeHtml(str) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+/* ---- Normalize any invoice item to consistent structure ----
+ * RULE: discountValue = per-piece, discount = qty * discountValue, net = qty*price - discount
+ * Call this whenever loading items from DB, draft, or external source.
+ */
+function normalizeItem(it) {
+  var qty          = parseFloat(it.qty)          || 0;
+  var price        = parseFloat(it.price)        || 0;
+  var discPerPiece = parseFloat(it.discountValue) || 0;
+  /* If discountValue missing but discount (lineDiscount) stored from old data, derive per-piece */
+  if (!discPerPiece && it.discount && qty > 0) {
+    discPerPiece = parseFloat((parseFloat(it.discount) / qty).toFixed(4)) || 0;
+  }
+  var lineDisc = parseFloat((discPerPiece * qty).toFixed(2));
+  return Object.assign({}, it, {
+    qty          : qty,
+    price        : price,
+    discountValue: discPerPiece,
+    discount     : lineDisc,
+  });
+}
+
 function calcTotals(items) {
-  /* NOTE: 'returned' (المرتجع) removed from invoice screen in Phase 2.
-     It remains in DB schema for Phase 3 returns module.
-     Net = gross - discount (no returns at invoice level). */
   var gross=0, disc=0;
   items.forEach(function(it) {
     var g = (it.qty||0) * (it.price||0);
     gross += g;
-    disc  += (it.discount||0);
+    disc  += (it.discountValue||0) * (it.qty||0);   /* always per-piece × qty */
   });
   return { gross:gross, disc:disc, ret:0, net: gross - disc };
 }
@@ -1925,16 +2233,37 @@ function calcTotals(items) {
 function seedDemoData() {
   if (localGet(K.PRODUCTS).length === 0) {
     localSet(K.PRODUCTS, [
-      { id:uid(), barcode:'6001001001', name:'كرواسان سادة',       price:18, discountValue:0  },
-      { id:uid(), barcode:'6001001002', name:'كرواسان لوز',         price:22, discountValue:5  },
-      { id:uid(), barcode:'6001001003', name:'تارت فراولة',          price:35, discountValue:10 },
-      { id:uid(), barcode:'6001001004', name:'بان أوشوكولاه',        price:25, discountValue:0  },
-      { id:uid(), barcode:'6001001005', name:'ماكرون مشكل (6 حبة)', price:55, discountValue:15 },
+      { id:uid(), product_code:'6001001001', barcode:'6001001001', name:'كرواسان سادة',       price:18, discountValue:0  },
+      { id:uid(), product_code:'6001001002', barcode:'6001001002', name:'كرواسان لوز',         price:22, discountValue:5  },
+      { id:uid(), product_code:'6001001003', barcode:'6001001003', name:'تارت فراولة',          price:35, discountValue:10 },
+      { id:uid(), product_code:'6001001004', barcode:'6001001004', name:'بان أوشوكولاه',        price:25, discountValue:0  },
+      { id:uid(), product_code:'6001001005', barcode:'6001001005', name:'ماكرون مشكل (6 حبة)', price:55, discountValue:15 },
     ]);
+  } else {
+    /* Migrate old products — add product_code if missing */
+    var prods = localGet(K.PRODUCTS);
+    var changed = false;
+    prods.forEach(function(p) {
+      if (!p.product_code) { p.product_code = p.barcode; changed = true; }
+    });
+    if (changed) localSet(K.PRODUCTS, prods);
   }
   if (localGet(K.CHANNELS).length === 0) {
     var defaults = ['ماركت لولو','ماركت طازة','المدرسة الفرنسية','Adyctd','O.Bros','O.Bros White'];
     localSet(K.CHANNELS, defaults.map(function(n){ return { id:uid(), name:n }; }));
+  }
+  /* Seed demo customer prices if empty */
+  if (localGet(K.PRICES).length === 0) {
+    var prods2 = localGet(K.PRODUCTS);
+    var chs    = localGet(K.CHANNELS);
+    var prices = [];
+    prods2.forEach(function(p) {
+      chs.forEach(function(c) {
+        prices.push({ id:uid(), product_code: p.product_code, channel_name: c.name,
+                      price: p.price, discount_value: p.discountValue || 0 });
+      });
+    });
+    localSet(K.PRICES, prices);
   }
 }
 
@@ -1957,6 +2286,7 @@ function showPage(id) {
   if (id==='dashboard') loadDashboard();
   if (id==='returns')   { initReturnIfEmpty(); renderReturnsList(); retFocusScanner(); }
   if (id==='statement') { initStatementPage(); }
+  if (id==='pricing')   { initPricingPage(); }
 }
 
 
@@ -1980,12 +2310,14 @@ function renderProductsTable() {
 
   tbody.innerHTML = products.map(function(p,i) {
     var esc = escapeHtml(p.id);
+    var costDisp = p.costPrice > 0 ? fmt(p.costPrice)+' ج.م' : '<span class="muted">—</span>';
     return '<tr id="prod-row-'+esc+'">' +
       '<td class="muted">'+(i+1)+'</td>' +
       '<td><span class="num">'+escapeHtml(p.barcode)+'</span></td>' +
       '<td>'+escapeHtml(p.name)+'</td>' +
       '<td class="num gold">'+fmt(p.price)+' ج.م</td>' +
       '<td class="num" style="color:var(--gold);">'+fmt(p.discountValue||0)+' ج.م</td>' +
+      '<td class="num muted">'+costDisp+'</td>' +
       '<td><div class="td-actions">' +
         '<button class="btn btn-outline btn-sm" onclick="editProduct(\''+esc+'\')">✏️ تعديل</button>' +
         '<button class="btn btn-danger btn-sm" onclick="confirmDeleteProduct(\''+esc+'\')">🗑 حذف</button>' +
@@ -1995,30 +2327,33 @@ function renderProductsTable() {
 }
 
 async function saveProduct() {
-  var barcode     = document.getElementById('fp_barcode').value.trim();
-  var name        = document.getElementById('fp_name').value.trim();
-  var price       = parseFloat(document.getElementById('fp_price').value)||0;
+  var barcode       = document.getElementById('fp_barcode').value.trim();
+  var name          = document.getElementById('fp_name').value.trim();
+  var price         = parseFloat(document.getElementById('fp_price').value)||0;
   var discountValue = parseFloat(document.getElementById('fp_discount').value)||0;
+  var costPrice     = parseFloat((document.getElementById('fp_cost')||{}).value)||0;
 
-  if (!barcode) { toast('⚠️ أدخل الباركود','err'); return; }
+  if (!barcode) { toast('⚠️ أدخل الباركود / الكود','err'); return; }
   if (!name)    { toast('⚠️ أدخل اسم المنتج','err'); return; }
   if (price<=0) { toast('⚠️ أدخل سعراً صحيحاً','err'); return; }
   if (discountValue < 0) { toast('⚠️ خصم القطعة يجب أن يكون 0 أو أكثر','err'); return; }
 
-  /* Check duplicate barcode */
+  /* Prevent duplicate barcode / product_code */
   var dupCheck = APP.products.find(function(p) {
-    return p.barcode.toLowerCase()===barcode.toLowerCase() && p.id!==editingProductId;
+    return (p.barcode.toLowerCase()===barcode.toLowerCase() ||
+            (p.product_code||'').toLowerCase()===barcode.toLowerCase()) &&
+           p.id !== editingProductId;
   });
-  if (dupCheck) { toast('⚠️ هذا الباركود موجود بالفعل','err'); return; }
+  if (dupCheck) { toast('⚠️ هذا الكود / الباركود موجود بالفعل: ' + escapeHtml(dupCheck.name),'err'); return; }
 
-  var product = { barcode:barcode, name:name, price:price, discountValue:discountValue };
+  var product = { barcode:barcode, product_code:barcode, name:name, price:price,
+                  discountValue:discountValue, costPrice:costPrice };
   if (editingProductId) product.id = editingProductId;
 
-  var saved = await DB.saveProduct(product);
-
-  /* Refresh in-memory cache */
+  await DB.saveProduct(product);
   APP.products = await DB.getProducts();
-  toast(editingProductId ? '✅ تم تعديل المنتج' : '✅ تم إضافة المنتج', 'ok');
+  APP.customerPrices = await DB.getCustomerPrices();
+  toast(editingProductId ? '✅ تم تعديل المنتج' : '✅ تم إضافة المنتج — لا تنسَ إضافة أسعار العملاء 💰', 'ok');
   cancelProductEdit();
   renderProductsTable();
 }
@@ -2030,6 +2365,8 @@ function editProduct(id) {
   document.getElementById('fp_name').value     = p.name;
   document.getElementById('fp_price').value    = p.price;
   document.getElementById('fp_discount').value = p.discountValue || 0;
+  var costEl = document.getElementById('fp_cost');
+  if (costEl) costEl.value = p.costPrice || 0;
   editingProductId = id;
   document.getElementById('prodBtnText').textContent = 'حفظ التعديلات';
   document.getElementById('prodBtnIcon').textContent = '💾';
@@ -2056,6 +2393,8 @@ function clearProductForm() {
   document.getElementById('fp_name').value     = '';
   document.getElementById('fp_price').value    = '';
   document.getElementById('fp_discount').value = '';
+  var costEl = document.getElementById('fp_cost');
+  if (costEl) costEl.value = '';
 }
 
 function confirmDeleteProduct(id) {
@@ -2158,30 +2497,148 @@ function initInvoice() {
 /* ---- Add / increment item from scan ---- */
 function addOrIncrementItem(product) {
   var existing = INV.items.find(function(it) {
-    return it.barcode.trim().toLowerCase() === product.barcode.trim().toLowerCase();
+    return (it.product_code && product.product_code && it.product_code === product.product_code) ||
+           (it.barcode && product.barcode && it.barcode.trim().toLowerCase() === product.barcode.trim().toLowerCase());
   });
   if (existing) {
     existing.qty += 1;
     existing.discount = parseFloat(((existing.discountValue || 0) * existing.qty).toFixed(2));
+    renderInvoiceTable();
+    /* Flash the incremented row */
+    setTimeout(function() { flashInvRow(existing.id, 'row-changed'); }, 30);
   } else {
-    var qty   = 1;
+    var qty          = 1;
     var discPerPiece = parseFloat(product.discountValue) || 0;
-    var disc  = parseFloat((discPerPiece * qty).toFixed(2));
-    INV.items.push({
-      id            : uid(),
-      barcode       : product.barcode,
-      name          : product.name,
-      qty           : qty,
-      price         : product.price,
-      discountValue : discPerPiece,
-      discount      : disc,
-    });
+    var disc         = parseFloat((discPerPiece * qty).toFixed(2));
+    var newItem = {
+      id           : uid(),
+      barcode      : product.barcode,
+      product_code : product.product_code || product.barcode,
+      name         : product.name,
+      qty          : qty,
+      price        : product.price,
+      discountValue: discPerPiece,
+      discount     : disc,
+      _locked      : true,   /* price locked by default */
+    };
+    INV.items.push(newItem);
+    renderInvoiceTable();
+    /* Flash the new row */
+    setTimeout(function() { flashInvRow(newItem.id, 'row-added'); }, 30);
   }
+  saveInvoiceDraft();
+}
+
+/* Flash a table row by item id */
+function flashInvRow(itemId, cls) {
+  var rows = document.querySelectorAll('#invBody tr');
+  rows.forEach(function(tr) {
+    if (tr.getAttribute('data-id') === itemId) {
+      tr.classList.remove('row-added','row-changed','row-repriced');
+      void tr.offsetWidth;
+      tr.classList.add(cls);
+      setTimeout(function(){ tr.classList.remove(cls); }, 950);
+    }
+  });
+}
+
+/* ---- Price lock / unlock ---- */
+function requestUnlockPrice(itemId) {
+  showConfirm(
+    'تعديل السعر يدوياً قد يسبب اختلافاً في التقارير.<br>هل تريد فتح التعديل لهذا الصنف؟',
+    function() {
+      var item = INV.items.find(function(x){ return x.id === itemId; });
+      if (item) { item._locked = false; renderInvoiceTable(); }
+    }
+  );
+}
+
+function lockPrice(itemId) {
+  var item = INV.items.find(function(x){ return x.id === itemId; });
+  if (item) { item._locked = true; renderInvoiceTable(); }
+}
+
+/* ---- Channel change with re-pricing ---- */
+var _prevChannel = '';
+
+function onChannelChange(selectEl) {
+  var newChannel = selectEl.value;
+  if (!newChannel) { _prevChannel = ''; return; }
+
+  /* Remove error style */
+  selectEl.classList.remove('input-error');
+
+  if (INV.items.length === 0) {
+    _prevChannel = newChannel;
+    return;
+  }
+
+  showConfirm(
+    'تغيير العميل إلى <strong>' + escapeHtml(newChannel) + '</strong> سيُعيد تسعير كل المنتجات حسب أسعار العميل الجديد.<br>هل تريد المتابعة؟',
+    function() {
+      _prevChannel = newChannel;
+      repriceItems(newChannel);
+    }
+  );
+
+  /* Immediately revert the select to old value; repriceItems will keep it if confirmed */
+  selectEl.value = _prevChannel;
+}
+
+function repriceItems(channel) {
+  /* Set channel in select */
+  var sel = document.getElementById('invChannel');
+  if (sel) sel.value = channel;
+
+  var changedIds = [];
+  INV.items.forEach(function(item) {
+    var code     = item.product_code || item.barcode;
+    var priceRec = DB.getPriceForChannel(code, channel);
+    var newPrice, newDisc;
+    if (priceRec) {
+      newPrice = priceRec.price;
+      newDisc  = priceRec.discount_value || 0;
+    } else {
+      /* fallback to master price */
+      var master = APP.products.find(function(p) {
+        return (p.product_code||p.barcode) === code || p.barcode === item.barcode;
+      });
+      newPrice = master ? master.price       : item.price;
+      newDisc  = master ? (master.discountValue||0) : item.discountValue;
+    }
+    if (newPrice !== item.price || newDisc !== item.discountValue) {
+      changedIds.push(item.id);
+    }
+    item.price        = newPrice;
+    item.discountValue= newDisc;
+    item.discount     = parseFloat((newDisc * (item.qty||1)).toFixed(2));
+    item._locked      = true; /* re-lock after repricing */
+  });
+
   renderInvoiceTable();
+  saveInvoiceDraft(true);
+
+  /* Flash repriced rows red to highlight change */
+  setTimeout(function() {
+    changedIds.forEach(function(id) { flashInvRow(id, 'row-repriced'); });
+  }, 40);
+
+  if (changedIds.length > 0) {
+    toast('🔄 تم إعادة تسعير ' + changedIds.length + ' صنف للعميل: ' + channel, 'ok');
+  } else {
+    toast('✅ العميل تم التغيير — لا فرق في الأسعار', 'ok');
+  }
 }
 
 /* ---- Manual row ---- */
 function addManualRow() {
+  /* Phase 8: Must select channel first */
+  var channelSel = document.getElementById('invChannel');
+  if (!channelSel || !channelSel.value) {
+    toast('⚠️ اختر العميل أولاً قبل إضافة منتج', 'err');
+    if (channelSel) { channelSel.classList.add('input-error'); channelSel.focus(); }
+    return;
+  }
   INV.items.push({ id:uid(), barcode:'', name:'', qty:1, price:0, discountValue:0, discount:0 });
   renderInvoiceTable();
   refocusScanner();
@@ -2189,39 +2646,107 @@ function addManualRow() {
 
 /* ---- Delete row ---- */
 function deleteInvRow(id) {
-  INV.items = INV.items.filter(function(it){ return it.id!==id; });
-  renderInvoiceTable();
+  var it = INV.items.find(function(x){ return x.id===id; });
+  var label = it ? escapeHtml(it.name||it.barcode||'الصنف') : 'الصنف';
+  showConfirm('هل أنت متأكد من حذف <strong>'+label+'</strong> من الفاتورة؟', function() {
+    INV.items = INV.items.filter(function(x){ return x.id!==id; });
+    renderInvoiceTable();
+    saveInvoiceDraft();
+  });
 }
 
 /* ---- Update cell ---- */
+/* ---- Scroll-preserving render wrapper ---- */
+function renderInvoiceTableKeepScroll() {
+  var page = document.getElementById('page-invoice');
+  var sy   = page ? page.scrollTop : window.pageYOffset;
+  renderInvoiceTable();
+  if (page) page.scrollTop = sy; else window.scrollTo(0, sy);
+}
+
 function updateItem(id, field, value) {
   var item = INV.items.find(function(it){ return it.id===id; });
   if (!item) return;
   if (field==='name' || field==='barcode') { item[field] = value; }
   else { item[field] = parseFloat(value)||0; }
+  /* No full re-render for simple text/number field update — just totals */
   renderTotals();
+  saveInvoiceDraft(true);
 }
 
-/* ---- Update qty or price AND recalculate discount amount from per-piece discount ---- */
+/* Called on BLUR or Enter for qty/price fields — prevents jump during typing */
+function commitItemQtyPrice(id, field, value) {
+  var item = INV.items.find(function(it){ return it.id===id; });
+  if (!item) return;
+  var v = parseFloat(value);
+  if (isNaN(v)) return;
+  item[field] = v;
+  /* discountValue stays per-piece; recalculate total discount */
+  item.discount = parseFloat(((item.discountValue||0) * (item.qty||0)).toFixed(2));
+  renderInvoiceTableKeepScroll();
+  saveInvoiceDraft(true);
+}
+
+/* Called on BLUR or Enter for discountValue field */
+function commitDiscountValue(id, value) {
+  var item = INV.items.find(function(it){ return it.id===id; });
+  if (!item) return;
+  var v = parseFloat(value);
+  if (isNaN(v)) return;
+  item.discountValue = v;
+  item.discount = parseFloat((v * (item.qty||0)).toFixed(2));
+  renderInvoiceTableKeepScroll();
+  saveInvoiceDraft(true);
+}
+
+/* Called on BLUR or Enter for manual total-discount override */
+function commitTotalDiscount(id, value) {
+  var item = INV.items.find(function(it){ return it.id===id; });
+  if (!item) return;
+  var v = parseFloat(value);
+  if (isNaN(v)) return;
+  item.discount = v;
+  /* Back-calculate discountValue per piece so it stays consistent */
+  item.discountValue = (item.qty > 0) ? parseFloat((v / item.qty).toFixed(4)) : 0;
+  renderInvoiceTableKeepScroll();
+  saveInvoiceDraft(true);
+}
+
+/* Keep legacy names so old callers don't break */
 function updateItemAndRecalcDiscount(id, field, value) {
+  /* Kept for backward compatibility — no-op during typing, committed on blur */
   var item = INV.items.find(function(it){ return it.id===id; });
   if (!item) return;
   item[field] = parseFloat(value)||0;
-  item.discount = parseFloat(((item.discountValue || 0) * (item.qty || 0)).toFixed(2));
-  renderInvoiceTable();
+  item.discount = parseFloat(((item.discountValue||0)*(item.qty||0)).toFixed(2));
+  renderTotals();
 }
 
-/* ---- Update per-piece discount → recalculate total discount amount ---- */
 function updateDiscountValue(id, value) {
+  /* Kept for backward compatibility */
   var item = INV.items.find(function(it){ return it.id===id; });
   if (!item) return;
   item.discountValue = parseFloat(value)||0;
-  item.discount = parseFloat(((item.discountValue || 0) * (item.qty || 0)).toFixed(2));
-  renderInvoiceTable();
+  item.discount = parseFloat(((item.discountValue||0)*(item.qty||0)).toFixed(2));
+  renderTotals();
+}
+
+/* Enter key helper for numeric inputs in invoice table */
+function onInvInputEnter(e, id, field, type) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  var v = e.target.value;
+  if (type==='qty' || type==='price') commitItemQtyPrice(id, field, v);
+  else if (type==='discountValue')    commitDiscountValue(id, v);
+  else if (type==='discount')         commitTotalDiscount(id, v);
+  e.target.blur();
 }
 
 /* ---- Render invoice table ---- */
 function renderInvoiceTable() {
+  var scrollEl = document.getElementById('page-invoice');
+  var sy = scrollEl ? scrollEl.scrollTop : window.pageYOffset;
+
   var tbody = document.getElementById('invBody');
   var empty = document.getElementById('invEmpty');
 
@@ -2232,44 +2757,62 @@ function renderInvoiceTable() {
   empty.style.display='none';
 
   tbody.innerHTML = INV.items.map(function(it,i) {
-    var gross = (it.qty||0) * (it.price||0);
-    var net   = gross - (it.discount||0);
-    var id    = escapeHtml(it.id);
-    return '<tr>' +
+    var gross    = (it.qty||0) * (it.price||0);
+    var disc     = (it.discountValue||0) * (it.qty||0);   /* always discountValue × qty */
+    var net      = gross - disc;
+    var id       = escapeHtml(it.id);
+    var locked   = it._locked !== false;
+    var lockAttr = locked ? ' readonly class="cell-input num price-locked"' : ' class="cell-input num"';
+    var manualBadge = (!locked) ? '<span class="manual-badge">Manual</span>' : '';
+
+    return '<tr data-id="'+id+'">' +
       '<td class="muted">'+(i+1)+'</td>' +
       /* barcode */
-      '<td><input class="cell-input num" value="'+escapeHtml(it.barcode)+'"' +
+      '<td><input class="cell-input num" value="'+escapeHtml(it.barcode||'')+'"' +
           ' onchange="updateItem(\''+id+'\',\'barcode\',this.value)"' +
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
       /* name */
-      '<td><input class="cell-input" style="width:150px" value="'+escapeHtml(it.name)+'"' +
+      '<td><input class="cell-input" style="width:150px" value="'+escapeHtml(it.name||'')+'"' +
           ' onchange="updateItem(\''+id+'\',\'name\',this.value)"' +
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      /* qty */
+      /* qty — commit on blur or Enter only */
       '<td><input class="cell-input num" type="number" min="1" value="'+(it.qty||1)+'"' +
-          ' oninput="updateItemAndRecalcDiscount(\''+id+'\',\'qty\',this.value);"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      /* price */
-      '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.price||0)+'"' +
-          ' oninput="updateItemAndRecalcDiscount(\''+id+'\',\'price\',this.value);"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      /* discount per piece — editable, triggers recalculation */
-      '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.discountValue||0)+'"' +
-          ' oninput="updateDiscountValue(\''+id+'\',this.value);"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      /* discount amount — editable manually too */
-      '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.discount||0)+'"' +
-          ' oninput="updateItem(\''+id+'\',\'discount\',this.value);renderInvoiceTable();"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      /* إجمالي قبل الخصم */
+          ' onblur="commitItemQtyPrice(\''+id+'\',\'qty\',this.value)"' +
+          ' onkeydown="onInvInputEnter(event,\''+id+'\',\'qty\',\'qty\')"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus();commitItemQtyPrice(\''+id+'\',\'qty\',this.value)"></td>' +
+      /* price — locked by default */
+      '<td style="white-space:nowrap;">' + manualBadge +
+        '<input type="number" min="0" step="0.01" value="'+(it.price||0)+'"'+lockAttr+
+          ' onblur="commitItemQtyPrice(\''+id+'\',\'price\',this.value)"' +
+          ' onkeydown="onInvInputEnter(event,\''+id+'\',\'price\',\'price\')"' +
+          (locked ? '' : ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus();commitItemQtyPrice(\''+id+'\',\'price\',this.value)"') +
+        '></td>' +
+      /* discountValue per piece — locked by default */
+      '<td><input type="number" min="0" step="0.01" value="'+parseFloat((it.discountValue||0).toFixed(4))+'"'+lockAttr+
+          (locked ? '' :
+          ' onblur="commitDiscountValue(\''+id+'\',this.value)"' +
+          ' onkeydown="onInvInputEnter(event,\''+id+'\',\'discountValue\',\'discountValue\')"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus();commitDiscountValue(\''+id+'\',this.value)"') +
+        '></td>' +
+      /* إجمالي قبل خصم */
       '<td class="num" style="color:var(--gold-light);">'+fmt(gross)+'</td>' +
+      /* خصم الكمية */
+      '<td class="num" style="color:var(--red);">'+fmt(disc)+'</td>' +
       /* صافي */
       '<td class="num" style="color:'+(net>=0?'var(--green)':'var(--red)')+';">'+fmt(net)+'</td>' +
-      /* حذف */
-      '<td><button class="btn btn-danger btn-icon" onclick="deleteInvRow(\''+id+'\')">🗑</button></td>' +
+      /* unlock + حذف */
+      '<td style="white-space:nowrap;display:flex;gap:4px;align-items:center;">' +
+        (locked
+          ? '<button class="btn btn-outline btn-icon" title="فتح تعديل السعر" onclick="requestUnlockPrice(\''+id+'\')">🔒</button>'
+          : '<button class="btn btn-outline btn-icon" title="قفل السعر" onclick="lockPrice(\''+id+'\')">🔓</button>') +
+        '<button class="btn btn-danger btn-icon" onclick="deleteInvRow(\''+id+'\')">🗑</button>' +
+      '</td>' +
     '</tr>';
   }).join('');
   renderTotals();
+
+  /* Restore scroll position */
+  if (scrollEl) scrollEl.scrollTop = sy; else window.scrollTo(0, sy);
 }
 
 /* ---- Render totals ---- */
@@ -2386,11 +2929,11 @@ async function confirmAndSaveInvoice() {
 }
 
 /* ---- Draft ---- */
-function saveInvoiceDraft() {
-  INV.channel = document.getElementById('invChannel').value;
-  INV.notes   = document.getElementById('invNotes').value.trim();
+function saveInvoiceDraft(silent) {
+  INV.channel = (document.getElementById('invChannel')||{}).value || INV.channel || '';
+  INV.notes   = ((document.getElementById('invNotes')||{}).value||'').trim();
   localStorage.setItem(K.DRAFT, JSON.stringify(INV));
-  toast('💾 تم حفظ المسودة','ok');
+  if (!silent) toast('💾 تم حفظ المسودة','ok');
 }
 
 function loadDraftIfExists() {
@@ -2398,17 +2941,62 @@ function loadDraftIfExists() {
     var raw = localStorage.getItem(K.DRAFT);
     if (!raw) return false;
     var d = JSON.parse(raw);
-    if (d && d.items && d.items.length>0) {
-      INV = d;
-      document.getElementById('invNumber').textContent = INV.number || genInvNumber();
-      document.getElementById('invDate').textContent   = INV.date   || fmtToday();
-      document.getElementById('invChannel').value      = INV.channel || '';
-      document.getElementById('invNotes').value        = INV.notes   || '';
-      renderInvoiceTable();
-      return true;
-    }
+    if (!d || !d.items || d.items.length === 0) return false;
+    /* Show restore prompt */
+    showConfirm(
+      'يوجد فاتورة محفوظة تلقائياً تحتوي على <strong>' + d.items.length + ' صنف</strong>.<br>هل تريد استعادتها؟',
+      function() {
+        /* Confirmed: restore */
+        INV = d;
+        INV.items = (INV.items || []).map(function(it){ return Object.assign({}, it, normalizeItem(it)); });
+        var numEl = document.getElementById('invNumber');
+        var dtEl  = document.getElementById('invDate');
+        var invDateEl = document.getElementById('inv_date');
+        var chEl  = document.getElementById('invChannel');
+        var ntEl  = document.getElementById('invNotes');
+        if (numEl) numEl.textContent = INV.number || genInvNumber();
+        if (dtEl)  dtEl.textContent  = INV.date   || fmtToday();
+        if (invDateEl) invDateEl.value = INV.date || fmtToday();
+        if (chEl)  chEl.value        = INV.channel || '';
+        if (ntEl)  ntEl.value        = INV.notes   || '';
+        renderInvoiceTable();
+        toast('✅ تم استعادة الفاتورة المحفوظة', 'ok');
+      }
+    );
+    /* Return true so bootstrap doesn't call initInvoice yet */
+    /* We'll let initInvoice stay as baseline until user confirms */
+    return false;  /* let initInvoice run, restore happens via confirm */
   } catch(e) {}
   return false;
+}
+
+/* Called at startup after initInvoice — offers draft restore if one exists */
+function offerDraftRestore() {
+  try {
+    var raw = localStorage.getItem(K.DRAFT);
+    if (!raw) return;
+    var d = JSON.parse(raw);
+    if (!d || !d.items || d.items.length === 0) return;
+    showConfirm(
+      'يوجد فاتورة محفوظة تلقائياً تحتوي على <strong>' + d.items.length + ' صنف</strong>.<br>هل تريد استعادتها؟',
+      function() {
+        INV = d;
+        INV.items = (INV.items || []).map(function(it){ return Object.assign({}, it, normalizeItem(it)); });
+        var chEl = document.getElementById('invChannel');
+        var ntEl = document.getElementById('invNotes');
+        var numEl = document.getElementById('invNumber');
+        var dtEl  = document.getElementById('invDate');
+        var invDateEl = document.getElementById('inv_date');
+        if (numEl) numEl.textContent = INV.number || genInvNumber();
+        if (dtEl)  dtEl.textContent  = INV.date   || fmtToday();
+        if (invDateEl) invDateEl.value = INV.date || fmtToday();
+        if (chEl)  chEl.value        = INV.channel || '';
+        if (ntEl)  ntEl.value        = INV.notes   || '';
+        renderInvoiceTable();
+        toast('✅ تم استعادة الفاتورة', 'ok');
+      }
+    );
+  } catch(e) {}
 }
 
 function clearInvoice() {
@@ -2438,15 +3026,7 @@ async function editInvoice(id) {
   INV.channel = iv.channel || '';
   INV.notes   = iv.notes   || '';
   INV.items   = items.map(function(it) {
-    return {
-      id           : uid(),
-      barcode      : it.barcode  || '',
-      name         : it.name     || '',
-      qty          : parseFloat(it.qty)   || 1,
-      price        : parseFloat(it.price) || 0,
-      discountValue: parseFloat(it.discountValue) || 0,
-      discount     : parseFloat(it.discount) || 0,
-    };
+    return Object.assign({ id: uid(), _locked: true }, normalizeItem(it));
   });
 
   /* Update UI */
@@ -2498,19 +3078,13 @@ async function copyInvoice(id) {
   INV.channel = iv.channel || '';
   INV.notes   = iv.notes   || '';
   INV.items   = items.map(function(it) {
-    return {
-      id           : uid(),
-      barcode      : it.barcode  || '',
-      name         : it.name     || '',
-      qty          : parseFloat(it.qty)   || 1,
-      price        : parseFloat(it.price) || 0,
-      discountValue: parseFloat(it.discountValue) || 0,
-      discount     : parseFloat(it.discount) || 0,
-    };
+    return Object.assign({ id: uid(), _locked: true }, normalizeItem(it));
   });
 
   document.getElementById('invNumber').textContent = INV.number;
   document.getElementById('invDate').textContent   = INV.date;
+  var _cInvDate = document.getElementById('inv_date');
+  if (_cInvDate) _cInvDate.value = INV.date;
   document.getElementById('invChannel').value      = INV.channel;
   document.getElementById('invNotes').value        = INV.notes;
 
@@ -2599,12 +3173,14 @@ async function openInvDetail(id) {
     html += '<div style="overflow-x:auto;"><table>' +
       '<thead><tr><th>#</th><th>المنتج</th><th>الكمية</th><th>السعر</th><th>خصم القطعة</th><th>الخصم ج.م</th><th>الإجمالي</th><th>الصافي</th></tr></thead>' +
       '<tbody>' + items.map(function(it,i) {
-        var gross = (it.qty||0) * (it.price||0);
-        var net   = gross - (it.discount||0);
-        return '<tr><td class="muted">'+(i+1)+'</td><td>'+escapeHtml(it.name)+'</td>' +
-          '<td class="num">'+it.qty+'</td><td class="num">'+fmt(it.price)+'</td>' +
-          '<td class="num">'+fmt(it.discountValue||0)+' ج.م</td>' +
-          '<td class="num" style="color:var(--red);">'+fmt(it.discount)+'</td>' +
+        var n     = normalizeItem(it);
+        var gross = n.qty * n.price;
+        var disc  = n.discount;          /* qty * discountValue */
+        var net   = gross - disc;
+        return '<tr><td class="muted">'+(i+1)+'</td><td>'+escapeHtml(n.name)+'</td>' +
+          '<td class="num">'+n.qty+'</td><td class="num">'+fmt(n.price)+'</td>' +
+          '<td class="num">'+fmt(n.discountValue)+' ج.م</td>' +
+          '<td class="num" style="color:var(--red);">'+fmt(disc)+'</td>' +
           '<td class="num" style="color:var(--gold-light);">'+fmt(gross)+'</td>' +
           '<td class="num" style="color:var(--green);">'+fmt(net)+'</td></tr>';
       }).join('') +
@@ -2692,23 +3268,81 @@ async function processBarcode(barcode) {
   if (!barcode) return;
   clearTimeout(scannerDebounce);
 
-  /* Search product — uses in-memory cache first for speed, DB fallback */
-  var product = APP.products.find(function(p){ return p.barcode.toLowerCase()===barcode.toLowerCase(); });
+  /* Must select channel before scanning */
+  var channelSel = document.getElementById('invChannel');
+  var selectedChannel = channelSel ? channelSel.value : '';
+  if (!selectedChannel) {
+    setStatus(status, '⚠️ اختر العميل أولاً قبل إضافة أي منتج', 'err');
+    flashWrap(wrap, 'error');
+    toast('⚠️ اختر العميل أولاً', 'err');
+    if (channelSel) { channelSel.classList.add('input-error'); channelSel.focus(); }
+    input.value = '';
+    return;
+  }
+
+  /* Search by barcode OR product_code */
+  var bc = barcode.trim().toLowerCase();
+  var product = APP.products.find(function(p) {
+    return (p.barcode||'').toLowerCase() === bc ||
+           (p.product_code||'').toLowerCase() === bc;
+  });
   if (!product) product = await DB.getProductByBarcode(barcode);
 
   if (product) {
-    addOrIncrementItem(product);
-    setStatus(status, '✅ تم إضافة: '+product.name, 'ok');
+    var productCode = product.product_code || product.barcode;
+    /* Look up channel-specific price */
+    var priceRec = DB.getPriceForChannel(productCode, selectedChannel);
+    if (!priceRec) {
+      APP.customerPrices = await DB.getCustomerPrices();
+      priceRec = DB.getPriceForChannel(productCode, selectedChannel);
+    }
+
+    var finalPrice, finalDisc;
+    if (priceRec) {
+      /* Customer has a specific price */
+      finalPrice = priceRec.price;
+      finalDisc  = priceRec.discount_value || 0;
+    } else {
+      /* Fallback: use base product price */
+      finalPrice = product.price || 0;
+      finalDisc  = product.discountValue || 0;
+      toast('ℹ️ لا يوجد سعر مخصص للعميل — تم استخدام السعر الأساسي', 'ok');
+    }
+
+    var pricedProduct = {
+      id           : product.id,
+      product_code : productCode,
+      barcode      : product.barcode,
+      name         : product.name,
+      price        : finalPrice,
+      discountValue: finalDisc,
+    };
+    addOrIncrementItem(pricedProduct);
+    setStatus(status, '✅ تم إضافة: ' + product.name + ' — ' + finalPrice + ' ج.م', 'ok');
     flashWrap(wrap, 'flash');
   } else {
-    document.getElementById('notFoundBarcode').textContent = barcode;
+    /* Store the scanned code for prefill */
+    window._lastScannedCode = barcode;
+    var el = document.getElementById('notFoundBarcode');
+    if (el) el.textContent = barcode;
     openModal('notFoundModal');
-    setStatus(status, '❌ الباركود غير موجود: '+barcode, 'err');
+    setStatus(status, '❌ الباركود غير موجود: ' + barcode, 'err');
     flashWrap(wrap, 'error');
   }
 
   input.value = '';
   setTimeout(refocusScanner, 50);
+}
+
+/* Open products page and pre-fill the barcode field with the scanned code */
+function addProductWithCode() {
+  closeModal('notFoundModal');
+  showPage('products');
+  var code = window._lastScannedCode || '';
+  if (code) {
+    var el = document.getElementById('fp_barcode');
+    if (el) { el.value = code; el.focus(); }
+  }
 }
 
 function setStatus(el, msg, cls) {
@@ -2802,46 +3436,88 @@ function clearFilters() {
   loadDashboard();
 }
 
+/* normDateStr: converts any date representation → YYYY-MM-DD string (local, no UTC shift).
+   Never uses new Date('YYYY-MM-DD') directly to avoid timezone issues. */
+function normDateStr(raw) {
+  if (!raw) return '';
+  var s = String(raw).trim();
+  /* Already YYYY-MM-DD (possibly with time suffix) */
+  var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1] + '-' + m[2] + '-' + m[3];
+  return '';
+}
+
+/* ---- Theme (Light / Dark) ---- */
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.body.classList.add('light-mode');
+    var lbl = document.getElementById('themeToggleLabel');
+    if (lbl) lbl.textContent = '☀️ فاتح';
+  } else {
+    document.body.classList.remove('light-mode');
+    var lbl = document.getElementById('themeToggleLabel');
+    if (lbl) lbl.textContent = '🌙 داكن';
+  }
+}
+function toggleTheme() {
+  var isLight = document.body.classList.contains('light-mode');
+  var next = isLight ? 'dark' : 'light';
+  localStorage.setItem('marinette_theme', next);
+  applyTheme(next);
+}
+
 function isoDate(d) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
+/* Safe parse: YYYY-MM-DD → Date object via split (avoids timezone shift) */
+function safeParseDateStr(raw) {
+  if (!raw) return null;
+  /* Already YYYY-MM-DD */
+  var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+  /* ISO with time: 2026-04-27T... */
+  var mi = raw.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+  if (mi) return new Date(parseInt(mi[1],10), parseInt(mi[2],10)-1, parseInt(mi[3],10));
+  return null;
+}
+
 function getInvDate(iv) {
-  /* Priority: invoice_date → created_at → createdAt → date (Arabic fallback) */
-  var candidates = [iv.invoice_date, iv.created_at, iv.createdAt];
-  for (var i = 0; i < candidates.length; i++) {
-    var raw = candidates[i];
-    if (!raw) continue;
-    /* If it's already YYYY-MM-DD or starts with ISO, extract first 10 chars */
-    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.substring(0, 10);
-    /* Try parsing as a JS Date (handles ISO with timezone offset) */
-    try {
-      var d = new Date(raw);
-      if (!isNaN(d)) return isoDate(d);
-    } catch(e) {}
+  /* Priority:
+     1. iv.date        — user-selected date (localStorage & Supabase display date)
+     2. iv.invoice_date — Supabase column name for user-selected date
+     3. iv.created_at / iv.createdAt — ONLY as last resort if no user date exists
+  */
+
+  /* Helper: extract YYYY-MM-DD from any raw string without UTC shift */
+  function extractYMD(raw) {
+    if (!raw) return '';
+    var s = String(raw).trim();
+    var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[1] + '-' + m[2] + '-' + m[3];
+    return '';
   }
-  /* Last resort: Arabic date string stored in iv.date */
-  var arabicRaw = iv.date || '';
-  if (arabicRaw) {
-    /* Try JS Date parse — may work for some locales */
-    try {
-      var ad = new Date(arabicRaw);
-      if (!isNaN(ad)) return isoDate(ad);
-    } catch(e) {}
-    /* Manual Arabic month map */
+
+  /* 1. User-selected date stored in iv.date (may be YYYY-MM-DD or Arabic) */
+  var userDate = iv.date || '';
+  if (userDate) {
+    var ymd = extractYMD(userDate);
+    if (ymd) return ymd;
+
+    /* Arabic date fallback */
     var arMonths = {
       'يناير':'01','فبراير':'02','مارس':'03','أبريل':'04','إبريل':'04',
       'مايو':'05','يونيو':'06','يوليو':'07','أغسطس':'08',
       'سبتمبر':'09','أكتوبر':'10','نوفمبر':'11','ديسمبر':'12'
     };
-    var normalized = arabicRaw
+    var normalized = userDate
       .replace(/[\u0660-\u0669]/g, function(c){ return c.charCodeAt(0) - 0x0660; })
       .replace(/[\u06F0-\u06F9]/g, function(c){ return c.charCodeAt(0) - 0x06F0; });
-    for (var m in arMonths) {
-      if (normalized.indexOf(m) !== -1) {
-        var parts = normalized.replace(m, arMonths[m]).trim().split(/\s+/);
+    for (var mn in arMonths) {
+      if (normalized.indexOf(mn) !== -1) {
+        var parts = normalized.replace(mn, arMonths[mn]).trim().split(/\s+/);
         if (parts.length === 3) {
-          var day   = parts[0].length === 1 ? '0' + parts[0] : parts[0];
+          var day   = parts[0].length === 1 ? '0'+parts[0] : parts[0];
           var month = parts[1];
           var year  = parts[2];
           return year + '-' + month + '-' + day;
@@ -2849,28 +3525,34 @@ function getInvDate(iv) {
       }
     }
   }
+
+  /* 2. Supabase invoice_date column */
+  var ymd2 = extractYMD(iv.invoice_date);
+  if (ymd2) return ymd2;
+
+  /* 3. Last resort: created_at / createdAt (system timestamp, not user date) */
+  var ymd3 = extractYMD(iv.created_at) || extractYMD(iv.createdAt);
+  if (ymd3) return ymd3;
+
   return '';
 }
 
 /* ---- Load dashboard ---- */
 async function loadDashboard() {
   /* Read filters */
- var fFrom = (document.getElementById('flt_from')||{}).value || DASH.fromDate || '';
-var fTo   = (document.getElementById('flt_to')||{}).value || DASH.toDate || '';
-  fFrom = fFrom ? fFrom.substring(0,10) : '';
-fTo   = fTo ? fTo.substring(0,10) : '';
+  var fFrom = ((document.getElementById('flt_from')||{}).value || DASH.fromDate || '').trim().substring(0,10);
+  var fTo   = ((document.getElementById('flt_to')||{}).value   || DASH.toDate   || '').trim().substring(0,10);
 
-if (fFrom && fTo && fFrom > fTo) {
-  var tmp = fFrom;
-  fFrom = fTo;
-  fTo = tmp;
-}
-  var fCh = (document.getElementById('flt_channel')||{}).value || DASH.channel || '';
+  if (fFrom && fTo && fFrom > fTo) { var tmp=fFrom; fFrom=fTo; fTo=tmp; }
+
+  var fCh   = (document.getElementById('flt_channel')||{}).value || DASH.channel || '';
   var fProd = ((document.getElementById('flt_product')||{}).value||'').trim().toLowerCase();
-DASH.fromDate = fFrom;
-DASH.toDate = fTo;
-DASH.channel = fCh;
-DASH.product = fProd;
+
+  DASH.fromDate = fFrom;
+  DASH.toDate   = fTo;
+  DASH.channel  = fCh;
+  DASH.product  = fProd;
+
   /* Populate channel filter select */
   populateDashChannelSelect(fCh);
 
@@ -2886,16 +3568,20 @@ DASH.product = fProd;
     itemsByInv[id].push(it);
   });
 
-  /* Filter invoices by date range and channel */
-  var filteredInv = allInvoices.filter(function(iv) {
-   var d = getInvDate(iv).substring(0,10);
-var from = fFrom || '';
-var to = fTo || '';
+  /* Helper: inclusive date range check — compares YYYY-MM-DD strings only */
+  function inDateRange(rawDate) {
+    var d = normDateStr(rawDate);
+    if (!d) return !fFrom && !fTo;          /* no date → include only when no filter */
+    if (fFrom && d < fFrom) return false;
+    if (fTo   && d > fTo)   return false;
+    return true;
+  }
 
-if (from && d < from) return false;
-if (to && d > to) return false;
-if (fCh && (iv.channel||'') !== fCh) return false;
-return true;
+  /* Filter invoices */
+  var filteredInv = allInvoices.filter(function(iv) {
+    if (!inDateRange(getInvDate(iv))) return false;
+    if (fCh && (iv.channel||'') !== fCh) return false;
+    return true;
   });
 
   /* Filter items: only from filtered invoices AND matching product search */
@@ -2903,23 +3589,21 @@ return true;
   filteredInv.forEach(function(iv){ filteredInvIds[iv.id]=true; });
 
   var filteredItems = allItems.filter(function(it) {
-   var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
-if (!filteredInvIds[itemInvId]) return false;
-   var itemName = String(it.name || it.product_name_snapshot || it.productName || it.product_name || '').toLowerCase();
-
-var search = String(fProd || '').trim().toLowerCase();
-
-if (search && !itemName.includes(search)) return false;
+    var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
+    if (!filteredInvIds[itemInvId]) return false;
+    var itemName = String(it.name || it.product_name_snapshot || it.productName || it.product_name || '').toLowerCase();
+    var search = String(fProd || '').trim().toLowerCase();
+    if (search && !itemName.includes(search)) return false;
     return true;
   });
 
   /* If product filter active — restrict invoices to those that contain filtered items */
   if (fProd) {
     var invWithProduct = {};
-   filteredItems.forEach(function(it){
-  var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
-  invWithProduct[itemInvId] = true;
-});
+    filteredItems.forEach(function(it){
+      var itemInvId = it.invoiceId || it.invoice_id || it.invoice || it.inv_id;
+      invWithProduct[itemInvId] = true;
+    });
     filteredInv = filteredInv.filter(function(iv){ return invWithProduct[iv.id]; });
   }
 
@@ -2929,9 +3613,9 @@ if (search && !itemName.includes(search)) return false;
   /* Fetch returns for same period */
   var allReturns = await DB.getReturns();
   var filteredReturns = allReturns.filter(function(r) {
-    var d = (r.date || r.createdAt || '').substring(0,10);
-    if (fFrom && d < fFrom) return false;
-    if (fTo   && d > fTo)   return false;
+    /* Priority: r.date (user-selected) → r.return_date → createdAt (last resort) */
+    var retDate = normDateStr(r.date) || normDateStr(r.return_date) || normDateStr(r.createdAt) || '';
+    if (!inDateRange(retDate)) return false;
     if (fCh && (r.channel||'') !== fCh) return false;
     return true;
   });
@@ -3031,23 +3715,36 @@ function renderTopProducts(items) {
   var prod = {};
   items.forEach(function(it) {
     var k = it.name || it.barcode || '—';
-    if (!prod[k]) prod[k] = { name:k, qty:0, net:0 };
+    var code = it.product_code || it.barcode || k;
+    if (!prod[k]) prod[k] = { name:k, code:code, qty:0, net:0, hasProfit:false, profit:0 };
     prod[k].qty += parseFloat(it.qty)||0;
-    var g = (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-    prod[k].net += g - (parseFloat(it.discount)||0);
+    var n = normalizeItem(it);
+    var g = n.qty * n.price;
+    prod[k].net += g - n.discount;
+    /* Profit calc using costPrice from master */
+    var master = APP.products.find(function(p){ return (p.product_code||p.barcode)===code || p.name===k; });
+    if (master && master.costPrice > 0) {
+      prod[k].hasProfit = true;
+      var unitProfit = n.price - master.costPrice - n.discountValue;
+      prod[k].profit += unitProfit * n.qty;
+    }
   });
 
-  var sorted = Object.values(prod).sort(function(a,b){return b.net-a.net;}).slice(0,8);
-  var maxNet = sorted.length ? sorted[0].net : 1;
+  var arr = Object.values(prod);
+  var byNet    = arr.slice().sort(function(a,b){return b.net-a.net;}).slice(0,8);
+  var byProfit = arr.filter(function(x){return x.hasProfit;}).sort(function(a,b){return b.profit-a.profit;}).slice(0,5);
+  var leastSold= arr.slice().sort(function(a,b){return a.qty-b.qty;}).slice(0,5);
 
-  if (sorted.length===0) {
+  if (arr.length===0) {
     wrap.innerHTML='<div class="empty"><p>لا توجد بيانات</p></div>'; return;
   }
 
+  var maxNet = byNet.length ? byNet[0].net : 1;
   var medals = ['🥇','🥈','🥉'];
-  wrap.innerHTML = '<div class="tbl-wrap" style="margin-top:0;"><table style="font-size:12px;">' +
+
+  var topTable = '<div class="tbl-wrap" style="margin-top:0;"><table style="font-size:12px;">' +
     '<thead><tr><th style="width:30px;">#</th><th>المنتج</th><th>الكمية</th><th>الصافي</th></tr></thead>' +
-    '<tbody>' + sorted.map(function(p,i){
+    '<tbody>' + byNet.map(function(p,i){
       return '<tr>' +
         '<td style="font-size:16px;text-align:center;">'+(medals[i]||''+(i+1))+'</td>' +
         '<td>'+escapeHtml(p.name)+'</td>' +
@@ -3055,6 +3752,35 @@ function renderTopProducts(items) {
         '<td class="num gold">'+fmt(p.net)+' ج.م</td>' +
       '</tr>';
     }).join('') + '</tbody></table></div>';
+
+  var profitSection = '';
+  if (byProfit.length > 0) {
+    profitSection = '<div style="margin-top:18px;">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">📈 أعلى ربحاً</div>' +
+      '<div class="tbl-wrap" style="margin-top:0;"><table style="font-size:12px;">' +
+      '<thead><tr><th>#</th><th>المنتج</th><th>الربح الصافي</th></tr></thead><tbody>' +
+      byProfit.map(function(p,i){
+        return '<tr>' +
+          '<td class="muted">'+(i+1)+'</td>' +
+          '<td>'+escapeHtml(p.name)+'</td>' +
+          '<td class="num" style="color:var(--green);">'+fmt(p.profit)+' ج.م</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div></div>';
+  }
+
+  var leastSection = '<div style="margin-top:18px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">📉 أقل مبيعاً</div>' +
+    '<div class="tbl-wrap" style="margin-top:0;"><table style="font-size:12px;">' +
+    '<thead><tr><th>#</th><th>المنتج</th><th>الكمية</th></tr></thead><tbody>' +
+    leastSold.map(function(p,i){
+      return '<tr>' +
+        '<td class="muted">'+(i+1)+'</td>' +
+        '<td>'+escapeHtml(p.name)+'</td>' +
+        '<td class="num" style="color:var(--red);">'+Math.round(p.qty)+'</td>' +
+      '</tr>';
+    }).join('') + '</tbody></table></div></div>';
+
+  wrap.innerHTML = topTable + profitSection + leastSection;
 }
 
 /* ---- Channel Breakdown ---- */
@@ -3132,12 +3858,13 @@ function renderProductsReport() {
       name:it.name||'—', barcode:k, qty:0, gross:0, disc:0, net:0,
       times:0, prices:[], lastDate:'',
     };
-    var g = (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-    var n = g - (parseFloat(it.discount)||0);
-    prod[k].qty   += parseFloat(it.qty)||0;
+    var n = normalizeItem(it);
+    var g = n.qty * n.price;
+    var d = n.discount;          /* qty * discountValue */
+    prod[k].qty   += n.qty;
     prod[k].gross += g;
-    prod[k].disc  += parseFloat(it.discount)||0;
-    prod[k].net   += n;
+    prod[k].disc  += d;
+    prod[k].net   += g - d;
     prod[k].times++;
     prod[k].prices.push(parseFloat(it.price)||0);
     var d = it.createdAt ? it.createdAt.substring(0,10) : '';
@@ -3298,19 +4025,21 @@ function buildPrintHTML(iv, items) {
   function safe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   var subtotal  = parseFloat(iv.totalGross)    || items.reduce(function(s,it){ return s+(it.qty||0)*(it.price||0); },0);
-  var discTotal = parseFloat(iv.totalDiscount) || items.reduce(function(s,it){ return s+(parseFloat(it.discount)||0); },0);
+  var discTotal = parseFloat(iv.totalDiscount) || items.reduce(function(s,it){ var n=normalizeItem(it); return s+n.discount; },0);
   var netTotal  = parseFloat(iv.netTotal)      || (subtotal - discTotal);
 
   var rows = items.map(function(it,i) {
-    var gross = (it.qty||0)*(it.price||0);
-    var net   = gross - (parseFloat(it.discount)||0);
+    var n     = normalizeItem(it);
+    var gross = n.qty * n.price;
+    var disc  = n.discount;              /* qty * discountValue — never per-piece */
+    var net   = gross - disc;
     return '<tr class="'+(i%2===0?'even':'')+'">' +
       '<td class="c">'+(i+1)+'</td>' +
-      '<td>'+safe(it.barcode||'')+'</td>' +
-      '<td class="name">'+safe(it.name||'—')+'</td>' +
-      '<td class="c">'+fmtN(it.qty)+'</td>' +
-      '<td class="r">'+fmtN(it.price)+'</td>' +
-      '<td class="r disc">'+fmtN(it.discount||0)+'</td>' +
+      '<td>'+safe(n.barcode||'')+'</td>' +
+      '<td class="name">'+safe(n.name||'—')+'</td>' +
+      '<td class="c">'+fmtN(n.qty)+'</td>' +
+      '<td class="r">'+fmtN(n.price)+'</td>' +
+      '<td class="r disc">'+fmtN(disc)+'</td>' +
       '<td class="r">'+fmtN(gross)+'</td>' +
       '<td class="r net">'+fmtN(net)+'</td>' +
     '</tr>';
@@ -3404,14 +4133,14 @@ function buildPrintHTML(iv, items) {
     '<div class="inv-badge">' +
       '<div class="inv-label">فاتورة مبيعات</div>' +
       '<div class="inv-num"># ' + safe(iv.number||'—') + '</div>' +
-      '<div class="inv-date">' + (iv.date ? safe(iv.date) : '') + '</div>' +
+      '<div class="inv-date">' + (iv.date ? safe(fmtDateStr(iv.date)) : '') + '</div>' +
     '</div>' +
   '</div>' +
 
   /* Meta info row */
   '<div class="meta-section">' +
     '<div class="meta-cell"><div class="meta-lbl">رقم الفاتورة</div><div class="meta-val">' + safe(iv.number||'—') + '</div></div>' +
-    '<div class="meta-cell"><div class="meta-lbl">التاريخ</div><div class="meta-val">' + safe(iv.date||'—') + '</div></div>' +
+    '<div class="meta-cell"><div class="meta-lbl">التاريخ</div><div class="meta-val">' + safe(fmtDateStr(iv.date||'')) + '</div></div>' +
     '<div class="meta-cell"><div class="meta-lbl">العميل</div><div class="meta-val">' + safe(iv.channel||'—') + '</div></div>' +
     (iv.notes ? '<div class="meta-cell"><div class="meta-lbl">ملاحظات</div><div class="meta-val">' + safe(iv.notes) + '</div></div>' : '') +
   '</div>' +
@@ -3507,11 +4236,12 @@ function exportProductsCSV() {
   items.forEach(function(it) {
     var k = it.barcode || it.name || '—';
     if (!prod[k]) prod[k] = {name:it.name||'—', barcode:k, qty:0, gross:0, disc:0, net:0, times:0, prices:[], lastDate:''};
-    var g = (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-    prod[k].qty   += parseFloat(it.qty)||0;
+    var n = normalizeItem(it);
+    var g = n.qty * n.price;
+    prod[k].qty   += n.qty;
     prod[k].gross += g;
-    prod[k].disc  += parseFloat(it.discount)||0;
-    prod[k].net   += g-(parseFloat(it.discount)||0);
+    prod[k].disc  += n.discount;
+    prod[k].net   += g - n.discount;
     prod[k].times++;
     prod[k].prices.push(parseFloat(it.price)||0);
     var d = (it.createdAt||'').substring(0,10);
@@ -3586,9 +4316,11 @@ function exportDailyCSV() {
 
 function exportSingleInvoiceCSV(iv, items) {
   var rows = items.map(function(it,i) {
-    var g = (it.qty||0)*(it.price||0);
-    var n = g-(it.discount||0);
-    return [i+1, it.name||'—', it.barcode||'—', it.qty, it.price, it.discount, g.toFixed(2), n.toFixed(2)];
+    var n  = normalizeItem(it);
+    var g  = n.qty * n.price;
+    var d  = n.discount;         /* qty * discountValue */
+    var nl = g - d;
+    return [i+1, n.name||'—', n.barcode||'—', n.qty, n.price, d, g.toFixed(2), nl.toFixed(2)];
   });
   /* Add totals row */
   rows.push(['','','','','','مجموع',
@@ -3615,6 +4347,7 @@ function genRetNumber() {
 
 /* ---- Init return (fresh state) ---- */
 function initReturn() {
+  _editingReturnId = null;
   RET.number  = genRetNumber();
   RET.date    = fmtToday();
   RET.channel = '';
@@ -3626,6 +4359,12 @@ function initReturn() {
   if (_retDateEl) _retDateEl.value = RET.date;
   document.getElementById('retChannel').value      = '';
   document.getElementById('retNotes').value        = '';
+  /* Hide editing banner */
+  var banner = document.getElementById('retEditingBanner');
+  if (banner) banner.style.display = 'none';
+  /* Reset save button */
+  var saveBtn = document.getElementById('retSaveBtn');
+  if (saveBtn) saveBtn.textContent = '✅ حفظ المرتجع';
   renderReturnTable();
 }
 
@@ -3701,14 +4440,15 @@ function addReturnItemFromProduct(product) {
     existing.qty += 1;
     existing.total = parseFloat((existing.qty * existing.price).toFixed(2));
   } else {
+    var discPerPiece = parseFloat(product.discountValue) || 0;
     RET.items.push({
       id      : uid(),
       barcode : product.barcode,
       name    : product.name,
       qty     : 1,
       price   : product.price,
-      discount: product.discountValue || 0,
-      total   : Math.max(0, product.price - (product.discountValue || 0)),
+      discount: discPerPiece,
+      total   : Math.max(0, product.price - discPerPiece),
     });
   }
   renderReturnTable();
@@ -3744,6 +4484,9 @@ function renderReturnTable() {
   var empty = document.getElementById('retEmpty');
   if (!tbody) return;
 
+  /* Preserve scroll position */
+  var scrollY = window.pageYOffset;
+
   if (RET.items.length === 0) {
     tbody.innerHTML = ''; empty.style.display = 'block';
     document.getElementById('retTotal').textContent = '0.00';
@@ -3761,15 +4504,18 @@ function renderReturnTable() {
       '<td><input class="cell-input" style="width:150px" value="'+escapeHtml(it.name)+'"' +
           ' onchange="updateReturnItem(\''+id+'\',\'name\',this.value)"' +
           ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      '<td><input class="cell-input num" type="number" min="1" step="1"" value="'+(it.qty||1)+'"' +
-          ' oninput="updateReturnItem(\''+id+'\',\'qty\',this.value)"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+      '<td><input class="cell-input num" type="number" min="1" step="1" value="'+(it.qty||1)+'"' +
+          ' onblur="updateReturnItem(\''+id+'\',\'qty\',this.value)"' +
+          ' onkeydown="if(event.key===\'Enter\'){updateReturnItem(\''+id+'\',\'qty\',this.value);this.blur();}"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus();updateReturnItem(\''+id+'\',\'qty\',this.value)"></td>' +
       '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.price||0)+'"' +
-          ' oninput="updateReturnItem(\''+id+'\',\'price\',this.value)"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
-      '<td><input class="cell-input num" type="number" min="0" step="1" value="'+(it.discount||0)+'"' +
-          ' oninput="updateReturnItem(\''+id+'\',\'discount\',this.value)"' +
-          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()"></td>' +
+          ' onblur="updateReturnItem(\''+id+'\',\'price\',this.value)"' +
+          ' onkeydown="if(event.key===\'Enter\'){updateReturnItem(\''+id+'\',\'price\',this.value);this.blur();}"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus();updateReturnItem(\''+id+'\',\'price\',this.value)"></td>' +
+      '<td><input class="cell-input num" type="number" min="0" step="0.01" value="'+(it.discount||0)+'"' +
+          ' onblur="updateReturnItem(\''+id+'\',\'discount\',this.value)"' +
+          ' onkeydown="if(event.key===\'Enter\'){updateReturnItem(\''+id+'\',\'discount\',this.value);this.blur();}"' +
+          ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus();updateReturnItem(\''+id+'\',\'discount\',this.value)"></td>' +
       '<td class="num" style="color:var(--red);font-weight:600;">'+fmt(it.total)+'</td>' +
       '<td><button class="btn btn-danger btn-icon" onclick="deleteReturnRow(\''+id+'\')">🗑</button></td>' +
     '</tr>';
@@ -3778,6 +4524,9 @@ function renderReturnTable() {
   /* Update total */
   var total = RET.items.reduce(function(s,it){ return s+(parseFloat(it.total)||0); }, 0);
   document.getElementById('retTotal').textContent = fmt(total);
+
+  /* Restore scroll position */
+  window.scrollTo(0, scrollY);
 }
 
 async function confirmSaveReturn() {
@@ -3826,6 +4575,7 @@ async function confirmSaveReturn() {
     async function() {
       await DB.saveReturn(ret, items);
       toast('✅ تم حفظ المرتجع: ' + RET.number + ' — إجمالي: ' + fmt(RET.totalReturn) + ' ج.م', 'ok');
+      _editingReturnId = null;
       initReturn();
       renderReturnsList();
     }
@@ -3879,6 +4629,7 @@ async function renderReturnsList() {
       '</div>' +
       '<div class="inv-list-actions">' +
         '<button class="btn btn-outline btn-sm" onclick="openReturnDetail(\''+esc+'\')">👁 تفاصيل</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="editReturn(\''+esc+'\')">✏️ تعديل</button>' +
         '<button class="btn btn-danger btn-sm" onclick="confirmDeleteReturn(\''+esc+'\')">🗑</button>' +
       '</div>' +
     '</div>';
@@ -3943,6 +4694,79 @@ function confirmDeleteReturn(id) {
   });
 }
 
+/* ---- Edit Return ---- */
+var _editingReturnId = null;
+
+async function editReturn(id) {
+  var returns = await DB.getReturns();
+  var r = returns.find(function(x){ return x.id===id; });
+  if (!r) return;
+
+  _editingReturnId = id;
+
+  /* Switch to returns page and load data into the return form */
+  showPage('returns');
+
+  /* Populate header fields */
+  var numEl = document.getElementById('retNumber');
+  var chEl  = document.getElementById('retChannel');
+  var ntEl  = document.getElementById('retNotes');
+  if (numEl) numEl.textContent = r.number || '';
+  if (chEl)  chEl.value        = r.channel || '';
+  if (ntEl)  ntEl.value        = r.notes   || '';
+
+  /* Load items into RET.items */
+  var items = await DB.getReturnItems(id);
+  if (typeof RET !== 'undefined') {
+    RET.id      = id;
+    RET.number  = r.number;
+    RET.date    = r.date || RET.date;
+    RET.channel = r.channel;
+    RET.notes   = r.notes;
+    RET.items   = items.map(function(it) {
+      var qty          = parseFloat(it.qty)   || 1;
+      var price        = parseFloat(it.price) || 0;
+      /* In returns, discount field is always per-piece */
+      var discPerPiece = parseFloat(it.discount_value !== undefined ? it.discount_value : it.discountValue) || 0;
+      return {
+        id      : it.id || uid(),
+        barcode : it.barcode || '',
+        name    : it.name   || '',
+        qty     : qty,
+        price   : price,
+        discount: discPerPiece,
+        total   : parseFloat((qty * Math.max(0, price - discPerPiece)).toFixed(2)),
+      };
+    });
+  }
+
+  /* Show editing banner */
+  var banner = document.getElementById('retEditingBanner');
+  if (banner) banner.style.display = 'flex';
+  var bannerNum = document.getElementById('retEditingBannerNum');
+  if (bannerNum) bannerNum.textContent = r.number || '';
+
+  /* Change save button text */
+  var saveBtn = document.getElementById('retSaveBtn');
+  if (saveBtn) saveBtn.textContent = '🔄 تحديث المرتجع';
+
+  /* Render without scroll reset */
+  if (typeof renderReturnTable === 'function') renderReturnTable();
+
+  toast('✏️ جارٍ تعديل المرتجع: ' + (r.number||''), 'ok');
+}
+
+function cancelReturnEdit() {
+  _editingReturnId = null;
+  /* Hide banner, reset button */
+  var banner = document.getElementById('retEditingBanner');
+  if (banner) banner.style.display = 'none';
+  var saveBtn = document.getElementById('retSaveBtn');
+  if (saveBtn) saveBtn.textContent = '✅ حفظ المرتجع';
+  initReturn();
+  toast('↩️ تم إلغاء تعديل المرتجع', 'ok');
+}
+
 /* ---- Export returns CSV ---- */
 async function exportReturnsCSV() {
   var returns  = await DB.getReturns();
@@ -3986,6 +4810,247 @@ function exportSingleReturnCSV(r, items) {
 /* also add a today() helper that uses isoDate */
 function today() { return isoDate(new Date()); }
 
+
+
+/* ============================================================
+   PRICING MODULE (Phase 9) — أسعار العملاء
+   ============================================================ */
+
+function initPricingPage() {
+  var sel = document.getElementById('pricing_channel');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— اختر العميل —</option>';
+  APP.channels.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.name; opt.textContent = c.name;
+    if (c.name === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  renderPricingTable();
+}
+
+function renderPricingTable() {
+  var channel = (document.getElementById('pricing_channel')||{}).value || '';
+  var query   = ((document.getElementById('pricing_search')||{}).value||'').trim().toLowerCase();
+
+  var noChEl  = document.getElementById('pricingNoChannel');
+  var wrapEl  = document.getElementById('pricingTableWrap');
+  var emptyEl = document.getElementById('pricingEmpty');
+
+  if (!channel) {
+    if (noChEl)  noChEl.style.display  = 'block';
+    if (wrapEl)  wrapEl.style.display  = 'none';
+    if (emptyEl) emptyEl.style.display = 'none';
+    return;
+  }
+  if (noChEl) noChEl.style.display = 'none';
+
+  var exactMatch = !!(document.getElementById('pricing_exact')||{}).checked;
+
+  var products = APP.products.filter(function(p) {
+    if (!query) return true;
+    var code = (p.product_code||p.barcode||'').toLowerCase();
+    var nm   = (p.name||'').toLowerCase();
+    if (exactMatch) return code === query;
+    return nm.indexOf(query) > -1 || code.indexOf(query) > -1;
+  });
+
+  if (products.length === 0) {
+    if (wrapEl)  wrapEl.style.display  = 'none';
+    if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.querySelector('p').textContent = 'لا توجد منتجات'; }
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (wrapEl)  wrapEl.style.display  = 'block';
+
+  var tbody = document.getElementById('pricingBody');
+  tbody.innerHTML = products.map(function(p, i) {
+    var code      = p.product_code || p.barcode;
+    var priceRec  = DB.getPriceForChannel(code, channel);
+    /* If no saved price, suggest base price but mark unsaved */
+    var savedPrice = priceRec ? priceRec.price         : null;
+    var savedDisc  = priceRec ? priceRec.discount_value : null;
+    var dispPrice  = savedPrice !== null ? savedPrice : p.price;   /* suggestion */
+    var dispDisc   = savedDisc  !== null ? savedDisc  : (p.discountValue || 0);
+    var isSaved    = priceRec !== null;
+
+    var statusId   = 'pstatus-' + code.replace(/[^a-z0-9]/gi,'_');
+    var statusBadge = isSaved
+      ? '<span id="'+statusId+'" class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(82,183,136,0.3);">✔ محفوظ</span>'
+      : '<span id="'+statusId+'" class="badge" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,0.3);">⚠ غير محفوظ</span>';
+
+    /* Safe attr values */
+    var safeCode = escapeHtml(code);
+    var safeCh   = escapeHtml(channel);
+
+    return '<tr>' +
+      '<td class="muted">'+(i+1)+'</td>' +
+      '<td><span class="num" style="color:var(--gold-light);">'+safeCode+'</span></td>' +
+      '<td>'+escapeHtml(p.name)+'</td>' +
+      '<td>' +
+        '<input class="cell-input num" type="number" min="0" step="0.01"' +
+        ' data-code="'+safeCode+'" data-field="price"' +
+        ' value="'+dispPrice+'"' +
+        ' placeholder="'+escapeHtml(String(p.price))+'"' +
+        ' oninput="onPriceInput(this)" onchange="onPriceInput(this)"' +
+        ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()" style="width:110px;">' +
+      '</td>' +
+      '<td>' +
+        '<input class="cell-input num" type="number" min="0" step="0.01"' +
+        ' data-code="'+safeCode+'" data-field="discount_value"' +
+        ' value="'+dispDisc+'"' +
+        ' oninput="onPriceInput(this)" onchange="onPriceInput(this)"' +
+        ' onfocus="pauseScannerFocus()" onblur="resumeScannerFocus()" style="width:100px;">' +
+      '</td>' +
+      '<td id="'+statusId+'">'+statusBadge+'</td>' +
+      '<td>' +
+        '<button class="btn btn-outline btn-sm btn-save-row" onclick="saveRowPrice(\''+safeCode+'\')">💾</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+/* Called on every keystroke in a pricing input */
+function onPriceInput(inputEl) {
+  var code    = inputEl.getAttribute('data-code') || '';
+  var field   = inputEl.getAttribute('data-field') || '';
+  var channel = (document.getElementById('pricing_channel')||{}).value || '';
+  if (!code || !field || !channel) return;
+
+  /* Update status badge to "تم التعديل" */
+  var statusId = 'pstatus-' + code.replace(/[^a-z0-9]/gi,'_');
+  var statusEl = document.getElementById(statusId);
+  if (statusEl) {
+    statusEl.innerHTML = '<span class="badge" style="background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid var(--gold-border);">✏ تم التعديل</span>';
+  }
+}
+
+async function saveAllPrices() {
+  var channel = (document.getElementById('pricing_channel')||{}).value || '';
+  if (!channel) { toast('⚠️ اختر عميلاً أولاً', 'err'); return; }
+
+  /* Read ALL inputs directly from the DOM — don't rely on _pricingEdits */
+  var tbody = document.getElementById('pricingBody');
+  if (!tbody) return;
+
+  var priceInputs    = tbody.querySelectorAll('input[data-field="price"]');
+  var discInputs     = tbody.querySelectorAll('input[data-field="discount_value"]');
+
+  /* Build a map: code → { price, discount_value } */
+  var inputMap = {};
+  priceInputs.forEach(function(el) {
+    var code = el.getAttribute('data-code');
+    if (!code) return;
+    if (!inputMap[code]) inputMap[code] = { price: 0, discount_value: 0 };
+    inputMap[code].price = parseFloat(el.value) || 0;
+  });
+  discInputs.forEach(function(el) {
+    var code = el.getAttribute('data-code');
+    if (!code) return;
+    if (!inputMap[code]) inputMap[code] = { price: 0, discount_value: 0 };
+    inputMap[code].discount_value = parseFloat(el.value) || 0;
+  });
+
+  /* Compare with saved values — collect only changed rows */
+  var toSave = [];
+  Object.keys(inputMap).forEach(function(code) {
+    var input   = inputMap[code];
+    var saved   = DB.getPriceForChannel(code, channel);
+    var sPrice  = saved ? saved.price         : null;
+    var sDisc   = saved ? saved.discount_value : null;
+    /* Always save if: no saved record, or price/disc differs */
+    var changed = saved === null ||
+                  parseFloat(input.price) !== parseFloat(sPrice) ||
+                  parseFloat(input.discount_value) !== parseFloat(sDisc);
+    if (changed) {
+      toSave.push({
+        id            : saved ? saved.id : undefined,
+        product_code  : code,
+        channel_name  : channel,
+        price         : input.price,
+        discount_value: input.discount_value,
+      });
+    }
+  });
+
+  if (toSave.length === 0) {
+    toast('ℹ️ لا توجد تغييرات فعلية للحفظ', 'ok');
+    return;
+  }
+
+  /* Disable button and show loading state */
+  var saveBtn = document.getElementById('pricingSaveBtn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ جاري الحفظ...'; }
+
+  var saved = 0;
+  var errors = 0;
+  var errorMsgs = [];
+
+  for (var i = 0; i < toSave.length; i++) {
+    var rec = toSave[i];
+    try {
+      await DB.saveCustomerPrice(rec);
+      saved++;
+    } catch(e) {
+      errors++;
+      errorMsgs.push(rec.product_code + ': ' + (e.message || 'خطأ'));
+    }
+  }
+
+  /* Refresh cache */
+  APP.customerPrices = await DB.getCustomerPrices();
+
+  /* Restore button */
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 حفظ الأسعار'; }
+
+  if (errors > 0) {
+    toast('❌ فشل حفظ ' + errors + ' سعر: ' + errorMsgs.slice(0,2).join(' | '), 'err');
+  } else {
+    toast('✅ تم حفظ ' + saved + ' سعر للعميل: ' + channel, 'ok');
+  }
+
+  /* Refresh table — status badges now show محفوظ */
+  renderPricingTable();
+}
+
+/* ---- Save a single pricing row ---- */
+async function saveRowPrice(productCode) {
+  var channel = (document.getElementById('pricing_channel')||{}).value || '';
+  if (!channel) { toast('⚠️ اختر عميلاً أولاً', 'err'); return; }
+
+  /* Read inputs for this code */
+  var tbody = document.getElementById('pricingBody');
+  var priceInput = tbody ? tbody.querySelector('input[data-code="'+productCode+'"][data-field="price"]') : null;
+  var discInput  = tbody ? tbody.querySelector('input[data-code="'+productCode+'"][data-field="discount_value"]') : null;
+
+  if (!priceInput) { toast('⚠️ لم يُعثر على الصنف', 'err'); return; }
+
+  var newPrice = parseFloat(priceInput.value) || 0;
+  var newDisc  = parseFloat(discInput ? discInput.value : 0) || 0;
+
+  try {
+    var existing = DB.getPriceForChannel(productCode, channel);
+    await DB.saveCustomerPrice({
+      id            : existing ? existing.id : undefined,
+      product_code  : productCode,
+      channel_name  : channel,
+      price         : newPrice,
+      discount_value: newDisc,
+    });
+    APP.customerPrices = await DB.getCustomerPrices();
+
+    /* Update status badge inline */
+    var statusId = 'pstatus-' + productCode.replace(/[^a-z0-9]/gi,'_');
+    var statusEl = document.getElementById(statusId);
+    if (statusEl) {
+      statusEl.innerHTML = '<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(82,183,136,0.3);">✔ محفوظ</span>';
+    }
+    toast('✅ تم حفظ سعر ' + productCode + ' للعميل ' + channel, 'ok');
+  } catch(e) {
+    toast('❌ فشل الحفظ: ' + (e.message||'خطأ غير معروف'), 'err');
+  }
+}
 
 
 /* ============================================================
@@ -4033,8 +5098,9 @@ async function loadStatement() {
   var allInvoices = await DB.getInvoices();
   var allReturns  = await DB.getReturns();
 
-  function inRange(dateStr) {
-    var d = (dateStr || '').substring(0, 10);
+  function inRange(d) {
+    /* d must already be YYYY-MM-DD */
+    if (!d) return !from && !to;
     if (from && d < from) return false;
     if (to   && d > to)   return false;
     return true;
@@ -4044,7 +5110,17 @@ async function loadStatement() {
     return (iv.channel || '') === channel && inRange(getInvDate(iv));
   });
   var returns = allReturns.filter(function(r) {
-    return (r.channel || '') === channel && inRange(r.date || r.createdAt || '');
+    /* Priority: r.date (user-selected) → r.return_date → createdAt (last resort) */
+    var retDate = normDateStr(r.date) || normDateStr(r.return_date) || normDateStr(r.createdAt) || '';
+    return (r.channel || '') === channel && inRange(retDate);
+  });
+
+  /* Sort ascending — oldest first */
+  invoices.sort(function(a,b){ return getInvDate(a).localeCompare(getInvDate(b)); });
+  returns.sort(function(a,b){
+    var da = normDateStr(a.date) || normDateStr(a.return_date) || (a.createdAt||'').substring(0,10);
+    var db = normDateStr(b.date) || normDateStr(b.return_date) || (b.createdAt||'').substring(0,10);
+    return da.localeCompare(db);
   });
 
   var totalGross = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalGross)||0); }, 0);

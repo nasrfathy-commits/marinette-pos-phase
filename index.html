@@ -734,7 +734,27 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
     </div>
 
     <div class="search-bar">
-      <input type="text" id="invSearch" placeholder="🔍 بحث برقم الفاتورة أو العميل..." oninput="renderInvoicesList()" style="max-width:340px;">
+      <input type="text" id="invSearch" placeholder="🔍 بحث برقم الفاتورة أو العميل..." oninput="renderInvoicesList()" style="max-width:300px;">
+      <!-- [تعديل] استبدال Dropdown الشهر/السنة بـ Date Range Pickers — نفس UI شاشة الفاتورة -->
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">من:</label>
+        <input type="date" id="invFilterFrom"
+               style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                      padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;
+                      outline:none;transition:border-color 0.2s,box-shadow 0.2s;"
+               oninput="renderInvoicesList()"
+               onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px var(--gold-dim)'"
+               onblur="this.style.borderColor='var(--gold-border)';this.style.boxShadow=''">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">إلى:</label>
+        <input type="date" id="invFilterTo"
+               style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                      padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;
+                      outline:none;transition:border-color 0.2s,box-shadow 0.2s;"
+               oninput="renderInvoicesList()"
+               onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px var(--gold-dim)'"
+               onblur="this.style.borderColor='var(--gold-border)';this.style.boxShadow=''">
+        <button class="btn btn-outline btn-sm" onclick="clearInvListFilter()" title="مسح الفلتر">✕</button>
+      </div>
       <button class="btn btn-outline btn-sm" onclick="renderInvoicesList()">🔄 تحديث</button>
       <span id="invListCount" class="muted small"></span>
     </div>
@@ -851,6 +871,31 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="form-group">
         <label>المنتج</label>
         <input type="text" id="flt_product" placeholder="اسم المنتج..." oninput="applyFilters()">
+      </div>
+      <!-- [إضافة] فلتر الشهر والسنة — يحسب fromDate/toDate تلقائيًا -->
+      <div class="form-group">
+        <label>الشهر</label>
+        <select id="flt_month" onchange="applyMonthFilter()">
+          <option value="">— كل الشهور</option>
+          <option value="01">يناير</option>
+          <option value="02">فبراير</option>
+          <option value="03">مارس</option>
+          <option value="04">أبريل</option>
+          <option value="05">مايو</option>
+          <option value="06">يونيو</option>
+          <option value="07">يوليو</option>
+          <option value="08">أغسطس</option>
+          <option value="09">سبتمبر</option>
+          <option value="10">أكتوبر</option>
+          <option value="11">نوفمبر</option>
+          <option value="12">ديسمبر</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>السنة</label>
+        <select id="flt_year" onchange="applyMonthFilter()">
+          <option value="">— كل السنوات</option>
+        </select>
       </div>
       <div class="form-group" style="flex:0 0 auto;">
         <label>&nbsp;</label>
@@ -1054,7 +1099,27 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       </div>
 
       <div class="search-bar">
-        <input type="text" id="retSearch" placeholder="🔍 بحث برقم المرتجع أو العميل..." oninput="renderReturnsList()" style="max-width:340px;">
+        <input type="text" id="retSearch" placeholder="🔍 بحث برقم المرتجع أو العميل..." oninput="renderReturnsList()" style="max-width:300px;">
+        <!-- [تعديل] استبدال Dropdown الشهر/السنة بـ Date Range Pickers — نفس UI شاشة المرتجع -->
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">من:</label>
+          <input type="date" id="retFilterFrom"
+                 style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                        padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;
+                        outline:none;transition:border-color 0.2s,box-shadow 0.2s;"
+                 oninput="renderReturnsList()"
+                 onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px var(--gold-dim)'"
+                 onblur="this.style.borderColor='var(--gold-border)';this.style.boxShadow=''">
+          <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">إلى:</label>
+          <input type="date" id="retFilterTo"
+                 style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                        padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;
+                        outline:none;transition:border-color 0.2s,box-shadow 0.2s;"
+                 oninput="renderReturnsList()"
+                 onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px var(--gold-dim)'"
+                 onblur="this.style.borderColor='var(--gold-border)';this.style.boxShadow=''">
+          <button class="btn btn-outline btn-sm" onclick="clearRetListFilter()" title="مسح الفلتر">✕</button>
+        </div>
         <span id="retListCount" class="muted small"></span>
       </div>
 
@@ -1636,37 +1701,45 @@ var DB = {
   },
 
   getInvoiceItems: async function(invoiceId) {
-  if (APP.mode === 'live') {
-    try {
-      var res = await APP.sb
-        .from('invoice_items')
-        .select('*')
-        .eq('invoice_id', invoiceId);
+    /* Normalize invoiceId to string for safe comparison */
+    var safeId = (invoiceId !== undefined && invoiceId !== null) ? String(invoiceId).trim() : '';
 
-      if (res.error) throw res.error;
-
-      return (res.data || []).map(function(r) {
-        var qty          = parseFloat(r.quantity)      || 0;
-        var discPerPiece = parseFloat(r.discount_value) || 0;
-        return {
-          id           : r.id,
-          barcode      : r.barcode,
-          name         : r.product_name_snapshot,
-          qty          : qty,
-          price        : parseFloat(r.price) || 0,
-          discountValue: discPerPiece,
-          discount     : parseFloat((discPerPiece * qty).toFixed(2)),
-        };
-      });
-    } catch(e) {
-      console.warn('DB.getInvoiceItems:', e);
-      return [];
+    if (APP.mode === 'live') {
+      try {
+        var query = APP.sb.from('invoice_items').select('*');
+        if (safeId) query = query.eq('invoice_id', safeId);
+        var res = await query;
+        if (res.error) throw res.error;
+        return (res.data || []).map(function(r) {
+          var qty          = parseFloat(r.quantity)       || 0;
+          var price        = parseFloat(r.price)          || 0;
+          var discPerPiece = parseFloat(r.discount_value) || 0;
+          var lineDisc     = parseFloat((discPerPiece * qty).toFixed(2));
+          return {
+            id           : r.id,
+            invoiceId    : String(r.invoice_id || '').trim(),
+            barcode      : r.barcode      || '',
+            name         : r.product_name_snapshot || r.product_name || r.barcode || '—',
+            qty          : qty,
+            price        : price,
+            discountValue: discPerPiece,
+            discount     : lineDisc,
+            net          : parseFloat((qty * price - lineDisc).toFixed(2)),
+          };
+        });
+      } catch(e) {
+        console.warn('DB.getInvoiceItems:', e);
+        return [];
+      }
     }
-  }
 
-  var items = localGet(K.INV_ITEMS);
-  return items.filter(function(it){ return it.invoiceId === invoiceId; });
-},
+    /* localStorage fallback */
+    var allLocal = localGet(K.INV_ITEMS);
+    if (!safeId) return allLocal;
+    return allLocal.filter(function(it) {
+      return String(it.invoiceId || it.invoice_id || '').trim() === safeId;
+    });
+  },
 
   saveInvoice: async function(inv, items, existingId) {
     /*
@@ -1794,29 +1867,41 @@ var DB = {
     localSet(K.INV_ITEMS, localGet(K.INV_ITEMS).filter(function(x){ return x.invoiceId !== id; }));
   },
 
-  /* ---- Phase 3: get ALL items at once for dashboard aggregation ---- */
   getAllInvoiceItems: async function() {
     if (APP.mode === 'live') {
       try {
-        var res = await APP.sb.from('invoice_items').select('*')
+        var res = await APP.sb.from('invoice_items').select('*');
         if (res.error) throw res.error;
         return (res.data || []).map(function(r) {
-          var qty          = parseFloat(r.quantity)      || 0;
+          var qty          = parseFloat(r.quantity)       || 0;
+          var price        = parseFloat(r.price)          || 0;
           var discPerPiece = parseFloat(r.discount_value) || 0;
+          var lineDisc     = parseFloat((discPerPiece * qty).toFixed(2));
           return {
             id           : r.id,
-            invoiceId    : r.invoice_id,
-            barcode      : r.barcode,
-            name         : r.product_name_snapshot,
+            invoiceId    : String(r.invoice_id || '').trim(),
+            barcode      : r.barcode      || '',
+            name         : r.product_name_snapshot || r.product_name || r.barcode || '—',
             qty          : qty,
-            price        : parseFloat(r.price) || 0,
+            price        : price,
             discountValue: discPerPiece,
-            discount     : parseFloat((discPerPiece * qty).toFixed(2)),
+            discount     : lineDisc,
+            net          : parseFloat((qty * price - lineDisc).toFixed(2)),
           };
         });
       } catch(e) { console.warn('DB.getAllInvoiceItems:', e); return localGet(K.INV_ITEMS); }
     }
-    return localGet(K.INV_ITEMS);
+    /* localStorage: add net field on the fly */
+    return localGet(K.INV_ITEMS).map(function(it) {
+      var qty   = parseFloat(it.qty)          || 0;
+      var price = parseFloat(it.price)        || 0;
+      var disc  = parseFloat(it.discount)     || 0;
+      return Object.assign({}, it, {
+        invoiceId: String(it.invoiceId || it.invoice_id || '').trim(),
+        name     : it.name || it.product_name_snapshot || it.barcode || '—',
+        net      : parseFloat((qty * price - disc).toFixed(2)),
+      });
+    });
   },
 
   /* ---- RETURNS (Phase 5) ---- */
@@ -2062,6 +2147,9 @@ function setDbStatus(state, label) {
 async function bootstrap() {
   /* 0. Apply saved theme immediately */
   applyTheme(localStorage.getItem('marinette_theme') || 'dark');
+
+  /* [إضافة] تهيئة قائمة السنوات في فلتر الداشبورد */
+  initYearDropdown();
 
   /* 1. Show UI immediately in demo mode — never wait for network */
   setDbStatus('demo');
@@ -2731,15 +2819,37 @@ function updateDiscountValue(id, value) {
   renderTotals();
 }
 
-/* Enter key helper for numeric inputs in invoice table */
+/* Enter key helper for numeric inputs in invoice table
+   [تعديل] بعد الحفظ ينتقل المؤشر للخانة التي تحتها في نفس العمود */
 function onInvInputEnter(e, id, field, type) {
   if (e.key !== 'Enter') return;
   e.preventDefault();
   var v = e.target.value;
+
+  /* 1. نفذ الحفظ كما كان */
   if (type==='qty' || type==='price') commitItemQtyPrice(id, field, v);
   else if (type==='discountValue')    commitDiscountValue(id, v);
   else if (type==='discount')         commitTotalDiscount(id, v);
-  e.target.blur();
+
+  /* 2. [تعديل] انتقل للخانة التي تحتها في نفس العمود */
+  var currentInput = e.target;
+  var currentTd    = currentInput.closest('td');
+  var currentTr    = currentInput.closest('tr');
+  if (currentTd && currentTr) {
+    var colIndex = Array.prototype.indexOf.call(currentTr.cells, currentTd);
+    var nextTr   = currentTr.nextElementSibling;
+    if (nextTr) {
+      var nextTd    = nextTr.cells[colIndex];
+      var nextInput = nextTd ? nextTd.querySelector('input') : null;
+      if (nextInput && !nextInput.readOnly) {
+        nextInput.focus();
+        nextInput.select();
+        return; /* لا blur على الحالي — المؤشر انتقل */
+      }
+    }
+  }
+  /* fallback: blur فقط لو ما في صف تحت */
+  currentInput.blur();
 }
 
 /* ---- Render invoice table ---- */
@@ -3106,17 +3216,41 @@ async function renderInvoicesList() {
   var wrap  = document.getElementById('invListWrap');
   var empty = document.getElementById('invListEmpty');
   var query = (document.getElementById('invSearch').value||'').trim().toLowerCase();
+  /* [تعديل] فلتر Date Range بدلاً من Dropdown الشهر/السنة */
+  var fFrom = ((document.getElementById('invFilterFrom')||{}).value||'').trim();
+  var fTo   = ((document.getElementById('invFilterTo')  ||{}).value||'').trim();
 
   wrap.innerHTML = '<div style="padding:20px;color:var(--w60);font-size:13px;text-align:center;">⏳ جاري التحميل...</div>';
 
   var invoices = await DB.getInvoices();
 
+  /* فلتر نص البحث */
   if (query) {
     invoices = invoices.filter(function(iv) {
       return (iv.number||'').toLowerCase().indexOf(query)>-1 ||
              (iv.channel||'').toLowerCase().indexOf(query)>-1;
     });
   }
+
+  /* [تعديل] فلتر التاريخ — يعتمد فقط على invoice.date / invoice_date (لا createdAt) */
+  if (fFrom || fTo) {
+    invoices = invoices.filter(function(iv) {
+      var d = getInvDate(iv);   /* YYYY-MM-DD من تاريخ الفاتورة المختار */
+      if (!d) return false;
+      if (fFrom && d < fFrom) return false;
+      if (fTo   && d > fTo)   return false;
+      return true;
+    });
+  }
+
+  /* [تعديل] ترتيب الفواتير تصاعدياً حسب التاريخ (Chronological) */
+  invoices.sort(function(a, b) {
+    var da = getInvDate(a) || '';
+    var db = getInvDate(b) || '';
+    if (da < db) return -1;
+    if (da > db) return  1;
+    return 0;
+  });
 
   document.getElementById('invListCount').textContent = invoices.length + ' فاتورة';
 
@@ -3143,6 +3277,8 @@ async function renderInvoicesList() {
       '</div>' +
       '<div class="inv-list-actions" onclick="event.stopPropagation()">' +
         '<button class="btn btn-edit btn-sm" onclick="editInvoice(\''+esc+'\')">✏️</button>' +
+        /* [تعديل] زر PDF صغير — يفتح نافذة الطباعة لحفظ PDF */
+        '<button class="btn btn-print btn-sm" title="حفظ PDF" onclick="printInvoiceById(\''+esc+'\')">🖨️</button>' +
         '<button class="btn btn-copy btn-sm" onclick="copyInvoice(\''+esc+'\')">📋</button>' +
         '<button class="btn btn-danger btn-sm" onclick="confirmDeleteInvoice(\''+esc+'\')">🗑</button>' +
       '</div>' +
@@ -3417,6 +3553,80 @@ function setPeriod(el, days) {
   loadDashboard();
 }
 
+/* [إضافة] فلتر الشهر والسنة
+   - يحسب fromDate = أول يوم في الشهر
+   - يحسب toDate = آخر يوم في الشهر (بدون new Date('YYYY-MM-DD'))
+   - يُحدّث flt_from / flt_to ثم يستدعي applyFilters() */
+function applyMonthFilter() {
+  var month = (document.getElementById('flt_month').value || '').trim();
+  var year  = (document.getElementById('flt_year').value  || '').trim();
+
+  if (!month || !year) {
+    /* لو أحد الاثنين فارغ — امسح من/إلى وحمّل الكل */
+    document.getElementById('flt_from').value = '';
+    document.getElementById('flt_to').value   = '';
+    applyFilters();
+    return;
+  }
+
+  /* أول يوم في الشهر */
+  var from = year + '-' + month + '-01';
+
+  /* آخر يوم في الشهر — نستخدم day=0 للشهر التالي (local safe) */
+  var m   = parseInt(month, 10);
+  var y   = parseInt(year, 10);
+  var lastDay = new Date(y, m, 0).getDate();   /* الشهر m وday=0 يعني آخر يوم في الشهر m-1+1 = m */
+  var to  = year + '-' + month + '-' + String(lastDay).padStart(2, '0');
+
+  /* حدّث الـ inputs المرئية ثم استدعِ applyFilters() العادية */
+  document.getElementById('flt_from').value = from;
+  document.getElementById('flt_to').value   = to;
+
+  /* أبطِل period-pills الحالي لأن الفلتر يدوي الآن */
+  document.querySelectorAll('.period-pill').forEach(function(p){ p.classList.remove('active'); });
+
+  applyFilters();
+}
+
+/* [إضافة] تهيئة قوائم السنوات (آخر 3 سنوات + السنة الحالية) لكل الصفحات */
+function initYearDropdown() {
+  var curYear = new Date().getFullYear();
+  var years = [];
+  for (var y = curYear; y >= curYear - 3; y--) years.push(String(y));
+
+  /* الداشبورد */
+  var dashSel = document.getElementById('flt_year');
+  if (dashSel) {
+    years.forEach(function(yr) {
+      var opt = document.createElement('option');
+      opt.value = yr; opt.textContent = yr;
+      dashSel.appendChild(opt);
+    });
+    dashSel.value = String(curYear);
+  }
+
+  /* صفحة الفواتير */
+  var invSel = document.getElementById('invFilterYear');
+  if (invSel) {
+    years.forEach(function(yr) {
+      var opt = document.createElement('option');
+      opt.value = yr; opt.textContent = yr;
+      invSel.appendChild(opt);
+    });
+    /* لا نختار سنة افتراضية هنا — المستخدم يختار يدوياً */
+  }
+
+  /* سجل المرتجعات */
+  var retSel = document.getElementById('retFilterYear');
+  if (retSel) {
+    years.forEach(function(yr) {
+      var opt = document.createElement('option');
+      opt.value = yr; opt.textContent = yr;
+      retSel.appendChild(opt);
+    });
+  }
+}
+
 function applyFilters() {
   DASH.fromDate = (document.getElementById('flt_from').value||'').trim();
   DASH.toDate   = (document.getElementById('flt_to').value||'').trim();
@@ -3430,6 +3640,11 @@ function clearFilters() {
   document.getElementById('flt_to').value      = '';
   document.getElementById('flt_channel').value = '';
   document.getElementById('flt_product').value = '';
+  /* [إضافة] إعادة dropdowns الشهر والسنة */
+  var mEl = document.getElementById('flt_month');
+  var yEl = document.getElementById('flt_year');
+  if (mEl) mEl.value = '';
+  if (yEl) yEl.value = '';
   document.querySelectorAll('.period-pill').forEach(function(p){ p.classList.remove('active'); });
   document.querySelector('.period-pill[data-days="0"]').classList.add('active');
   DASH.fromDate = ''; DASH.toDate = ''; DASH.channel = ''; DASH.product = ''; DASH.period = 0;
@@ -3624,7 +3839,20 @@ async function loadDashboard() {
   /* Render everything */
   renderKPIs(filteredInv, filteredItems, filteredReturns);
   renderDailyChart(filteredInv);
-  renderTopProducts(filteredItems);
+
+  /* Build soldItems from filteredInv — ensures every item is tied to a filtered invoice */
+  var soldItems = [];
+  filteredInv.forEach(function(iv) {
+    var invId = String(iv.id || '').trim();
+    var ivItems = (iv.items && iv.items.length)
+      ? iv.items
+      : allItems.filter(function(it) {
+          return String(it.invoiceId || it.invoice_id || it.invoice || it.inv_id || '').trim() === invId;
+        });
+    ivItems.forEach(function(it) { soldItems.push(it); });
+  });
+  renderTopProducts(soldItems);
+
   renderChannelBreakdown(filteredInv, filteredItems, itemsByInv);
 
   /* Sub-tab reports */
@@ -3711,29 +3939,46 @@ function renderTopProducts(items) {
   var wrap = document.getElementById('topProductsWrap');
   if (!wrap) return;
 
-  /* Aggregate by product name */
+  /* Aggregate by stable code (product_code → barcode fallback) */
   var prod = {};
   items.forEach(function(it) {
-    var k = it.name || it.barcode || '—';
-    var code = it.product_code || it.barcode || k;
-    if (!prod[k]) prod[k] = { name:k, code:code, qty:0, net:0, hasProfit:false, profit:0 };
-    prod[k].qty += parseFloat(it.qty)||0;
+    /* Stable grouping key */
+    var code = (it.product_code || it.barcode || '').trim();
+    if (!code) code = (it.name || it.product_name_snapshot || it.product_name || '—').trim();
+
+    /* Display name — never fall back to code unless truly nothing else exists */
+    var displayName = (it.name || it.product_name_snapshot || it.product_name || '').trim() || code;
+
+    if (!prod[code]) {
+      prod[code] = { name: displayName, code: code, qty: 0, net: 0, hasProfit: false, profit: 0 };
+    } else if (prod[code].name === code && displayName !== code) {
+      /* Upgrade name if we previously only had the code */
+      prod[code].name = displayName;
+    }
+
     var n = normalizeItem(it);
-    var g = n.qty * n.price;
-    prod[k].net += g - n.discount;
+    prod[code].qty += n.qty;
+    /* net = qty * price - qty * discountValue */
+    prod[code].net += n.qty * n.price - n.discount;
+
     /* Profit calc using costPrice from master */
-    var master = APP.products.find(function(p){ return (p.product_code||p.barcode)===code || p.name===k; });
+    var master = APP.products.find(function(p){
+      return (p.product_code && p.product_code === it.product_code) ||
+             (p.barcode      && p.barcode      === it.barcode)      ||
+             (p.name         && p.name         === displayName);
+    });
     if (master && master.costPrice > 0) {
-      prod[k].hasProfit = true;
-      var unitProfit = n.price - master.costPrice - n.discountValue;
-      prod[k].profit += unitProfit * n.qty;
+      prod[code].hasProfit = true;
+      prod[code].profit += (n.price - master.costPrice - n.discountValue) * n.qty;
     }
   });
 
   var arr = Object.values(prod);
-  var byNet    = arr.slice().sort(function(a,b){return b.net-a.net;}).slice(0,8);
-  var byProfit = arr.filter(function(x){return x.hasProfit;}).sort(function(a,b){return b.profit-a.profit;}).slice(0,5);
-  var leastSold= arr.slice().sort(function(a,b){return a.qty-b.qty;}).slice(0,5);
+  /* Sort by net descending — highest revenue first */
+  var byNet    = arr.slice().sort(function(a,b){ return b.net - a.net; }).slice(0, 8);
+  var byProfit = arr.filter(function(x){ return x.hasProfit; })
+                    .sort(function(a,b){ return b.profit - a.profit; }).slice(0, 5);
+  var leastSold = arr.slice().sort(function(a,b){ return a.qty - b.qty; }).slice(0, 5);
 
   if (arr.length===0) {
     wrap.innerHTML='<div class="empty"><p>لا توجد بيانات</p></div>'; return;
@@ -4011,10 +4256,9 @@ function printInvoice(iv, items) {
   doc.open();
   doc.write(html);
   doc.close();
-  /* Wait for font load then print */
+  /* [تعديل] انتظار تحميل الخط ثم طباعة — بدون zoom (مضبوط بـ @page CSS) */
   setTimeout(function() {
     iframe.contentWindow.focus();
-    iframe.contentWindow.document.body.style.zoom = "0.75";
     iframe.contentWindow.print();
     setTimeout(function(){ iframe.style.display='none'; }, 1200);
   }, 750);
@@ -4103,23 +4347,18 @@ function buildPrintHTML(iv, items) {
   '.footer-msg{font-size:12px;font-weight:600;color:#9B7C2E;}' +
   '.footer-sub{font-size:8.5px;color:#ccc;letter-spacing:1px;}' +
 
-  /* ── PRINT ── */
+  /* ── PRINT — [تعديل] ضبط A4 بدون zoom، ثابت B&W ── */
+  '@page{size:A4 portrait;margin:10mm 12mm;}' +
   '@media print{' +
-'body{font-size:11px;}' +
-'.page-wrap{padding:0;}' +
-
-'table, tbody, tr, td, th{' +
-'page-break-inside:auto !important;' +
-'break-inside:auto !important;' +
-'}' +
-
-'.totals, .tot-grid, .footer{' +
-'page-break-inside:avoid !important;' +
-'break-inside:avoid !important;' +
-'}' +
-
-'@page{margin:10mm 14mm;}' +
-'}' +
+    'html,body{width:210mm;margin:0;padding:0;background:#fff!important;color:#111!important;}' +
+    '.page-wrap{max-width:100%;padding:0;margin:0;}' +
+    /* منع قطع الصفوف */
+    'tr{page-break-inside:avoid;break-inside:avoid;}' +
+    /* منع قطع الإجماليات والفوتر */
+    '.totals-wrap,.footer{page-break-inside:avoid;break-inside:avoid;}' +
+    /* تأكيد الألوان B&W-friendly */
+    '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+  '}' +
   '</style></head><body>' +
   '<div class="page-wrap">' +
 
@@ -4600,13 +4839,38 @@ async function renderReturnsList() {
 
   var returns = await DB.getReturns();
   var query   = ((document.getElementById('retSearch')||{}).value||'').trim().toLowerCase();
+  /* [تعديل] فلتر Date Range بدلاً من Dropdown الشهر/السنة */
+  var fFrom   = ((document.getElementById('retFilterFrom')||{}).value||'').trim();
+  var fTo     = ((document.getElementById('retFilterTo')  ||{}).value||'').trim();
 
+  /* فلتر نص البحث */
   if (query) {
     returns = returns.filter(function(r) {
       return (r.number||'').toLowerCase().includes(query) ||
              (r.channel||'').toLowerCase().includes(query);
     });
   }
+
+  /* [تعديل] فلتر التاريخ — يعتمد فقط على return.date / return_date (لا createdAt) */
+  if (fFrom || fTo) {
+    returns = returns.filter(function(r) {
+      /* الأولوية: r.date ← r.return_date */
+      var d = normDateStr(r.date) || normDateStr(r.return_date) || '';
+      if (!d) return false;
+      if (fFrom && d < fFrom) return false;
+      if (fTo   && d > fTo)   return false;
+      return true;
+    });
+  }
+
+  /* [تعديل] ترتيب المرتجعات تصاعدياً حسب التاريخ (Chronological) */
+  returns.sort(function(a, b) {
+    var da = normDateStr(a.date) || normDateStr(a.return_date) || '';
+    var db = normDateStr(b.date) || normDateStr(b.return_date) || '';
+    if (da < db) return -1;
+    if (da > db) return  1;
+    return 0;
+  });
 
   if (count) count.textContent = returns.length + ' مرتجع';
 
@@ -5359,6 +5623,28 @@ function _doStmtPDF() {
       toast('❌ خطأ في PDF: ' + e.message, 'err');
     });
   }, 500);
+}
+
+/* ============================================================
+   [تعديل] دوال مسح فلاتر التاريخ — الفواتير والمرتجعات
+   ============================================================ */
+
+/* مسح فلتر تاريخ الفواتير */
+function clearInvListFilter() {
+  var from = document.getElementById('invFilterFrom');
+  var to   = document.getElementById('invFilterTo');
+  if (from) from.value = '';
+  if (to)   to.value   = '';
+  renderInvoicesList();
+}
+
+/* مسح فلتر تاريخ المرتجعات */
+function clearRetListFilter() {
+  var from = document.getElementById('retFilterFrom');
+  var to   = document.getElementById('retFilterTo');
+  if (from) from.value = '';
+  if (to)   to.value   = '';
+  renderReturnsList();
 }
 
 /* ============================================================

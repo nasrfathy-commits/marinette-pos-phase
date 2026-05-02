@@ -2009,10 +2009,15 @@ var DB = {
   },
 
   saveReturn: async function(ret, items) {
-    /* ret:   { number, date, channel, notes, totalReturn }
-     * items: [ { barcode, name, qty, price, total } ]
+    /* ret:   { id?, number, date, channel, notes, totalReturn }
+     * items: [ { barcode, name, qty, price, discount, total } ]
      * Returns saved return id.
+     *
+     * FIX: إذا ret.id موجود → update + delete/re-insert items
+     *      إذا ret.id غير موجود → insert جديد
      */
+    var isEdit = !!ret.id;
+
     if (APP.mode === 'live') {
       try {
         var channelId = null;
@@ -2020,17 +2025,46 @@ var DB = {
           var chRes = await APP.sb.from('channels').select('id').eq('channel_name', ret.channel).limit(1);
           if (chRes.data && chRes.data.length > 0) channelId = chRes.data[0].id;
         }
+
         var retRow = {
-          return_number       : ret.number,
           return_date         : ret.date,
           channel_id          : channelId,
           notes               : ret.notes || '',
           total_return_amount : ret.totalReturn,
           created_by          : APP.user ? APP.user.email : 'demo',
         };
-        var res = await APP.sb.from('returns').insert(retRow).select().single();
-        if (res.error) throw res.error;
-        var savedId = res.data.id;
+
+        var savedId;
+
+        if (isEdit) {
+          /* FIX: تعديل مرتجع موجود — update بدون return_number جديد */
+          console.log('[saveReturn] UPDATE mode — id:', ret.id);
+          var upRes = await APP.sb.from('returns').update(retRow).eq('id', ret.id).select().single();
+          if (upRes.error) {
+            console.error('[saveReturn] UPDATE returns failed:', upRes.error);
+            throw upRes.error;
+          }
+          savedId = ret.id;
+
+          /* FIX: احذف return_items القديمة ثم أعد insert */
+          var delRes = await APP.sb.from('return_items').delete().eq('return_id', savedId);
+          if (delRes.error) {
+            console.error('[saveReturn] DELETE old return_items failed:', delRes.error);
+            throw delRes.error;
+          }
+        } else {
+          /* مرتجع جديد — insert كامل مع return_number */
+          retRow.return_number = ret.number;
+          console.log('[saveReturn] INSERT mode — number:', ret.number);
+          var res = await APP.sb.from('returns').insert(retRow).select().single();
+          if (res.error) {
+            console.error('[saveReturn] INSERT returns failed:', res.error);
+            throw res.error;
+          }
+          savedId = res.data.id;
+        }
+
+        /* Insert return_items (سواء جديد أو تعديل) */
         var itemRows = items.map(function(it) {
           return {
             return_id            : savedId,
@@ -2044,15 +2078,42 @@ var DB = {
         });
         if (itemRows.length > 0) {
           var ir = await APP.sb.from('return_items').insert(itemRows);
-          if (ir.error) console.warn('return_items insert:', ir.error);
+          if (ir.error) {
+            console.error('[saveReturn] INSERT return_items failed:', ir.error);
+            console.warn('return_items insert:', ir.error);
+          }
         }
         return savedId;
+
       } catch(e) {
-        console.warn('DB.saveReturn live failed:', e);
+        console.error('[saveReturn] live failed — full error:', e);
         toast('⚠️ خطأ في الاتصال — تم الحفظ محلياً', 'err');
       }
     }
+
     /* Demo / localStorage */
+    if (isEdit) {
+      /* FIX: تعديل localStorage — update بدل insert */
+      var allRet = localGet(K.RETURNS);
+      var idx = allRet.findIndex(function(x){ return x.id === ret.id; });
+      if (idx !== -1) {
+        allRet[idx].date        = ret.date;
+        allRet[idx].channel     = ret.channel;
+        allRet[idx].notes       = ret.notes;
+        allRet[idx].totalReturn = ret.totalReturn;
+        localSet(K.RETURNS, allRet);
+      }
+      /* احذف items القديمة وأعد insert */
+      var allRI = localGet(K.RET_ITEMS).filter(function(x){ return x.returnId !== ret.id; });
+      items.forEach(function(it) {
+        allRI.push({ id:uid(), returnId:ret.id, barcode:it.barcode, name:it.name,
+          qty:it.qty, price:it.price, discount_value:it.discount||0, total:it.total });
+      });
+      localSet(K.RET_ITEMS, allRI);
+      return ret.id;
+    }
+
+    /* مرتجع جديد في localStorage */
     var id = uid();
     var allRet = localGet(K.RETURNS);
     allRet.unshift({ id:id, number:ret.number, date:ret.date, channel:ret.channel,
@@ -4833,6 +4894,7 @@ async function confirmSaveReturn() {
 
   /* 6. Build return objects */
   var ret = {
+    id         : _editingReturnId || null,   /* FIX: pass id so saveReturn knows it's an update */
     number     : RET.number,
     date       : RET.date,
     channel    : RET.channel,

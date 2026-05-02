@@ -4334,12 +4334,14 @@ function buildPrintHTML(iv, items) {
   '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">' +
   '<title>فاتورة ' + safe(iv.number||'') + ' — Marinette</title>' +
   '<style>' +
-  '@page{size:A4;margin:14mm 18mm;}' +
+  /* تم التعديل لحل مشكلة الطباعة — @page موحّد بدون تكرار */
+  '@page{size:A4 portrait;margin:12mm 14mm;}' +
   '*{margin:0;padding:0;box-sizing:border-box;}' +
   'body{font-family:Cairo,Arial,sans-serif;font-size:12px;color:#111;background:#fff;direction:rtl;}' +
 
   /* ── HEADER ── */
-  '.page-wrap{max-width:720px;margin:0 auto;padding:18px 0;}' +
+  /* تم التعديل لحل مشكلة الطباعة — max-width 100% بدلاً من 720px لملء A4 */
+  '.page-wrap{width:100%;max-width:100%;margin:0;padding:14px 0;}' +
   '.hdr{display:flex;justify-content:space-between;align-items:flex-start;' +
        'border-bottom:2.5px solid #C9A84C;padding-bottom:12px;margin-bottom:16px;}' +
   '.brand{}' +
@@ -4386,16 +4388,19 @@ function buildPrintHTML(iv, items) {
   '.footer-msg{font-size:12px;font-weight:600;color:#9B7C2E;}' +
   '.footer-sub{font-size:8.5px;color:#ccc;letter-spacing:1px;}' +
 
-  /* ── PRINT — [تعديل] ضبط A4 بدون zoom، ثابت B&W ── */
-  '@page{size:A4 portrait;margin:10mm 12mm;}' +
+  /* تم التعديل لحل مشكلة الطباعة — @media print نظيف بدون تعارض */
   '@media print{' +
-    'html,body{width:210mm;margin:0;padding:0;background:#fff!important;color:#111!important;}' +
-    '.page-wrap{max-width:100%;padding:0;margin:0;}' +
-    /* منع قطع الصفوف */
+    /* لا padding/margin زائد على body */
+    'html,body{margin:0;padding:0;background:#fff!important;color:#111!important;}' +
+    /* الـ wrapper يملأ العرض كاملاً بدون padding جانبي */
+    '.page-wrap{width:100%;max-width:100%;padding:0;margin:0;}' +
+    /* منع قطع الصفوف في وسط الصفحة */
     'tr{page-break-inside:avoid;break-inside:avoid;}' +
     /* منع قطع الإجماليات والفوتر */
     '.totals-wrap,.footer{page-break-inside:avoid;break-inside:avoid;}' +
-    /* تأكيد الألوان B&W-friendly */
+    /* الهيدر لا ينقطع */
+    '.hdr,.meta-section{page-break-inside:avoid;break-inside:avoid;}' +
+    /* تأكيد طباعة الألوان كما هي */
     '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
   '}' +
   '</style></head><body>' +
@@ -5514,10 +5519,11 @@ function buildStatementHTML() {
   '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">' +
   '<title>كشف حساب — '+escapeHtml(s.channel)+'</title>' +
   '<style>' +
-  '@page{size:A4;margin:14mm 18mm;}' +
+  /* تم التعديل لحل مشكلة الطباعة — @page موحّد، wrap بعرض 100% */
+  '@page{size:A4 portrait;margin:12mm 14mm;}' +
   '*{margin:0;padding:0;box-sizing:border-box;}' +
   'body{font-family:Cairo,Arial,sans-serif;font-size:12px;color:#111;background:#fff;direction:rtl;}' +
-  '.wrap{max-width:720px;margin:0 auto;padding:20px 0;}' +
+  '.wrap{width:100%;max-width:100%;margin:0;padding:14px 0;}' +
   '.hdr{display:flex;justify-content:space-between;align-items:flex-start;' +
        'border-bottom:2.5px solid #C9A84C;padding-bottom:14px;margin-bottom:18px;}' +
   '.brand-logo{font-size:26px;font-weight:700;color:#9B7C2E;line-height:1;}' +
@@ -5547,7 +5553,14 @@ function buildStatementHTML() {
   'tfoot td{padding:8px 10px;font-weight:700;color:#9B7C2E;border-top:2px solid #C9A84C;text-align:right;}' +
   '.footer{margin-top:20px;padding-top:10px;border-top:1px solid #eee;' +
     'display:flex;justify-content:space-between;font-size:9px;color:#ccc;}' +
-  '@media print{.wrap{padding:0;}}' +
+  /* تم التعديل لحل مشكلة الطباعة — @media print محسّن */
+  '@media print{' +
+    'html,body{margin:0;padding:0;background:#fff!important;color:#111!important;}' +
+    '.wrap{width:100%;max-width:100%;padding:0;margin:0;}' +
+    'tr{page-break-inside:avoid;break-inside:avoid;}' +
+    '.summary,.footer{page-break-inside:avoid;break-inside:avoid;}' +
+    '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+  '}' +
   '</style></head><body><div class="wrap">' +
 
   '<div class="hdr">' +

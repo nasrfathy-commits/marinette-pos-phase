@@ -1750,42 +1750,25 @@ var DB = {
         var res = await query;
         if (res.error) throw res.error;
         return (res.data || []).map(function(r) {
-          var qty   = parseFloat(r.quantity) || 0;
-          var price = parseFloat(r.price)    || 0;
+          var qty          = parseFloat(r.quantity)       || 0;
+          var price        = parseFloat(r.price)          || 0;
 
-          /* COMPREHENSIVE LEGACY FALLBACK — تعدد مصادر للفواتير القديمة:
-           * المستوى 1: r.discount_value (أحدث Schema — per-piece)
-           * المستوى 2: r.discount / qty (legacy schema — line discount)
-           * المستوى 3: (total_before_discount - net_total) / qty (إجماليات مخزّنة)
-           * المستوى 4: r.total / qty (الـ net المخزّن خطأ في legacy schema)
-           *           إذا total < qty*price → الفرق = الخصم
+          /* LEGACY FALLBACK:
+           * الفواتير الجديدة: discount_value موجود (per-piece)
+           * الفواتير القديمة: discount_value غير موجود في الـ schema —
+           *   بدلاً منه يوجد discount (line total) و total_before_discount و net_total
+           *   نحسب discPerPiece من discount ÷ qty إذا discount_value = 0
            */
           var discPerPiece = parseFloat(r.discount_value) || 0;
-
           if (!discPerPiece && qty > 0) {
-            var lineDisc = parseFloat(r.discount) || 0;
-            if (lineDisc > 0) {
-              discPerPiece = parseFloat((lineDisc / qty).toFixed(4));
+            var legacyLineDisc = parseFloat(r.discount) || 0;
+            if (!legacyLineDisc && r.total_before_discount && r.net_total) {
+              /* آخر fallback: احسب الخصم من (gross - net) */
+              legacyLineDisc = parseFloat(r.total_before_discount) - parseFloat(r.net_total);
+              if (legacyLineDisc < 0) legacyLineDisc = 0;
             }
-          }
-
-          if (!discPerPiece && qty > 0) {
-            var gross = parseFloat(r.total_before_discount) || 0;
-            var net   = parseFloat(r.net_total) || 0;
-            if (gross > 0 && net > 0 && gross > net) {
-              discPerPiece = parseFloat(((gross - net) / qty).toFixed(4));
-            }
-          }
-
-          /* المستوى 4: r.total (الـ net الذي حُفظ في schema قديم باسم 'total') */
-          if (!discPerPiece && qty > 0) {
-            var savedTotal = parseFloat(r.total);
-            if (!isNaN(savedTotal) && savedTotal > 0) {
-              var expectedGross = qty * price;
-              if (expectedGross > savedTotal) {
-                var inferredLineDisc = expectedGross - savedTotal;
-                discPerPiece = parseFloat((inferredLineDisc / qty).toFixed(4));
-              }
+            if (legacyLineDisc > 0) {
+              discPerPiece = parseFloat((legacyLineDisc / qty).toFixed(4));
             }
           }
 
@@ -1800,9 +1783,9 @@ var DB = {
             discountValue: discPerPiece,
             discount     : lineDisc,
             net          : parseFloat((qty * price - lineDisc).toFixed(2)),
-            /* LEGACY HINTS — يمررها لـ normalizeItem للـ fallback المستويات */
+            /* LEGACY HINTS — يمررها لـ normalizeItem للـ fallback المستوى 3 */
             total_before_discount: parseFloat(r.total_before_discount) || (qty * price),
-            net_total            : parseFloat(r.net_total) || parseFloat(r.total) || parseFloat((qty * price - lineDisc).toFixed(2)),
+            net_total            : parseFloat(r.net_total) || parseFloat((qty * price - lineDisc).toFixed(2)),
           };
         });
       } catch(e) {
@@ -1951,35 +1934,20 @@ var DB = {
         var res = await APP.sb.from('invoice_items').select('*');
         if (res.error) throw res.error;
         return (res.data || []).map(function(r) {
-          var qty   = parseFloat(r.quantity) || 0;
-          var price = parseFloat(r.price)    || 0;
-
-          /* COMPREHENSIVE LEGACY FALLBACK — نفس منطق getInvoiceItems (4 مستويات) */
+          var qty          = parseFloat(r.quantity)       || 0;
+          var price        = parseFloat(r.price)          || 0;
+          /* LEGACY FALLBACK — نفس منطق getInvoiceItems */
           var discPerPiece = parseFloat(r.discount_value) || 0;
-
           if (!discPerPiece && qty > 0) {
-            var lineDisc = parseFloat(r.discount) || 0;
-            if (lineDisc > 0) discPerPiece = parseFloat((lineDisc / qty).toFixed(4));
-          }
-
-          if (!discPerPiece && qty > 0) {
-            var gross = parseFloat(r.total_before_discount) || 0;
-            var net   = parseFloat(r.net_total) || 0;
-            if (gross > 0 && net > 0 && gross > net) {
-              discPerPiece = parseFloat(((gross - net) / qty).toFixed(4));
+            var legacyLineDisc = parseFloat(r.discount) || 0;
+            if (!legacyLineDisc && r.total_before_discount && r.net_total) {
+              legacyLineDisc = parseFloat(r.total_before_discount) - parseFloat(r.net_total);
+              if (legacyLineDisc < 0) legacyLineDisc = 0;
+            }
+            if (legacyLineDisc > 0) {
+              discPerPiece = parseFloat((legacyLineDisc / qty).toFixed(4));
             }
           }
-
-          if (!discPerPiece && qty > 0) {
-            var savedTotal = parseFloat(r.total);
-            if (!isNaN(savedTotal) && savedTotal > 0) {
-              var expectedGross = qty * price;
-              if (expectedGross > savedTotal) {
-                discPerPiece = parseFloat(((expectedGross - savedTotal) / qty).toFixed(4));
-              }
-            }
-          }
-
           var lineDisc = parseFloat((discPerPiece * qty).toFixed(2));
           return {
             id           : r.id,
@@ -1991,8 +1959,9 @@ var DB = {
             discountValue: discPerPiece,
             discount     : lineDisc,
             net          : parseFloat((qty * price - lineDisc).toFixed(2)),
+            /* LEGACY HINTS — يمررها لـ normalizeItem للـ fallback المستوى 3 */
             total_before_discount: parseFloat(r.total_before_discount) || (qty * price),
-            net_total            : parseFloat(r.net_total) || parseFloat(r.total) || parseFloat((qty * price - lineDisc).toFixed(2)),
+            net_total            : parseFloat(r.net_total) || parseFloat((qty * price - lineDisc).toFixed(2)),
           };
         });
       } catch(e) { console.warn('DB.getAllInvoiceItems:', e); return localGet(K.INV_ITEMS); }
@@ -2040,13 +2009,15 @@ var DB = {
         if (res.error) throw res.error;
         return (res.data || []).map(function(r) {
           return {
-            id      : r.id,
-            returnId: r.return_id,
-            barcode : r.barcode,
-            name    : r.product_name_snapshot,
-            qty     : parseFloat(r.quantity)  || 0,
-            price   : parseFloat(r.price)     || 0,
-            total   : parseFloat(r.line_total) || 0,
+            id            : r.id,
+            returnId      : r.return_id,
+            barcode       : r.barcode,
+            name          : r.product_name_snapshot,
+            qty           : parseFloat(r.quantity)        || 0,
+            price         : parseFloat(r.price)           || 0,
+            /* FIX: discount_value يُملأ من return_discount (اسم العمود في DB) */
+            discount_value: parseFloat(r.return_discount) || 0,
+            total         : parseFloat(r.line_total)      || 0,
           };
         });
       } catch(e) { return []; }
@@ -3493,9 +3464,7 @@ async function openInvDetail(id) {
   var invoices = await DB.getInvoices();
   var iv = invoices.find(function(x){ return x.id===id; });
   if (!iv) return;
-  var rawItems = await DB.getInvoiceItems(id);
-  /* FIX: نمرر كل item عبر normalizeItem قبل العرض/الحساب — يضمن صحة الفواتير القديمة */
-  var items = rawItems.map(function(it){ return normalizeItem(it); });
+  var items = await DB.getInvoiceItems(id);
 
   /* Store for print/export */
   DASH.currentInv   = iv;
@@ -3978,9 +3947,7 @@ async function loadDashboard() {
 
   /* Fetch all data */
   var allInvoices = await DB.getInvoices();
-  var rawAllItems = await DB.getAllInvoiceItems();
-  /* FIX: تطبيع كل items قبل عرضها في الـ dashboard / KPIs / تقارير — يضمن صحة legacy */
-  var allItems = rawAllItems.map(function(it){ return normalizeItem(it); });
+  var allItems    = await DB.getAllInvoiceItems();
 
   /* Map items by invoiceId for quick lookup */
   var itemsByInv = {};
@@ -4451,9 +4418,7 @@ async function printInvoiceById(id) {
   var invoices = await DB.getInvoices();
   var iv = invoices.find(function(x){ return x.id===id; });
   if (!iv) { toast('⚠️ الفاتورة غير موجودة','err'); return; }
-  var rawItems = await DB.getInvoiceItems(id);
-  /* FIX: تطبيع legacy items قبل الطباعة */
-  var items = rawItems.map(function(it){ return normalizeItem(it); });
+  var items = await DB.getInvoiceItems(id);
   printInvoice(iv, items);
 }
 

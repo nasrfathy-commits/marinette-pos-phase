@@ -3417,12 +3417,12 @@ async function renderInvoicesList() {
     });
   }
 
-  /* [تعديل] ترتيب الفواتير تصاعدياً حسب التاريخ (Chronological) */
+  /* [تعديل] ترتيب الفواتير تنازلياً حسب التاريخ (الأحدث أولاً) */
   invoices.sort(function(a, b) {
     var da = getInvDate(a) || '';
     var db = getInvDate(b) || '';
-    if (da < db) return -1;
-    if (da > db) return  1;
+    if (da < db) return  1;
+    if (da > db) return -1;
     return 0;
   });
 
@@ -5043,12 +5043,12 @@ async function renderReturnsList() {
     });
   }
 
-  /* [تعديل] ترتيب المرتجعات تصاعدياً حسب التاريخ (Chronological) */
+  /* [تعديل] ترتيب المرتجعات تنازلياً حسب التاريخ (الأحدث أولاً) */
   returns.sort(function(a, b) {
     var da = normDateStr(a.date) || normDateStr(a.return_date) || '';
     var db = normDateStr(b.date) || normDateStr(b.return_date) || '';
-    if (da < db) return -1;
-    if (da > db) return  1;
+    if (da < db) return  1;
+    if (da > db) return -1;
     return 0;
   });
 
@@ -5559,12 +5559,12 @@ async function loadStatement() {
     return (r.channel || '') === channel && inRange(retDate);
   });
 
-  /* Sort ascending — oldest first */
-  invoices.sort(function(a,b){ return getInvDate(a).localeCompare(getInvDate(b)); });
+  /* Sort descending — newest first */
+  invoices.sort(function(a,b){ return getInvDate(b).localeCompare(getInvDate(a)); });
   returns.sort(function(a,b){
     var da = normDateStr(a.date) || normDateStr(a.return_date) || (a.createdAt||'').substring(0,10);
     var db = normDateStr(b.date) || normDateStr(b.return_date) || (b.createdAt||'').substring(0,10);
-    return da.localeCompare(db);
+    return db.localeCompare(da);
   });
 
   var totalGross = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalGross)||0); }, 0);

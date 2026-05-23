@@ -270,6 +270,106 @@ tbody td{padding:11px 14px;color:var(--w90);white-space:nowrap;text-align:right;
 .confirm-icon{font-size:44px;text-align:center;margin-bottom:12px;}
 .confirm-body{text-align:center;color:var(--w60);font-size:14px;margin-bottom:4px;line-height:1.7;}
 
+/* ---- Returns Side Drawer ---- */
+.returns-drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;
+  display:flex;align-items:flex-start;justify-content:flex-end;
+  animation:fadeIn 0.2s ease;
+}
+.returns-drawer{
+  background:var(--black-2);width:100%;max-width:700px;height:100vh;
+  box-shadow:-4px 0 24px rgba(0,0,0,0.4);
+  display:flex;flex-direction:column;
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
+
+.returns-drawer-header{
+  padding:24px 30px;border-bottom:1px solid var(--gold-border);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  background:linear-gradient(135deg,var(--black-3),rgba(212,175,55,0.05));
+}
+.returns-drawer-close{
+  background:none;border:none;color:var(--gold);font-size:28px;
+  cursor:pointer;padding:0;width:36px;height:36px;
+  border-radius:6px;transition:all 0.2s;flex-shrink:0;
+}
+.returns-drawer-close:hover{
+  background:rgba(212,175,55,0.15);transform:rotate(90deg);
+}
+
+.returns-drawer-tabs{
+  display:flex;gap:0;border-bottom:1px solid var(--gold-border);
+  background:var(--black-3);padding:0 30px;
+}
+.returns-tab{
+  background:none;border:none;color:var(--w60);
+  padding:14px 20px;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;border-bottom:3px solid transparent;
+  font-family:'Cairo',sans-serif;display:flex;align-items:center;gap:8px;
+}
+.returns-tab span{font-size:16px;}
+.returns-tab:hover{color:var(--gold-light);background:rgba(212,175,55,0.05);}
+.returns-tab.active{
+  color:var(--gold);border-bottom-color:var(--gold);
+  background:rgba(212,175,55,0.08);
+}
+
+.returns-drawer-body{
+  flex:1;overflow-y:auto;padding:24px 30px;
+}
+.returns-drawer-body::-webkit-scrollbar{width:8px;}
+.returns-drawer-body::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);}
+.returns-drawer-body::-webkit-scrollbar-thumb{background:var(--gold);border-radius:4px;}
+
+.returns-tab-content{display:none;}
+.returns-tab-content.active{display:block;}
+
+.returns-filters{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;margin-bottom:20px;padding:16px;
+  background:rgba(212,175,55,0.05);border-radius:8px;
+  border:1px solid rgba(212,175,55,0.15);
+}
+
+.returns-table-wrap{
+  overflow-x:auto;margin-bottom:20px;
+  border:1px solid var(--gold-border);border-radius:8px;
+}
+.returns-table{
+  width:100%;border-collapse:collapse;
+}
+.returns-table thead tr{
+  background:rgba(212,175,55,0.1);
+}
+.returns-table th{
+  padding:12px 14px;color:var(--gold);font-weight:600;font-size:13px;
+  border-bottom:2px solid var(--gold);
+}
+.returns-table tbody tr{
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  transition:background 0.2s;cursor:pointer;
+}
+.returns-table tbody tr:hover{
+  background:rgba(212,175,55,0.08);
+}
+.returns-table tbody tr.expanded{
+  background:rgba(212,175,55,0.12);border-left:3px solid var(--gold);
+}
+.returns-table td{
+  padding:14px;color:#fff;font-size:13px;
+}
+
+.returns-summary{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:15px;
+  margin-top:20px;padding:20px;background:rgba(212,175,55,0.05);
+  border-radius:8px;border:1px solid var(--gold);
+}
+.summary-item{text-align:center;}
+.summary-label{font-size:12px;color:var(--w60);margin-bottom:6px;}
+.summary-value{font-size:22px;font-weight:700;color:var(--gold);}
+
+
 /* ---- LOGIN OVERLAY ---- */
 #loginOverlay{
   position:fixed;inset:0;background:rgba(10,10,10,0.94);
@@ -339,6 +439,16 @@ tbody td{padding:11px 14px;color:var(--w90);white-space:nowrap;text-align:right;
   .nav-tabs{padding:0 16px;}
   .tot-item{padding:8px 12px;border-left:none;border-top:1px solid var(--gold-border);}
   .inv-list-amounts{gap:10px;}
+  
+  /* Returns Drawer Responsive */
+  .returns-drawer{max-width:100%;}
+  .returns-drawer-header{padding:18px 20px;}
+  .returns-drawer-tabs{padding:0 20px;}
+  .returns-drawer-body{padding:18px 20px;}
+  .returns-filters{grid-template-columns:1fr;gap:10px;padding:12px;}
+  .returns-summary{grid-template-columns:1fr;gap:12px;padding:15px;}
+  .returns-table{font-size:12px;}
+  .returns-table th,.returns-table td{padding:10px 8px;font-size:12px;}
 }
 
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -915,6 +1025,37 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">أفضل عميل</div><div class="kpi-value" id="kpi_top_ch" style="font-size:15px;margin-top:4px;">—</div><div class="kpi-sub" id="kpi_top_ch_val"></div></div>
       <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">ج.م</div></div>
       <div class="kpi-card kpi-highlight"><div class="kpi-icon">💎</div><div class="kpi-label">الصافي الحقيقي</div><div class="kpi-value" id="kpi_true_net">—</div><div class="kpi-sub">بعد المرتجعات</div></div>
+    </div>
+
+    <!-- Returns Analysis Compact Card -->
+    <div class="kpi-card" style="margin-top:20px;cursor:pointer;border-color:rgba(224,82,82,0.35);" onclick="openReturnsDrawer()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="kpi-icon" style="font-size:32px;">↩️</div>
+          <div>
+            <div class="kpi-label">تحليل المرتجعات</div>
+            <div style="font-size:11px;color:var(--w30);margin-top:2px;">اضغط لعرض التفاصيل الكاملة</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openReturnsDrawer();event.stopPropagation();" style="background:var(--gold);color:var(--dark-bg);padding:8px 16px;">
+          عرض التفاصيل ←
+        </button>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
+        <div style="text-align:center;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
+          <div style="font-size:11px;color:var(--w60);margin-bottom:4px;">إجمالي المرتجعات</div>
+          <div id="ret_total_amount_compact" style="font-size:18px;font-weight:700;color:var(--red);">—</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
+          <div style="font-size:11px;color:var(--w60);margin-bottom:4px;">عدد العمليات</div>
+          <div id="ret_count_compact" style="font-size:18px;font-weight:700;color:var(--gold);">—</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
+          <div style="font-size:11px;color:var(--w60);margin-bottom:4px;">أكثر منتج مرتجع</div>
+          <div id="ret_top_product_compact" style="font-size:13px;font-weight:600;color:var(--gold-light);line-height:1.2;max-height:36px;overflow:hidden;">—</div>
+        </div>
+      </div>
     </div>
 
     <!-- Daily Sales Chart -->
@@ -2377,6 +2518,10 @@ function fmt(n) {
   return (parseFloat(n) || 0).toLocaleString('ar-EG', { minimumFractionDigits:2, maximumFractionDigits:2 });
 }
 
+function safe(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function localDateStr() {
   /* Returns YYYY-MM-DD in local time — never uses UTC */
   var d = new Date();
@@ -3762,11 +3907,16 @@ function applyMonthFilter() {
   applyFilters();
 }
 
-/* [إضافة] تهيئة قوائم السنوات (آخر 3 سنوات + السنة الحالية) لكل الصفحات */
+/* [تعديل] تهيئة قوائم السنوات ديناميكياً — تحديث تلقائي كل سنة جديدة */
 function initYearDropdown() {
   var curYear = new Date().getFullYear();
+  var startYear = 2023; // أقدم سنة متوقعة للبيانات (يمكن تعديلها حسب الحاجة)
   var years = [];
-  for (var y = curYear; y >= curYear - 3; y--) years.push(String(y));
+  
+  // توليد السنوات من الحالية إلى startYear تنازلياً
+  for (var y = curYear; y >= startYear; y--) {
+    years.push(String(y));
+  }
 
   /* الداشبورد */
   var dashSel = document.getElementById('flt_year');
@@ -4012,6 +4162,7 @@ async function loadDashboard() {
 
   /* Render everything */
   renderKPIs(filteredInv, filteredItems, filteredReturns);
+  renderReturnsAnalysis(filteredReturns, filteredInv, filteredItems);
   renderDailyChart(filteredInv);
 
   /* Build soldItems from filteredInv — ensures every item is tied to a filtered invoice */
@@ -4071,7 +4222,56 @@ function renderKPIs(invoices, items, returns) {
 
 function setText(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; }
 
-/* ---- Daily Bar Chart ---- */
+/* ---- Returns Analysis Card ---- */
+async function renderReturnsAnalysis(returns, invoices, items) {
+  returns = returns || [];
+  
+  // إجمالي المرتجعات
+  var totalReturns = returns.reduce(function(s,r){ return s+(parseFloat(r.totalReturn)||0); }, 0);
+  setText('ret_total_amount_compact', fmt(totalReturns) + ' ج.م');
+  
+  // عدد عمليات المرتجع
+  setText('ret_count_compact', returns.length);
+  
+  // جمع كل الـ return items
+  var allReturnItems = await DB.getAllReturnItems();
+  
+  // فلترة return items حسب المرتجعات المفلترة
+  var returnIds = {};
+  returns.forEach(function(r){ returnIds[r.id] = true; });
+  
+  var filteredReturnItems = allReturnItems.filter(function(ri) {
+    var retId = ri.return_id || ri.returnId || ri.returnID;
+    return returnIds[retId];
+  });
+  
+  // تجميع المنتجات المرتجعة حسب الاسم
+  var productReturns = {};
+  filteredReturnItems.forEach(function(ri) {
+    var name = ri.name || ri.product_name || ri.productName || 'غير محدد';
+    var qty = parseFloat(ri.qty || ri.quantity) || 0;
+    
+    if (!productReturns[name]) {
+      productReturns[name] = { name: name, qty: 0 };
+    }
+    productReturns[name].qty += qty;
+  });
+  
+  // تحويل إلى array وترتيب تنازلياً حسب الكمية
+  var sortedProducts = Object.values(productReturns).sort(function(a,b){ 
+    return b.qty - a.qty; 
+  });
+  
+  // أكثر منتج مرتجع
+  if (sortedProducts.length > 0) {
+    var topProduct = sortedProducts[0];
+    setText('ret_top_product_compact', topProduct.name);
+  } else {
+    setText('ret_top_product_compact', 'لا توجد مرتجعات');
+  }
+}
+
+/* ---- Daily Chart ---- */
 function renderDailyChart(invoices) {
   var wrap = document.getElementById('dailyChart');
   if (!wrap) return;
@@ -5836,6 +6036,305 @@ function clearRetListFilter() {
 }
 
 /* ============================================================
+   Returns Details Modal Functions
+   ============================================================ */
+
+/* ============================================================
+   Returns Side Drawer Management
+   ============================================================ */
+
+var RETURNS_DRAWER = {
+  allReturns: [],
+  allReturnItems: [],
+  filteredOperations: [],
+  filteredProducts: [],
+  currentTab: 'operations',
+  expandedReturnId: null
+};
+
+// فتح الـ Drawer
+async function openReturnsDrawer() {
+  // تحميل البيانات
+  RETURNS_DRAWER.allReturns = await DB.getReturns();
+  RETURNS_DRAWER.allReturnItems = await DB.getAllReturnItems();
+  
+  // ترتيب المرتجعات تنازلياً (الأحدث أولاً) حسب created_at
+  RETURNS_DRAWER.allReturns.sort(function(a, b) {
+    var dateA = a.createdAt || a.created_at || a.date || '';
+    var dateB = b.createdAt || b.created_at || b.date || '';
+    return dateB.localeCompare(dateA); // DESC
+  });
+  
+  // عرض الـ Drawer
+  document.getElementById('returnsDrawer').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  
+  // عرض التاب الأول
+  switchReturnsTab('operations');
+}
+
+// إغلاق الـ Drawer
+function closeReturnsDrawer() {
+  document.getElementById('returnsDrawer').style.display = 'none';
+  document.body.style.overflow = '';
+  closeReturnDetails();
+}
+
+// التبديل بين التابات
+function switchReturnsTab(tab) {
+  RETURNS_DRAWER.currentTab = tab;
+  
+  // تحديث UI للتابات
+  var tabs = document.querySelectorAll('.returns-tab');
+  var contents = document.querySelectorAll('.returns-tab-content');
+  
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  contents.forEach(function(c) { c.classList.remove('active'); });
+  
+  if (tab === 'operations') {
+    tabs[0].classList.add('active');
+    document.getElementById('returnsTabOperations').classList.add('active');
+    applyReturnsFilters();
+  } else {
+    tabs[1].classList.add('active');
+    document.getElementById('returnsTabProducts').classList.add('active');
+    applyProductsFilters();
+  }
+}
+
+/* ============================================================
+   Tab 1: Return Operations
+   ============================================================ */
+
+function applyReturnsFilters() {
+  var fromDate = (document.getElementById('retDrawer_from').value || '').trim();
+  var toDate = (document.getElementById('retDrawer_to').value || '').trim();
+  var customerSearch = (document.getElementById('retDrawer_customer').value || '').trim().toLowerCase();
+  
+  // فلترة المرتجعات
+  var filtered = RETURNS_DRAWER.allReturns.filter(function(r) {
+    var retDate = normDateStr(r.date) || normDateStr(r.return_date) || normDateStr(r.createdAt) || '';
+    if (fromDate && retDate < fromDate) return false;
+    if (toDate && retDate > toDate) return false;
+    
+    if (customerSearch) {
+      var customer = String(r.channel || r.customer || '').toLowerCase();
+      if (!customer.includes(customerSearch)) return false;
+    }
+    
+    return true;
+  });
+  
+  RETURNS_DRAWER.filteredOperations = filtered;
+  renderReturnsOperations(filtered);
+}
+
+function clearReturnsFilters() {
+  document.getElementById('retDrawer_from').value = '';
+  document.getElementById('retDrawer_to').value = '';
+  document.getElementById('retDrawer_customer').value = '';
+  applyReturnsFilters();
+}
+
+function renderReturnsOperations(returns) {
+  var tbody = document.getElementById('returnsOperationsTable');
+  if (!tbody) return;
+  
+  if (returns.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:#999;">لا توجد نتائج</td></tr>';
+    setText('retOps_total_count', '0');
+    setText('retOps_total_items', '0');
+    setText('retOps_total_amount', '0.00 ج.م');
+    return;
+  }
+  
+  // تجميع عدد الأصناف لكل مرتجع
+  var itemsByReturn = {};
+  RETURNS_DRAWER.allReturnItems.forEach(function(item) {
+    var retId = item.return_id || item.returnId || item.returnID;
+    if (!itemsByReturn[retId]) itemsByReturn[retId] = [];
+    itemsByReturn[retId].push(item);
+  });
+  
+  var totalAmount = 0;
+  var totalItems = 0;
+  
+  tbody.innerHTML = returns.map(function(r) {
+    var retNumber = r.number || r.returnNumber || '—';
+    var customer = r.channel || r.customer || '—';
+    var retDate = normDateStr(r.date) || normDateStr(r.return_date) || normDateStr(r.createdAt) || '—';
+    var total = parseFloat(r.totalReturn || r.total) || 0;
+    var items = itemsByReturn[r.id] || [];
+    var itemCount = items.length;
+    
+    totalAmount += total;
+    totalItems += itemCount;
+    
+    return '<tr onclick="toggleReturnDetails(\'' + r.id + '\')" ' +
+           'class="' + (RETURNS_DRAWER.expandedReturnId === r.id ? 'expanded' : '') + '">' +
+           '<td style="text-align:right;font-weight:600;color:var(--gold);">' + safe(retNumber) + '</td>' +
+           '<td style="text-align:right;">' + safe(customer) + '</td>' +
+           '<td style="text-align:center;"><span style="background:rgba(212,175,55,0.15);padding:4px 12px;border-radius:12px;font-weight:600;color:var(--gold);">' + itemCount + '</span></td>' +
+           '<td style="text-align:center;font-weight:700;color:var(--red);">' + fmt(total) + ' ج.م</td>' +
+           '<td style="text-align:center;color:var(--w60);">' + retDate + '</td>' +
+           '</tr>';
+  }).join('');
+  
+  // تحديث الملخص
+  setText('retOps_total_count', returns.length);
+  setText('retOps_total_items', totalItems);
+  setText('retOps_total_amount', fmt(totalAmount) + ' ج.م');
+}
+
+// عرض تفاصيل مرتجع معين
+function toggleReturnDetails(returnId) {
+  if (RETURNS_DRAWER.expandedReturnId === returnId) {
+    closeReturnDetails();
+    return;
+  }
+  
+  RETURNS_DRAWER.expandedReturnId = returnId;
+  
+  // إيجاد المرتجع
+  var ret = RETURNS_DRAWER.allReturns.find(function(r){ return r.id === returnId; });
+  if (!ret) return;
+  
+  // إيجاد الأصناف
+  var items = RETURNS_DRAWER.allReturnItems.filter(function(item) {
+    var retId = item.return_id || item.returnId || item.returnID;
+    return retId === returnId;
+  });
+  
+  // عرض القسم
+  var section = document.getElementById('returnDetailsSection');
+  section.style.display = 'block';
+  
+  // عرض رقم المرتجع
+  setText('currentReturnNumber', ret.number || ret.returnNumber || returnId);
+  
+  // عرض الأصناف
+  var itemsTable = document.getElementById('returnDetailsItemsTable');
+  itemsTable.innerHTML = items.map(function(item) {
+    var name = item.name || item.product_name || item.productName || '—';
+    var qty = parseFloat(item.qty || item.quantity) || 0;
+    var price = parseFloat(item.price || item.returnPrice) || 0;
+    var total = parseFloat(item.total || item.totalReturn) || (qty * price);
+    
+    return '<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">' +
+           '<td style="padding:10px;text-align:right;">' + safe(name) + '</td>' +
+           '<td style="padding:10px;text-align:center;font-weight:600;">' + Math.round(qty) + '</td>' +
+           '<td style="padding:10px;text-align:center;">' + fmt(price) + ' ج.م</td>' +
+           '<td style="padding:10px;text-align:center;font-weight:700;color:var(--red);">' + fmt(total) + ' ج.م</td>' +
+           '</tr>';
+  }).join('');
+  
+  // تحديث الصفوف لإظهار expanded
+  renderReturnsOperations(RETURNS_DRAWER.filteredOperations);
+  
+  // Scroll للقسم
+  setTimeout(function() {
+    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+function closeReturnDetails() {
+  RETURNS_DRAWER.expandedReturnId = null;
+  document.getElementById('returnDetailsSection').style.display = 'none';
+  if (RETURNS_DRAWER.filteredOperations.length) {
+    renderReturnsOperations(RETURNS_DRAWER.filteredOperations);
+  }
+}
+
+/* ============================================================
+   Tab 2: Returned Products
+   ============================================================ */
+
+function applyProductsFilters() {
+  var productSearch = (document.getElementById('retDrawer_product').value || '').trim().toLowerCase();
+  
+  // تجميع المنتجات حسب الاسم
+  var productGroups = {};
+  
+  RETURNS_DRAWER.allReturnItems.forEach(function(item) {
+    var name = item.name || item.product_name || item.productName || 'غير محدد';
+    
+    // فلتر بحث
+    if (productSearch && !name.toLowerCase().includes(productSearch)) {
+      return;
+    }
+    
+    var qty = parseFloat(item.qty || item.quantity) || 0;
+    var total = parseFloat(item.total || item.totalReturn) || 0;
+    
+    if (!productGroups[name]) {
+      productGroups[name] = { name: name, qty: 0, total: 0 };
+    }
+    productGroups[name].qty += qty;
+    productGroups[name].total += total;
+  });
+  
+  // تحويل لـ array وترتيب تنازلياً حسب الكمية
+  var products = Object.values(productGroups).sort(function(a, b) {
+    return b.qty - a.qty;
+  });
+  
+  RETURNS_DRAWER.filteredProducts = products;
+  renderReturnedProducts(products);
+}
+
+function clearProductsFilters() {
+  document.getElementById('retDrawer_product').value = '';
+  applyProductsFilters();
+}
+
+function renderReturnedProducts(products) {
+  var tbody = document.getElementById('returnsProductsTable');
+  if (!tbody) return;
+  
+  if (products.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:40px;text-align:center;color:#999;">لا توجد نتائج</td></tr>';
+    setText('retProds_total_count', '0');
+    setText('retProds_total_qty', '0');
+    setText('retProds_total_amount', '0.00 ج.م');
+    return;
+  }
+  
+  // حساب إجمالي المبيعات لكل منتج (للنسبة)
+  var productSales = {};
+  
+  if (DASH.items) {
+    DASH.items.forEach(function(item) {
+      var name = item.name || item.product_name || item.productName || 'غير محدد';
+      var total = parseFloat(item.total || item.netTotal) || 0;
+      productSales[name] = (productSales[name] || 0) + total;
+    });
+  }
+  
+  var totalQty = 0;
+  var totalAmount = 0;
+  
+  tbody.innerHTML = products.map(function(p) {
+    totalQty += p.qty;
+    totalAmount += p.total;
+    
+    var salesTotal = productSales[p.name] || 0;
+    var returnPercent = salesTotal > 0 ? ((p.total / salesTotal) * 100).toFixed(1) : '0.0';
+    
+    return '<tr>' +
+           '<td style="text-align:right;font-weight:600;">' + safe(p.name) + '</td>' +
+           '<td style="text-align:center;"><span style="background:rgba(212,175,55,0.1);padding:4px 12px;border-radius:12px;font-weight:600;">' + Math.round(p.qty) + '</span></td>' +
+           '<td style="text-align:center;font-weight:700;color:var(--red);">' + fmt(p.total) + ' ج.م</td>' +
+           '<td style="text-align:center;font-weight:700;color:var(--gold);">' + returnPercent + '%</td>' +
+           '</tr>';
+  }).join('');
+  
+  // تحديث الملخص
+  setText('retProds_total_count', products.length);
+  setText('retProds_total_qty', Math.round(totalQty));
+  setText('retProds_total_amount', fmt(totalAmount) + ' ج.م');
+}
+
+/* ============================================================
    [تعديل] Scroll داخل تفاصيل الفاتورة — لا يمس الصفحة
    ============================================================ */
 
@@ -5943,6 +6442,167 @@ insert into channels (channel_name) values
 on conflict do nothing;
 
 ============================================================ -->
+
+<!-- Returns Side Drawer -->
+<div id="returnsDrawer" class="returns-drawer-overlay" style="display:none;" onclick="closeReturnsDrawer()">
+  <div class="returns-drawer" onclick="event.stopPropagation()">
+    <!-- Drawer Header -->
+    <div class="returns-drawer-header">
+      <div>
+        <h3 style="margin:0;color:var(--gold);font-size:20px;font-weight:700;">↩️ تحليل المرتجعات</h3>
+        <p style="margin:4px 0 0;color:var(--w60);font-size:12px;">إدارة ومراجعة جميع عمليات المرتجع</p>
+      </div>
+      <button class="returns-drawer-close" onclick="closeReturnsDrawer()">✕</button>
+    </div>
+
+    <!-- Drawer Tabs -->
+    <div class="returns-drawer-tabs">
+      <button class="returns-tab active" onclick="switchReturnsTab('operations')">
+        <span>🔄</span> عمليات المرتجع
+      </button>
+      <button class="returns-tab" onclick="switchReturnsTab('products')">
+        <span>📦</span> المنتجات المرتجعة
+      </button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="returns-drawer-body">
+      
+      <!-- Tab 1: Return Operations -->
+      <div id="returnsTabOperations" class="returns-tab-content active">
+        
+        <!-- Filters -->
+        <div class="returns-filters">
+          <div class="form-group">
+            <label>من تاريخ</label>
+            <input type="date" id="retDrawer_from" class="form-control" onchange="applyReturnsFilters()" />
+          </div>
+          <div class="form-group">
+            <label>إلى تاريخ</label>
+            <input type="date" id="retDrawer_to" class="form-control" onchange="applyReturnsFilters()" />
+          </div>
+          <div class="form-group">
+            <label>العميل</label>
+            <input type="text" id="retDrawer_customer" class="form-control" placeholder="ابحث..." oninput="applyReturnsFilters()" />
+          </div>
+          <div class="form-group" style="align-self:end;">
+            <button class="btn btn-outline btn-sm" onclick="clearReturnsFilters()" style="width:100%;">
+              ✕ مسح
+            </button>
+          </div>
+        </div>
+
+        <!-- Returns Operations Table -->
+        <div class="returns-table-wrap">
+          <table class="returns-table">
+            <thead>
+              <tr>
+                <th style="text-align:right;width:20%;">رقم المرتجع</th>
+                <th style="text-align:right;width:25%;">العميل</th>
+                <th style="text-align:center;width:15%;">عدد الأصناف</th>
+                <th style="text-align:center;width:20%;">الإجمالي</th>
+                <th style="text-align:center;width:20%;">التاريخ</th>
+              </tr>
+            </thead>
+            <tbody id="returnsOperationsTable">
+              <tr><td colspan="5" style="padding:40px;text-align:center;color:#999;">لا توجد بيانات</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Return Details Expandable Section -->
+        <div id="returnDetailsSection" style="display:none;margin-top:20px;padding:20px;background:rgba(212,175,55,0.05);border-radius:8px;border:1px solid var(--gold);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+            <h4 style="margin:0;color:var(--gold);font-size:16px;">تفاصيل المرتجع: <span id="currentReturnNumber"></span></h4>
+            <button class="btn btn-outline btn-sm" onclick="closeReturnDetails()">✕ إغلاق</button>
+          </div>
+          
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:rgba(0,0,0,0.2);border-bottom:1px solid var(--gold-border);">
+                  <th style="padding:10px;text-align:right;color:var(--gold);font-size:12px;">المنتج</th>
+                  <th style="padding:10px;text-align:center;color:var(--gold);font-size:12px;">الكمية</th>
+                  <th style="padding:10px;text-align:center;color:var(--gold);font-size:12px;">السعر</th>
+                  <th style="padding:10px;text-align:center;color:var(--gold);font-size:12px;">الإجمالي</th>
+                </tr>
+              </thead>
+              <tbody id="returnDetailsItemsTable">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="returns-summary">
+          <div class="summary-item">
+            <div class="summary-label">إجمالي العمليات</div>
+            <div class="summary-value" id="retOps_total_count">—</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">إجمالي الأصناف</div>
+            <div class="summary-value" id="retOps_total_items">—</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">إجمالي القيمة</div>
+            <div class="summary-value" id="retOps_total_amount" style="color:var(--red);">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Returned Products -->
+      <div id="returnsTabProducts" class="returns-tab-content">
+        
+        <!-- Filters -->
+        <div class="returns-filters">
+          <div class="form-group">
+            <label>بحث بالمنتج</label>
+            <input type="text" id="retDrawer_product" class="form-control" placeholder="ابحث عن منتج..." oninput="applyProductsFilters()" />
+          </div>
+          <div class="form-group" style="align-self:end;">
+            <button class="btn btn-outline btn-sm" onclick="clearProductsFilters()" style="width:100%;">
+              ✕ مسح
+            </button>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="returns-table-wrap">
+          <table class="returns-table">
+            <thead>
+              <tr>
+                <th style="text-align:right;width:40%;">المنتج</th>
+                <th style="text-align:center;width:20%;">الكمية المرتجعة</th>
+                <th style="text-align:center;width:20%;">القيمة</th>
+                <th style="text-align:center;width:20%;">نسبة المرتجع</th>
+              </tr>
+            </thead>
+            <tbody id="returnsProductsTable">
+              <tr><td colspan="4" style="padding:40px;text-align:center;color:#999;">لا توجد بيانات</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary -->
+        <div class="returns-summary">
+          <div class="summary-item">
+            <div class="summary-label">عدد المنتجات</div>
+            <div class="summary-value" id="retProds_total_count">—</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">إجمالي الكمية</div>
+            <div class="summary-value" id="retProds_total_qty">—</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">إجمالي القيمة</div>
+            <div class="summary-value" id="retProds_total_amount" style="color:var(--red);">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

@@ -4653,7 +4653,7 @@ function buildPrintHTML(iv, items) {
     var n     = normalizeItem(it);
     var gross = n.qty * n.price;
     var discPerPiece = n.discountValue || 0;  /* خصم القطعة الواحدة */
-    var discTotal    = n.discount;             /* إجمالي الخصم للسطر (qty × discountValue) */
+    var discTotal    = n.discount;             /* إجمالي الخصم للسطر - للحسابات فقط */
     var net   = gross - discTotal;
     
     return '<tr class="'+(i%2===0?'even':'')+'">' +
@@ -4662,8 +4662,7 @@ function buildPrintHTML(iv, items) {
       '<td class="name">'+safe(n.name||'—')+'</td>' +
       '<td class="c">'+fmtN(n.qty)+'</td>' +
       '<td class="r">'+fmtN(n.price)+'</td>' +
-      '<td class="r disc">'+fmtN(discPerPiece)+'</td>' +     /* خصم القطعة */
-      '<td class="r disc">'+fmtN(discTotal)+'</td>' +        /* الخصم الإجمالي */
+      '<td class="r disc">'+fmtN(discPerPiece)+'</td>' +     /* خصم القطعة فقط */
       '<td class="r">'+fmtN(gross)+'</td>' +
       '<td class="r net">'+fmtN(net)+'</td>' +
     '</tr>';
@@ -4778,7 +4777,6 @@ function buildPrintHTML(iv, items) {
       '<th class="c">الكمية</th>' +
       '<th class="r">السعر</th>' +
       '<th class="r">خصم القطعة</th>' +
-      '<th class="r">الخصم</th>' +
       '<th class="r">الإجمالي</th>' +
       '<th class="r">الصافي</th>' +
     '</tr></thead>' +

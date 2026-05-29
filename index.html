@@ -270,106 +270,6 @@ tbody td{padding:11px 14px;color:var(--w90);white-space:nowrap;text-align:right;
 .confirm-icon{font-size:44px;text-align:center;margin-bottom:12px;}
 .confirm-body{text-align:center;color:var(--w60);font-size:14px;margin-bottom:4px;line-height:1.7;}
 
-/* ---- Returns Side Drawer ---- */
-.returns-drawer-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;
-  display:flex;align-items:flex-start;justify-content:flex-end;
-  animation:fadeIn 0.2s ease;
-}
-.returns-drawer{
-  background:var(--black-2);width:100%;max-width:700px;height:100vh;
-  box-shadow:-4px 0 24px rgba(0,0,0,0.4);
-  display:flex;flex-direction:column;
-  animation:slideIn 0.3s ease;
-}
-@keyframes slideIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
-
-.returns-drawer-header{
-  padding:24px 30px;border-bottom:1px solid var(--gold-border);
-  display:flex;justify-content:space-between;align-items:flex-start;
-  background:linear-gradient(135deg,var(--black-3),rgba(212,175,55,0.05));
-}
-.returns-drawer-close{
-  background:none;border:none;color:var(--gold);font-size:28px;
-  cursor:pointer;padding:0;width:36px;height:36px;
-  border-radius:6px;transition:all 0.2s;flex-shrink:0;
-}
-.returns-drawer-close:hover{
-  background:rgba(212,175,55,0.15);transform:rotate(90deg);
-}
-
-.returns-drawer-tabs{
-  display:flex;gap:0;border-bottom:1px solid var(--gold-border);
-  background:var(--black-3);padding:0 30px;
-}
-.returns-tab{
-  background:none;border:none;color:var(--w60);
-  padding:14px 20px;font-size:14px;font-weight:600;
-  cursor:pointer;transition:all 0.2s;border-bottom:3px solid transparent;
-  font-family:'Cairo',sans-serif;display:flex;align-items:center;gap:8px;
-}
-.returns-tab span{font-size:16px;}
-.returns-tab:hover{color:var(--gold-light);background:rgba(212,175,55,0.05);}
-.returns-tab.active{
-  color:var(--gold);border-bottom-color:var(--gold);
-  background:rgba(212,175,55,0.08);
-}
-
-.returns-drawer-body{
-  flex:1;overflow-y:auto;padding:24px 30px;
-}
-.returns-drawer-body::-webkit-scrollbar{width:8px;}
-.returns-drawer-body::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);}
-.returns-drawer-body::-webkit-scrollbar-thumb{background:var(--gold);border-radius:4px;}
-
-.returns-tab-content{display:none;}
-.returns-tab-content.active{display:block;}
-
-.returns-filters{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;margin-bottom:20px;padding:16px;
-  background:rgba(212,175,55,0.05);border-radius:8px;
-  border:1px solid rgba(212,175,55,0.15);
-}
-
-.returns-table-wrap{
-  overflow-x:auto;margin-bottom:20px;
-  border:1px solid var(--gold-border);border-radius:8px;
-}
-.returns-table{
-  width:100%;border-collapse:collapse;
-}
-.returns-table thead tr{
-  background:rgba(212,175,55,0.1);
-}
-.returns-table th{
-  padding:12px 14px;color:var(--gold);font-weight:600;font-size:13px;
-  border-bottom:2px solid var(--gold);
-}
-.returns-table tbody tr{
-  border-bottom:1px solid rgba(255,255,255,0.05);
-  transition:background 0.2s;cursor:pointer;
-}
-.returns-table tbody tr:hover{
-  background:rgba(212,175,55,0.08);
-}
-.returns-table tbody tr.expanded{
-  background:rgba(212,175,55,0.12);border-left:3px solid var(--gold);
-}
-.returns-table td{
-  padding:14px;color:#fff;font-size:13px;
-}
-
-.returns-summary{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:15px;
-  margin-top:20px;padding:20px;background:rgba(212,175,55,0.05);
-  border-radius:8px;border:1px solid var(--gold);
-}
-.summary-item{text-align:center;}
-.summary-label{font-size:12px;color:var(--w60);margin-bottom:6px;}
-.summary-value{font-size:22px;font-weight:700;color:var(--gold);}
-
-
 /* ---- LOGIN OVERLAY ---- */
 #loginOverlay{
   position:fixed;inset:0;background:rgba(10,10,10,0.94);
@@ -439,16 +339,6 @@ tbody td{padding:11px 14px;color:var(--w90);white-space:nowrap;text-align:right;
   .nav-tabs{padding:0 16px;}
   .tot-item{padding:8px 12px;border-left:none;border-top:1px solid var(--gold-border);}
   .inv-list-amounts{gap:10px;}
-  
-  /* Returns Drawer Responsive */
-  .returns-drawer{max-width:100%;}
-  .returns-drawer-header{padding:18px 20px;}
-  .returns-drawer-tabs{padding:0 20px;}
-  .returns-drawer-body{padding:18px 20px;}
-  .returns-filters{grid-template-columns:1fr;gap:10px;padding:12px;}
-  .returns-summary{grid-template-columns:1fr;gap:12px;padding:15px;}
-  .returns-table{font-size:12px;}
-  .returns-table th,.returns-table td{padding:10px 8px;font-size:12px;}
 }
 
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -1025,37 +915,6 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">أفضل عميل</div><div class="kpi-value" id="kpi_top_ch" style="font-size:15px;margin-top:4px;">—</div><div class="kpi-sub" id="kpi_top_ch_val"></div></div>
       <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">ج.م</div></div>
       <div class="kpi-card kpi-highlight"><div class="kpi-icon">💎</div><div class="kpi-label">الصافي الحقيقي</div><div class="kpi-value" id="kpi_true_net">—</div><div class="kpi-sub">بعد المرتجعات</div></div>
-    </div>
-
-    <!-- Returns Analysis Compact Card -->
-    <div class="kpi-card" style="margin-top:20px;cursor:pointer;border-color:rgba(224,82,82,0.35);" onclick="openReturnsDrawer()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="kpi-icon" style="font-size:32px;">↩️</div>
-          <div>
-            <div class="kpi-label">تحليل المرتجعات</div>
-            <div style="font-size:11px;color:var(--w30);margin-top:2px;">اضغط لعرض التفاصيل الكاملة</div>
-          </div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="openReturnsDrawer();event.stopPropagation();" style="background:var(--gold);color:var(--dark-bg);padding:8px 16px;">
-          عرض التفاصيل ←
-        </button>
-      </div>
-      
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
-        <div style="text-align:center;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
-          <div style="font-size:11px;color:var(--w60);margin-bottom:4px;">إجمالي المرتجعات</div>
-          <div id="ret_total_amount_compact" style="font-size:18px;font-weight:700;color:var(--red);">—</div>
-        </div>
-        <div style="text-align:center;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
-          <div style="font-size:11px;color:var(--w60);margin-bottom:4px;">عدد العمليات</div>
-          <div id="ret_count_compact" style="font-size:18px;font-weight:700;color:var(--gold);">—</div>
-        </div>
-        <div style="text-align:center;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
-          <div style="font-size:11px;color:var(--w60);margin-bottom:4px;">أكثر منتج مرتجع</div>
-          <div id="ret_top_product_compact" style="font-size:13px;font-weight:600;color:var(--gold-light);line-height:1.2;max-height:36px;overflow:hidden;">—</div>
-        </div>
-      </div>
     </div>
 
     <!-- Daily Sales Chart -->
@@ -1698,7 +1557,7 @@ var DB = {
         var p = res.data;
         return { id: p.id, product_code: p.barcode, barcode: p.barcode, name: p.product_name,
                  price: p.price, discountValue: parseFloat(p.discount_value) || 0 };
-      } catch(e) { console.warn('DB.saveProduct:', e); toast('⚠️ خطأ في الاتصال — تم الحفظ محلياً', 'err'); }
+      } catch(e) { console.warn('DB.saveProduct:', e); toast('⚠️ خطأ في الاتصال - تم الحفظ محلياً', 'err'); }
     }
     /* Demo / fallback */
     var all = localGet(K.PRODUCTS);
@@ -1754,7 +1613,7 @@ var DB = {
         var r = res.data;
         return { id: r.id, product_code: r.product_code, channel_name: r.channel_name,
                  price: parseFloat(r.price) || 0, discount_value: parseFloat(r.discount_value) || 0 };
-      } catch(e) { console.warn('DB.saveCustomerPrice:', e); toast('⚠️ خطأ — تم الحفظ محلياً', 'err'); }
+      } catch(e) { console.warn('DB.saveCustomerPrice:', e); toast('⚠️ خطأ - تم الحفظ محلياً', 'err'); }
     }
     var all = localGet(K.PRICES);
     var existing = all.findIndex(function(x) {
@@ -1861,7 +1720,7 @@ var DB = {
           .select('*, channels(channel_name)')
           .order('created_at', { ascending: false });
         if (res.error) throw res.error;
-        return (res.data || []).map(function(r) {
+        var invoices = (res.data || []).map(function(r) {
           return {
             id            : r.id,
             number        : r.invoice_number,
@@ -1875,9 +1734,26 @@ var DB = {
             createdAt     : r.created_at,
           };
         });
-      } catch(e) { console.warn('DB.getInvoices:', e); return localGet(K.INVOICES); }
+        console.log('DB.getInvoices: Loaded from Supabase, count:', invoices.length);
+        return invoices;
+      } catch(e) { 
+        console.warn('DB.getInvoices: Supabase error, falling back to localStorage:', e); 
+        var fallback = localGet(K.INVOICES);
+        // Sort by createdAt DESC for consistency
+        return fallback.sort(function(a, b) {
+          var aDate = a.createdAt || a.created_at || '';
+          var bDate = b.createdAt || b.created_at || '';
+          return bDate > aDate ? 1 : -1;
+        });
+      }
     }
-    return localGet(K.INVOICES);
+    var local = localGet(K.INVOICES);
+    // Sort by createdAt DESC for consistency
+    return local.sort(function(a, b) {
+      var aDate = a.createdAt || a.created_at || '';
+      var bDate = b.createdAt || b.created_at || '';
+      return bDate > aDate ? 1 : -1;
+    });
   },
 
   getInvoiceItems: async function(invoiceId) {
@@ -1918,7 +1794,7 @@ var DB = {
             id           : r.id,
             invoiceId    : String(r.invoice_id || '').trim(),
             barcode      : r.barcode      || '',
-            name         : r.product_name_snapshot || r.product_name || r.barcode || '—',
+            name         : r.product_name_snapshot || r.product_name || r.barcode || '-',
             qty          : qty,
             price        : price,
             discountValue: discPerPiece,
@@ -2002,14 +1878,32 @@ var DB = {
     total                : net,
   };
 });
+
+        console.log('TOTAL ITEMS TO SAVE (Supabase):', itemRows.length);
+        itemRows.forEach(function(row, i) {
+          console.log('Item', i + ':', row.barcode, 'qty:', row.quantity);
+        });
+
         if (itemRows.length > 0) {
           var itemRes = await APP.sb.from('invoice_items').insert(itemRows);
-          if (itemRes.error) console.warn('items insert:', itemRes.error);
+          if (itemRes.error) {
+            console.warn('items insert ERROR:', itemRes.error);
+          } else {
+            console.log('Items inserted successfully');
+            /* Verify saved items */
+            var verify = await APP.sb.from('invoice_items').select('*').eq('invoice_id', savedId);
+            if (verify.data) {
+              console.log('ACTUAL SAVED ITEMS (Supabase):', verify.data.length);
+              verify.data.forEach(function(item, i) {
+                console.log('Saved item', i + ':', item.barcode, 'qty:', item.quantity);
+              });
+            }
+          }
         }
         return savedId;
       } catch(e) {
         console.warn('DB.saveInvoice live failed:', e);
-        toast('⚠️ خطأ في الاتصال — تم الحفظ محلياً', 'err');
+        toast('⚠️ خطأ في الاتصال - تم الحفظ محلياً', 'err');
       }
     }
 
@@ -2027,7 +1921,9 @@ var DB = {
         });
       }
       /* Remove old items and re-insert */
+      console.log('UPDATING - TOTAL ITEMS TO SAVE:', items.length);
       var allItems2 = localGet(K.INV_ITEMS).filter(function(x){ return x.invoiceId !== id; });
+      var updateCount = 0;
       items.forEach(function(it) {
         var discPerPiece = it.discountValue || 0;
         var lineDisc = discPerPiece * (it.qty || 0);
@@ -2035,22 +1931,31 @@ var DB = {
         allItems2.push({ id: uid(), invoiceId: id, barcode: it.barcode, name: it.name,
           qty: it.qty, price: it.price, discountValue: discPerPiece, discount: lineDisc,
           totalGross: gross, netTotal: gross - lineDisc });
+        console.log('Updating item', updateCount + ':', it.barcode, 'qty:', it.qty);
+        updateCount++;
       });
+      console.log('TOTAL UPDATED:', updateCount);
       localSet(K.INVOICES, allInv);
       localSet(K.INV_ITEMS, allItems2);
     } else {
+      console.log('TOTAL ITEMS TO SAVE (localStorage):', items.length);
       allInv.unshift({ id: id, number: inv.number, date: inv.date, channel: inv.channel, notes: inv.notes,
         totalGross: inv.totalGross, totalDiscount: inv.totalDiscount,
         totalReturns: 0, netTotal: inv.netTotal, createdAt: localDateStr() });
       var allItems = localGet(K.INV_ITEMS);
+      var savedCount = 0;
       items.forEach(function(it) {
         var discPerPiece = it.discountValue || 0;
         var lineDisc = discPerPiece * (it.qty || 0);
         var gross = (it.qty||0) * (it.price||0);
-        allItems.push({ id: uid(), invoiceId: id, barcode: it.barcode, name: it.name,
+        var itemObj = { id: uid(), invoiceId: id, barcode: it.barcode, name: it.name,
           qty: it.qty, price: it.price, discountValue: discPerPiece, discount: lineDisc,
-          totalGross: gross, netTotal: gross - lineDisc });
+          totalGross: gross, netTotal: gross - lineDisc };
+        allItems.push(itemObj);
+        console.log('Saving localStorage item', savedCount + ':', it.barcode, 'qty:', it.qty);
+        savedCount++;
       });
+      console.log('TOTAL SAVED TO localStorage:', savedCount);
       localSet(K.INVOICES, allInv);
       localSet(K.INV_ITEMS, allItems);
     }
@@ -2072,9 +1977,55 @@ var DB = {
   getAllInvoiceItems: async function() {
     if (APP.mode === 'live') {
       try {
-        var res = await APP.sb.from('invoice_items').select('*');
+        /* Fetch ALL invoice_items with explicit limit to avoid pagination */
+        var res = await APP.sb
+          .from('invoice_items')
+          .select('*', { count: 'exact' })
+          .limit(10000);
+        
         if (res.error) throw res.error;
-        return (res.data || []).map(function(r) {
+        
+        console.log('=== DB.getAllInvoiceItems DEBUG ===');
+        console.log('Response status:', res.status);
+        console.log('Total rows in table (count):', res.count);
+        console.log('Rows returned in this response:', (res.data || []).length);
+        
+        /* If 206 status, need pagination loop */
+        if (res.status === 206 && res.count > (res.data || []).length) {
+          console.warn('Status 206 detected! Need pagination loop.');
+          console.warn('Total items:', res.count, 'Returned:', res.data.length);
+          
+          var allData = res.data ? res.data.slice() : [];
+          var offset = 1000;
+          
+          while (offset < res.count) {
+            var nextRes = await APP.sb
+              .from('invoice_items')
+              .select('*')
+              .range(offset, offset + 999);
+            
+            if (nextRes.error) {
+              console.warn('Pagination error at offset', offset, ':', nextRes.error);
+              break;
+            }
+            
+            console.log('Fetched batch at offset', offset, ':', (nextRes.data || []).length, 'items');
+            
+            if (nextRes.data && nextRes.data.length > 0) {
+              allData = allData.concat(nextRes.data);
+              offset += 1000;
+            } else {
+              break;
+            }
+          }
+          
+          console.log('Final total after pagination:', allData.length);
+          res.data = allData;
+        } else {
+          console.log('Status 200/201 - Full content returned');
+        }
+        
+        var mapped = (res.data || []).map(function(r) {
           var qty          = parseFloat(r.quantity)       || 0;
           var price        = parseFloat(r.price)          || 0;
           /* LEGACY FALLBACK — نفس منطق getInvoiceItems */
@@ -2094,7 +2045,7 @@ var DB = {
             id           : r.id,
             invoiceId    : String(r.invoice_id || '').trim(),
             barcode      : r.barcode      || '',
-            name         : r.product_name_snapshot || r.product_name || r.barcode || '—',
+            name         : r.product_name_snapshot || r.product_name || r.barcode || '-',
             qty          : qty,
             price        : price,
             discountValue: discPerPiece,
@@ -2105,7 +2056,14 @@ var DB = {
             net_total            : parseFloat(r.net_total) || parseFloat((qty * price - lineDisc).toFixed(2)),
           };
         });
-      } catch(e) { console.warn('DB.getAllInvoiceItems:', e); return localGet(K.INV_ITEMS); }
+        
+        console.log('Final total invoice_items loaded:', mapped.length);
+        
+        return mapped;
+      } catch(e) { 
+        console.error('DB.getAllInvoiceItems: Critical error from Supabase:', e); 
+        return localGet(K.INV_ITEMS); 
+      }
     }
     /* localStorage: add net field on the fly */
     return localGet(K.INV_ITEMS).map(function(it) {
@@ -2114,7 +2072,7 @@ var DB = {
       var disc  = parseFloat(it.discount)     || 0;
       return Object.assign({}, it, {
         invoiceId: String(it.invoiceId || it.invoice_id || '').trim(),
-        name     : it.name || it.product_name_snapshot || it.barcode || '—',
+        name     : it.name || it.product_name_snapshot || it.barcode || '-',
         net      : parseFloat((qty * price - disc).toFixed(2)),
       });
     });
@@ -2266,7 +2224,7 @@ var DB = {
 
       } catch(e) {
         console.error('[saveReturn] live failed — full error:', e);
-        toast('⚠️ خطأ في الاتصال — تم الحفظ محلياً', 'err');
+        toast('⚠️ خطأ في الاتصال - تم الحفظ محلياً', 'err');
       }
     }
 
@@ -2392,7 +2350,7 @@ async function doLogin() {
     activateLiveMode();
     toast('✅ تم تسجيل الدخول: ' + email, 'ok');
   } catch(e) {
-    errEl.textContent = 'حدث خطأ — تحقق من الاتصال';
+    errEl.textContent = 'حدث خطأ - تحقق من الاتصال';
   }
 }
 
@@ -2446,7 +2404,7 @@ async function bootstrap() {
   if (!url || !key) {
     /* No keys configured → stay demo */
     setDbStatus('demo', 'Demo Mode (no config)');
-    toast('🧪 وضع Demo — لا توجد مفاتيح Supabase', 'ok');
+    toast('🧪 وضع Demo - لا توجد مفاتيح Supabase', 'ok');
     return;
   }
 
@@ -2456,7 +2414,7 @@ async function bootstrap() {
 
   if (!connected) {
     setDbStatus('error', 'Error / Fallback');
-    toast('⚠️ تعذّر الاتصال بـ Supabase — وضع Demo مفعّل', 'err');
+    toast('⚠️ تعذّر الاتصال بـ Supabase - وضع Demo مفعّل', 'err');
     return;
   }
 
@@ -2516,10 +2474,6 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 
 function fmt(n) {
   return (parseFloat(n) || 0).toLocaleString('ar-EG', { minimumFractionDigits:2, maximumFractionDigits:2 });
-}
-
-function safe(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function localDateStr() {
@@ -3352,6 +3306,13 @@ async function confirmAndSaveInvoice() {
           : '✅ تم حفظ الفاتورة: '  + INV.number,
         'ok'
       );
+      
+      /* Reload dashboard data if currently viewing dashboard */
+      var currentPage = document.querySelector('.page.active');
+      if (currentPage && currentPage.id === 'page-dashboard') {
+        await loadDashboard();
+      }
+      
       initInvoice();
     }
   );
@@ -3562,12 +3523,12 @@ async function renderInvoicesList() {
     });
   }
 
-  /* [تعديل] ترتيب الفواتير تنازلياً حسب التاريخ (الأحدث أولاً) */
+  /* [تعديل] ترتيب الفواتير تنازلياً حسب التاريخ (أحدث أولاً) */
   invoices.sort(function(a, b) {
     var da = getInvDate(a) || '';
     var db = getInvDate(b) || '';
-    if (da < db) return  1;
     if (da > db) return -1;
+    if (da < db) return  1;
     return 0;
   });
 
@@ -3907,16 +3868,11 @@ function applyMonthFilter() {
   applyFilters();
 }
 
-/* [تعديل] تهيئة قوائم السنوات ديناميكياً — تحديث تلقائي كل سنة جديدة */
+/* [إضافة] تهيئة قوائم السنوات (آخر 3 سنوات + السنة الحالية) لكل الصفحات */
 function initYearDropdown() {
   var curYear = new Date().getFullYear();
-  var startYear = 2023; // أقدم سنة متوقعة للبيانات (يمكن تعديلها حسب الحاجة)
   var years = [];
-  
-  // توليد السنوات من الحالية إلى startYear تنازلياً
-  for (var y = curYear; y >= startYear; y--) {
-    years.push(String(y));
-  }
+  for (var y = curYear; y >= curYear - 3; y--) years.push(String(y));
 
   /* الداشبورد */
   var dashSel = document.getElementById('flt_year');
@@ -4099,6 +4055,57 @@ async function loadDashboard() {
   var allInvoices = await DB.getInvoices();
   var allItems    = await DB.getAllInvoiceItems();
 
+  /* DEBUG: Comprehensive data source logging */
+  console.log('=== loadDashboard DATA SOURCE DEBUG ===');
+  console.log('APP.mode:', APP.mode);
+  console.log('Data Source:', APP.mode === 'live' ? 'Supabase' : 'localStorage');
+  console.log('Total invoices loaded:', allInvoices.length);
+  console.log('Total items loaded:', allItems.length);
+  
+  if (allInvoices.length > 0) {
+    console.log('First invoice:', {
+      id: allInvoices[0].id,
+      number: allInvoices[0].number,
+      createdAt: allInvoices[0].createdAt
+    });
+    console.log('Last invoice:', {
+      id: allInvoices[allInvoices.length - 1].id,
+      number: allInvoices[allInvoices.length - 1].number,
+      createdAt: allInvoices[allInvoices.length - 1].createdAt
+    });
+    
+    /* Check how many items linked to latest invoice */
+    var latestInvId = allInvoices[0].id;
+    var itemsForLatest = allItems.filter(function(it) {
+      return (it.invoiceId || it.invoice_id) === latestInvId;
+    });
+    console.log('Items for latest invoice (', latestInvId, '):', itemsForLatest.length);
+    if (itemsForLatest.length > 0) {
+      console.log('Sample items for latest invoice:', itemsForLatest.slice(0, 2));
+    }
+  }
+  
+  if (allItems.length > 0) {
+    console.log('First item:', {
+      invoiceId: allItems[0].invoiceId,
+      barcode: allItems[0].barcode,
+      qty: allItems[0].qty
+    });
+  }
+  
+  /* Check if invoices are sorted DESC by created_at */
+  var isSortedDesc = true;
+  for (var i = 1; i < allInvoices.length; i++) {
+    var curr = allInvoices[i].createdAt || '';
+    var prev = allInvoices[i-1].createdAt || '';
+    if (curr > prev) {
+      isSortedDesc = false;
+      console.warn('Invoice sort issue: invoice', i, 'is older than', i-1);
+      break;
+    }
+  }
+  console.log('Invoices sorted DESC by createdAt:', isSortedDesc);
+
   /* Map items by invoiceId for quick lookup */
   var itemsByInv = {};
   allItems.forEach(function(it) {
@@ -4136,6 +4143,20 @@ async function loadDashboard() {
     return true;
   });
 
+  console.log('=== FILTERING DETAIL ===');
+  console.log('Filtered invoices count:', filteredInv.length);
+  console.log('Invoice IDs in filter:', Object.keys(filteredInvIds).length);
+  console.log('Items before filter:', allItems.length);
+  console.log('Items after filter:', filteredItems.length);
+  
+  if (filteredInv.length > 0 && allItems.length > 0) {
+    var inv0 = filteredInv[0];
+    var items0 = allItems.filter(function(it) {
+      return (it.invoiceId || it.invoice_id) === inv0.id;
+    });
+    console.log('Sample check - Invoice ID:', inv0.id, 'has items:', items0.length);
+  }
+
   /* If product filter active — restrict invoices to those that contain filtered items */
   if (fProd) {
     var invWithProduct = {};
@@ -4148,6 +4169,11 @@ async function loadDashboard() {
 
   DASH.invoices = filteredInv;
   DASH.items    = filteredItems;
+
+  console.log('=== DASH ASSIGNMENT ===');
+  console.log('DASH.invoices count:', DASH.invoices.length);
+  console.log('DASH.items count:', DASH.items.length);
+  console.log('Filter applied - from:', fFrom, 'to:', fTo, 'channel:', fCh);
 
   /* Fetch returns for same period */
   var allReturns = await DB.getReturns();
@@ -4162,7 +4188,6 @@ async function loadDashboard() {
 
   /* Render everything */
   renderKPIs(filteredInv, filteredItems, filteredReturns);
-  renderReturnsAnalysis(filteredReturns, filteredInv, filteredItems);
   renderDailyChart(filteredInv);
 
   /* Build soldItems from filteredInv — ensures every item is tied to a filtered invoice */
@@ -4222,56 +4247,7 @@ function renderKPIs(invoices, items, returns) {
 
 function setText(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; }
 
-/* ---- Returns Analysis Card ---- */
-async function renderReturnsAnalysis(returns, invoices, items) {
-  returns = returns || [];
-  
-  // إجمالي المرتجعات
-  var totalReturns = returns.reduce(function(s,r){ return s+(parseFloat(r.totalReturn)||0); }, 0);
-  setText('ret_total_amount_compact', fmt(totalReturns) + ' ج.م');
-  
-  // عدد عمليات المرتجع
-  setText('ret_count_compact', returns.length);
-  
-  // جمع كل الـ return items
-  var allReturnItems = await DB.getAllReturnItems();
-  
-  // فلترة return items حسب المرتجعات المفلترة
-  var returnIds = {};
-  returns.forEach(function(r){ returnIds[r.id] = true; });
-  
-  var filteredReturnItems = allReturnItems.filter(function(ri) {
-    var retId = ri.return_id || ri.returnId || ri.returnID;
-    return returnIds[retId];
-  });
-  
-  // تجميع المنتجات المرتجعة حسب الاسم
-  var productReturns = {};
-  filteredReturnItems.forEach(function(ri) {
-    var name = ri.name || ri.product_name || ri.productName || 'غير محدد';
-    var qty = parseFloat(ri.qty || ri.quantity) || 0;
-    
-    if (!productReturns[name]) {
-      productReturns[name] = { name: name, qty: 0 };
-    }
-    productReturns[name].qty += qty;
-  });
-  
-  // تحويل إلى array وترتيب تنازلياً حسب الكمية
-  var sortedProducts = Object.values(productReturns).sort(function(a,b){ 
-    return b.qty - a.qty; 
-  });
-  
-  // أكثر منتج مرتجع
-  if (sortedProducts.length > 0) {
-    var topProduct = sortedProducts[0];
-    setText('ret_top_product_compact', topProduct.name);
-  } else {
-    setText('ret_top_product_compact', 'لا توجد مرتجعات');
-  }
-}
-
-/* ---- Daily Chart ---- */
+/* ---- Daily Bar Chart ---- */
 function renderDailyChart(invoices) {
   var wrap = document.getElementById('dailyChart');
   if (!wrap) return;
@@ -4279,7 +4255,7 @@ function renderDailyChart(invoices) {
   /* Group net by date */
   var groups = {};
   invoices.forEach(function(iv) {
-    var d = getInvDate(iv) || '—';
+    var d = getInvDate(iv) || '-';
     groups[d] = (groups[d]||0) + (parseFloat(iv.netTotal)||0);
   });
 
@@ -4318,7 +4294,7 @@ function renderTopProducts(items) {
   items.forEach(function(it) {
     /* Stable grouping key */
     var code = (it.product_code || it.barcode || '').trim();
-    if (!code) code = (it.name || it.product_name_snapshot || it.product_name || '—').trim();
+    if (!code) code = (it.name || it.product_name_snapshot || it.product_name || '-').trim();
 
     /* Display name — never fall back to code unless truly nothing else exists */
     var displayName = (it.name || it.product_name_snapshot || it.product_name || '').trim() || code;
@@ -4469,10 +4445,14 @@ function renderProductsReport() {
   var emptyEl = document.getElementById('prodReportEmpty');
   if (!tbody) return;
 
+  console.log('=== renderProductsReport DEBUG ===');
+  console.log('DASH.items passed:', items.length);
+  console.log('First item in DASH.items:', items.length > 0 ? { invoiceId: items[0].invoiceId, barcode: items[0].barcode } : 'none');
+
   /* Aggregate */
   var prod = {};
   items.forEach(function(it) {
-    var k = it.barcode || it.name || '—';
+    var k = it.barcode || it.name || '-';
     if (!prod[k]) prod[k] = {
       name:it.name||'—', barcode:k, qty:0, gross:0, disc:0, net:0,
       times:0, prices:[], lastDate:'',
@@ -4489,6 +4469,9 @@ function renderProductsReport() {
     var d = it.createdAt ? it.createdAt.substring(0,10) : '';
     if (d > prod[k].lastDate) prod[k].lastDate = d;
   });
+
+  console.log('Total unique products aggregated:', Object.keys(prod).length);
+  console.log('Product aggregation sample:', Object.values(prod).slice(0, 3));
 
   var rows = Object.values(prod).filter(function(p){
     return !query || p.name.toLowerCase().includes(query) || p.barcode.toLowerCase().includes(query);
@@ -4585,14 +4568,32 @@ function renderInvoicesReport() {
 
   /* Items count per invoice from DASH.items */
   var itemCount = {};
-  DASH.items.forEach(function(it){ itemCount[it.invoiceId]=(itemCount[it.invoiceId]||0)+1; });
+  
+  console.log('=== renderInvoicesReport DEBUG ===');
+  console.log('DASH.items length:', DASH.items.length);
+  
+  DASH.items.forEach(function(it) {
+    var invId = String(it.invoiceId || it.invoice_id || '').trim();
+    if (invId) {
+      itemCount[invId] = (itemCount[invId] || 0) + 1;
+      console.log('Adding item - invId:', invId, 'count now:', itemCount[invId]);
+    } else {
+      console.warn('Item without invoiceId:', it);
+    }
+  });
+
+  console.log('itemCount keys:', Object.keys(itemCount));
+  console.log('itemCount:', itemCount);
 
   tbody.innerHTML = rows.map(function(iv,i) {
     var esc = escapeHtml(iv.id);
-    var cnt = itemCount[iv.id]||0;
+    var cnt = itemCount[iv.id] || 0;
+    
+    console.log('Invoice:', { id: iv.id, number: iv.number, count: cnt, inItemCount: !!itemCount[iv.id] });
+    
     return '<tr>' +
       '<td class="muted">'+(i+1)+'</td>' +
-      '<td class="num" style="color:var(--gold-light);">'+escapeHtml(iv.number||'—')+'</td>' +
+      '<td class="num" style="color:var(--gold-light);">'+escapeHtml(iv.number||'-')+'</td>' +
       '<td>'+fmtDateStr(iv.date||iv.createdAt)+'</td>' +
       '<td>'+(iv.channel?'<span class="badge">'+escapeHtml(iv.channel)+'</span>':'<span class="muted">—</span>')+'</td>' +
       '<td class="num">'+cnt+'</td>' +
@@ -4646,23 +4647,18 @@ function buildPrintHTML(iv, items) {
   var discTotal = parseFloat(iv.totalDiscount) || items.reduce(function(s,it){ var n=normalizeItem(it); return s+n.discount; },0);
   var netTotal  = parseFloat(iv.netTotal)      || (subtotal - discTotal);
 
-  // CRITICAL FIX: استخدام نسخة من المصفوفة لتجنب mutation
-  var printItems = items.slice(); // نسخة من المصفوفة بدون mutation
-  
-  var rows = printItems.map(function(it,i) {
+  var rows = items.map(function(it,i) {
     var n     = normalizeItem(it);
     var gross = n.qty * n.price;
-    var discPerPiece = n.discountValue || 0;  /* خصم القطعة الواحدة */
-    var discTotal    = n.discount;             /* إجمالي الخصم للسطر - للحسابات فقط */
-    var net   = gross - discTotal;
-    
+    var disc  = n.discount;              /* qty * discountValue — never per-piece */
+    var net   = gross - disc;
     return '<tr class="'+(i%2===0?'even':'')+'">' +
       '<td class="c">'+(i+1)+'</td>' +
       '<td>'+safe(n.barcode||'')+'</td>' +
       '<td class="name">'+safe(n.name||'—')+'</td>' +
       '<td class="c">'+fmtN(n.qty)+'</td>' +
       '<td class="r">'+fmtN(n.price)+'</td>' +
-      '<td class="r disc">'+fmtN(discPerPiece)+'</td>' +     /* خصم القطعة فقط */
+      '<td class="r disc">'+fmtN(disc)+'</td>' +
       '<td class="r">'+fmtN(gross)+'</td>' +
       '<td class="r net">'+fmtN(net)+'</td>' +
     '</tr>';
@@ -4776,7 +4772,7 @@ function buildPrintHTML(iv, items) {
       '<th>المنتج</th>' +
       '<th class="c">الكمية</th>' +
       '<th class="r">السعر</th>' +
-      '<th class="r">خصم القطعة</th>' +
+      '<th class="r">الخصم</th>' +
       '<th class="r">الإجمالي</th>' +
       '<th class="r">الصافي</th>' +
     '</tr></thead>' +
@@ -4857,7 +4853,7 @@ function exportProductsCSV() {
   if (items.length === 0) { toast('⚠️ لا توجد بيانات منتجات للتصدير','err'); return; }
   var prod   = {};
   items.forEach(function(it) {
-    var k = it.barcode || it.name || '—';
+    var k = it.barcode || it.name || '-';
     if (!prod[k]) prod[k] = {name:it.name||'—', barcode:k, qty:0, gross:0, disc:0, net:0, times:0, prices:[], lastDate:''};
     var n = normalizeItem(it);
     var g = n.qty * n.price;
@@ -5248,12 +5244,12 @@ async function renderReturnsList() {
     });
   }
 
-  /* [تعديل] ترتيب المرتجعات تنازلياً حسب التاريخ (الأحدث أولاً) */
+  /* [تعديل] ترتيب المرتجعات تصاعدياً حسب التاريخ (Chronological) */
   returns.sort(function(a, b) {
     var da = normDateStr(a.date) || normDateStr(a.return_date) || '';
     var db = normDateStr(b.date) || normDateStr(b.return_date) || '';
-    if (da < db) return  1;
-    if (da > db) return -1;
+    if (da < db) return -1;
+    if (da > db) return  1;
     return 0;
   });
 
@@ -5764,12 +5760,12 @@ async function loadStatement() {
     return (r.channel || '') === channel && inRange(retDate);
   });
 
-  /* Sort descending — newest first */
-  invoices.sort(function(a,b){ return getInvDate(b).localeCompare(getInvDate(a)); });
+  /* Sort ascending — oldest first */
+  invoices.sort(function(a,b){ return getInvDate(a).localeCompare(getInvDate(b)); });
   returns.sort(function(a,b){
     var da = normDateStr(a.date) || normDateStr(a.return_date) || (a.createdAt||'').substring(0,10);
     var db = normDateStr(b.date) || normDateStr(b.return_date) || (b.createdAt||'').substring(0,10);
-    return db.localeCompare(da);
+    return da.localeCompare(db);
   });
 
   var totalGross = invoices.reduce(function(s,iv){ return s+(parseFloat(iv.totalGross)||0); }, 0);
@@ -6041,305 +6037,6 @@ function clearRetListFilter() {
 }
 
 /* ============================================================
-   Returns Details Modal Functions
-   ============================================================ */
-
-/* ============================================================
-   Returns Side Drawer Management
-   ============================================================ */
-
-var RETURNS_DRAWER = {
-  allReturns: [],
-  allReturnItems: [],
-  filteredOperations: [],
-  filteredProducts: [],
-  currentTab: 'operations',
-  expandedReturnId: null
-};
-
-// فتح الـ Drawer
-async function openReturnsDrawer() {
-  // تحميل البيانات
-  RETURNS_DRAWER.allReturns = await DB.getReturns();
-  RETURNS_DRAWER.allReturnItems = await DB.getAllReturnItems();
-  
-  // ترتيب المرتجعات تنازلياً (الأحدث أولاً) حسب created_at
-  RETURNS_DRAWER.allReturns.sort(function(a, b) {
-    var dateA = a.createdAt || a.created_at || a.date || '';
-    var dateB = b.createdAt || b.created_at || b.date || '';
-    return dateB.localeCompare(dateA); // DESC
-  });
-  
-  // عرض الـ Drawer
-  document.getElementById('returnsDrawer').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  
-  // عرض التاب الأول
-  switchReturnsTab('operations');
-}
-
-// إغلاق الـ Drawer
-function closeReturnsDrawer() {
-  document.getElementById('returnsDrawer').style.display = 'none';
-  document.body.style.overflow = '';
-  closeReturnDetails();
-}
-
-// التبديل بين التابات
-function switchReturnsTab(tab) {
-  RETURNS_DRAWER.currentTab = tab;
-  
-  // تحديث UI للتابات
-  var tabs = document.querySelectorAll('.returns-tab');
-  var contents = document.querySelectorAll('.returns-tab-content');
-  
-  tabs.forEach(function(t) { t.classList.remove('active'); });
-  contents.forEach(function(c) { c.classList.remove('active'); });
-  
-  if (tab === 'operations') {
-    tabs[0].classList.add('active');
-    document.getElementById('returnsTabOperations').classList.add('active');
-    applyReturnsFilters();
-  } else {
-    tabs[1].classList.add('active');
-    document.getElementById('returnsTabProducts').classList.add('active');
-    applyProductsFilters();
-  }
-}
-
-/* ============================================================
-   Tab 1: Return Operations
-   ============================================================ */
-
-function applyReturnsFilters() {
-  var fromDate = (document.getElementById('retDrawer_from').value || '').trim();
-  var toDate = (document.getElementById('retDrawer_to').value || '').trim();
-  var customerSearch = (document.getElementById('retDrawer_customer').value || '').trim().toLowerCase();
-  
-  // فلترة المرتجعات
-  var filtered = RETURNS_DRAWER.allReturns.filter(function(r) {
-    var retDate = normDateStr(r.date) || normDateStr(r.return_date) || normDateStr(r.createdAt) || '';
-    if (fromDate && retDate < fromDate) return false;
-    if (toDate && retDate > toDate) return false;
-    
-    if (customerSearch) {
-      var customer = String(r.channel || r.customer || '').toLowerCase();
-      if (!customer.includes(customerSearch)) return false;
-    }
-    
-    return true;
-  });
-  
-  RETURNS_DRAWER.filteredOperations = filtered;
-  renderReturnsOperations(filtered);
-}
-
-function clearReturnsFilters() {
-  document.getElementById('retDrawer_from').value = '';
-  document.getElementById('retDrawer_to').value = '';
-  document.getElementById('retDrawer_customer').value = '';
-  applyReturnsFilters();
-}
-
-function renderReturnsOperations(returns) {
-  var tbody = document.getElementById('returnsOperationsTable');
-  if (!tbody) return;
-  
-  if (returns.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:#999;">لا توجد نتائج</td></tr>';
-    setText('retOps_total_count', '0');
-    setText('retOps_total_items', '0');
-    setText('retOps_total_amount', '0.00 ج.م');
-    return;
-  }
-  
-  // تجميع عدد الأصناف لكل مرتجع
-  var itemsByReturn = {};
-  RETURNS_DRAWER.allReturnItems.forEach(function(item) {
-    var retId = item.return_id || item.returnId || item.returnID;
-    if (!itemsByReturn[retId]) itemsByReturn[retId] = [];
-    itemsByReturn[retId].push(item);
-  });
-  
-  var totalAmount = 0;
-  var totalItems = 0;
-  
-  tbody.innerHTML = returns.map(function(r) {
-    var retNumber = r.number || r.returnNumber || '—';
-    var customer = r.channel || r.customer || '—';
-    var retDate = normDateStr(r.date) || normDateStr(r.return_date) || normDateStr(r.createdAt) || '—';
-    var total = parseFloat(r.totalReturn || r.total) || 0;
-    var items = itemsByReturn[r.id] || [];
-    var itemCount = items.length;
-    
-    totalAmount += total;
-    totalItems += itemCount;
-    
-    return '<tr onclick="toggleReturnDetails(\'' + r.id + '\')" ' +
-           'class="' + (RETURNS_DRAWER.expandedReturnId === r.id ? 'expanded' : '') + '">' +
-           '<td style="text-align:right;font-weight:600;color:var(--gold);">' + safe(retNumber) + '</td>' +
-           '<td style="text-align:right;">' + safe(customer) + '</td>' +
-           '<td style="text-align:center;"><span style="background:rgba(212,175,55,0.15);padding:4px 12px;border-radius:12px;font-weight:600;color:var(--gold);">' + itemCount + '</span></td>' +
-           '<td style="text-align:center;font-weight:700;color:var(--red);">' + fmt(total) + ' ج.م</td>' +
-           '<td style="text-align:center;color:var(--w60);">' + retDate + '</td>' +
-           '</tr>';
-  }).join('');
-  
-  // تحديث الملخص
-  setText('retOps_total_count', returns.length);
-  setText('retOps_total_items', totalItems);
-  setText('retOps_total_amount', fmt(totalAmount) + ' ج.م');
-}
-
-// عرض تفاصيل مرتجع معين
-function toggleReturnDetails(returnId) {
-  if (RETURNS_DRAWER.expandedReturnId === returnId) {
-    closeReturnDetails();
-    return;
-  }
-  
-  RETURNS_DRAWER.expandedReturnId = returnId;
-  
-  // إيجاد المرتجع
-  var ret = RETURNS_DRAWER.allReturns.find(function(r){ return r.id === returnId; });
-  if (!ret) return;
-  
-  // إيجاد الأصناف
-  var items = RETURNS_DRAWER.allReturnItems.filter(function(item) {
-    var retId = item.return_id || item.returnId || item.returnID;
-    return retId === returnId;
-  });
-  
-  // عرض القسم
-  var section = document.getElementById('returnDetailsSection');
-  section.style.display = 'block';
-  
-  // عرض رقم المرتجع
-  setText('currentReturnNumber', ret.number || ret.returnNumber || returnId);
-  
-  // عرض الأصناف
-  var itemsTable = document.getElementById('returnDetailsItemsTable');
-  itemsTable.innerHTML = items.map(function(item) {
-    var name = item.name || item.product_name || item.productName || '—';
-    var qty = parseFloat(item.qty || item.quantity) || 0;
-    var price = parseFloat(item.price || item.returnPrice) || 0;
-    var total = parseFloat(item.total || item.totalReturn) || (qty * price);
-    
-    return '<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">' +
-           '<td style="padding:10px;text-align:right;">' + safe(name) + '</td>' +
-           '<td style="padding:10px;text-align:center;font-weight:600;">' + Math.round(qty) + '</td>' +
-           '<td style="padding:10px;text-align:center;">' + fmt(price) + ' ج.م</td>' +
-           '<td style="padding:10px;text-align:center;font-weight:700;color:var(--red);">' + fmt(total) + ' ج.م</td>' +
-           '</tr>';
-  }).join('');
-  
-  // تحديث الصفوف لإظهار expanded
-  renderReturnsOperations(RETURNS_DRAWER.filteredOperations);
-  
-  // Scroll للقسم
-  setTimeout(function() {
-    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 100);
-}
-
-function closeReturnDetails() {
-  RETURNS_DRAWER.expandedReturnId = null;
-  document.getElementById('returnDetailsSection').style.display = 'none';
-  if (RETURNS_DRAWER.filteredOperations.length) {
-    renderReturnsOperations(RETURNS_DRAWER.filteredOperations);
-  }
-}
-
-/* ============================================================
-   Tab 2: Returned Products
-   ============================================================ */
-
-function applyProductsFilters() {
-  var productSearch = (document.getElementById('retDrawer_product').value || '').trim().toLowerCase();
-  
-  // تجميع المنتجات حسب الاسم
-  var productGroups = {};
-  
-  RETURNS_DRAWER.allReturnItems.forEach(function(item) {
-    var name = item.name || item.product_name || item.productName || 'غير محدد';
-    
-    // فلتر بحث
-    if (productSearch && !name.toLowerCase().includes(productSearch)) {
-      return;
-    }
-    
-    var qty = parseFloat(item.qty || item.quantity) || 0;
-    var total = parseFloat(item.total || item.totalReturn) || 0;
-    
-    if (!productGroups[name]) {
-      productGroups[name] = { name: name, qty: 0, total: 0 };
-    }
-    productGroups[name].qty += qty;
-    productGroups[name].total += total;
-  });
-  
-  // تحويل لـ array وترتيب تنازلياً حسب الكمية
-  var products = Object.values(productGroups).sort(function(a, b) {
-    return b.qty - a.qty;
-  });
-  
-  RETURNS_DRAWER.filteredProducts = products;
-  renderReturnedProducts(products);
-}
-
-function clearProductsFilters() {
-  document.getElementById('retDrawer_product').value = '';
-  applyProductsFilters();
-}
-
-function renderReturnedProducts(products) {
-  var tbody = document.getElementById('returnsProductsTable');
-  if (!tbody) return;
-  
-  if (products.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="padding:40px;text-align:center;color:#999;">لا توجد نتائج</td></tr>';
-    setText('retProds_total_count', '0');
-    setText('retProds_total_qty', '0');
-    setText('retProds_total_amount', '0.00 ج.م');
-    return;
-  }
-  
-  // حساب إجمالي المبيعات لكل منتج (للنسبة)
-  var productSales = {};
-  
-  if (DASH.items) {
-    DASH.items.forEach(function(item) {
-      var name = item.name || item.product_name || item.productName || 'غير محدد';
-      var total = parseFloat(item.total || item.netTotal) || 0;
-      productSales[name] = (productSales[name] || 0) + total;
-    });
-  }
-  
-  var totalQty = 0;
-  var totalAmount = 0;
-  
-  tbody.innerHTML = products.map(function(p) {
-    totalQty += p.qty;
-    totalAmount += p.total;
-    
-    var salesTotal = productSales[p.name] || 0;
-    var returnPercent = salesTotal > 0 ? ((p.total / salesTotal) * 100).toFixed(1) : '0.0';
-    
-    return '<tr>' +
-           '<td style="text-align:right;font-weight:600;">' + safe(p.name) + '</td>' +
-           '<td style="text-align:center;"><span style="background:rgba(212,175,55,0.1);padding:4px 12px;border-radius:12px;font-weight:600;">' + Math.round(p.qty) + '</span></td>' +
-           '<td style="text-align:center;font-weight:700;color:var(--red);">' + fmt(p.total) + ' ج.م</td>' +
-           '<td style="text-align:center;font-weight:700;color:var(--gold);">' + returnPercent + '%</td>' +
-           '</tr>';
-  }).join('');
-  
-  // تحديث الملخص
-  setText('retProds_total_count', products.length);
-  setText('retProds_total_qty', Math.round(totalQty));
-  setText('retProds_total_amount', fmt(totalAmount) + ' ج.م');
-}
-
-/* ============================================================
    [تعديل] Scroll داخل تفاصيل الفاتورة — لا يمس الصفحة
    ============================================================ */
 
@@ -6447,167 +6144,6 @@ insert into channels (channel_name) values
 on conflict do nothing;
 
 ============================================================ -->
-
-<!-- Returns Side Drawer -->
-<div id="returnsDrawer" class="returns-drawer-overlay" style="display:none;" onclick="closeReturnsDrawer()">
-  <div class="returns-drawer" onclick="event.stopPropagation()">
-    <!-- Drawer Header -->
-    <div class="returns-drawer-header">
-      <div>
-        <h3 style="margin:0;color:var(--gold);font-size:20px;font-weight:700;">↩️ تحليل المرتجعات</h3>
-        <p style="margin:4px 0 0;color:var(--w60);font-size:12px;">إدارة ومراجعة جميع عمليات المرتجع</p>
-      </div>
-      <button class="returns-drawer-close" onclick="closeReturnsDrawer()">✕</button>
-    </div>
-
-    <!-- Drawer Tabs -->
-    <div class="returns-drawer-tabs">
-      <button class="returns-tab active" onclick="switchReturnsTab('operations')">
-        <span>🔄</span> عمليات المرتجع
-      </button>
-      <button class="returns-tab" onclick="switchReturnsTab('products')">
-        <span>📦</span> المنتجات المرتجعة
-      </button>
-    </div>
-
-    <!-- Drawer Body -->
-    <div class="returns-drawer-body">
-      
-      <!-- Tab 1: Return Operations -->
-      <div id="returnsTabOperations" class="returns-tab-content active">
-        
-        <!-- Filters -->
-        <div class="returns-filters">
-          <div class="form-group">
-            <label>من تاريخ</label>
-            <input type="date" id="retDrawer_from" class="form-control" onchange="applyReturnsFilters()" />
-          </div>
-          <div class="form-group">
-            <label>إلى تاريخ</label>
-            <input type="date" id="retDrawer_to" class="form-control" onchange="applyReturnsFilters()" />
-          </div>
-          <div class="form-group">
-            <label>العميل</label>
-            <input type="text" id="retDrawer_customer" class="form-control" placeholder="ابحث..." oninput="applyReturnsFilters()" />
-          </div>
-          <div class="form-group" style="align-self:end;">
-            <button class="btn btn-outline btn-sm" onclick="clearReturnsFilters()" style="width:100%;">
-              ✕ مسح
-            </button>
-          </div>
-        </div>
-
-        <!-- Returns Operations Table -->
-        <div class="returns-table-wrap">
-          <table class="returns-table">
-            <thead>
-              <tr>
-                <th style="text-align:right;width:20%;">رقم المرتجع</th>
-                <th style="text-align:right;width:25%;">العميل</th>
-                <th style="text-align:center;width:15%;">عدد الأصناف</th>
-                <th style="text-align:center;width:20%;">الإجمالي</th>
-                <th style="text-align:center;width:20%;">التاريخ</th>
-              </tr>
-            </thead>
-            <tbody id="returnsOperationsTable">
-              <tr><td colspan="5" style="padding:40px;text-align:center;color:#999;">لا توجد بيانات</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Return Details Expandable Section -->
-        <div id="returnDetailsSection" style="display:none;margin-top:20px;padding:20px;background:rgba(212,175,55,0.05);border-radius:8px;border:1px solid var(--gold);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-            <h4 style="margin:0;color:var(--gold);font-size:16px;">تفاصيل المرتجع: <span id="currentReturnNumber"></span></h4>
-            <button class="btn btn-outline btn-sm" onclick="closeReturnDetails()">✕ إغلاق</button>
-          </div>
-          
-          <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;">
-              <thead>
-                <tr style="background:rgba(0,0,0,0.2);border-bottom:1px solid var(--gold-border);">
-                  <th style="padding:10px;text-align:right;color:var(--gold);font-size:12px;">المنتج</th>
-                  <th style="padding:10px;text-align:center;color:var(--gold);font-size:12px;">الكمية</th>
-                  <th style="padding:10px;text-align:center;color:var(--gold);font-size:12px;">السعر</th>
-                  <th style="padding:10px;text-align:center;color:var(--gold);font-size:12px;">الإجمالي</th>
-                </tr>
-              </thead>
-              <tbody id="returnDetailsItemsTable">
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Summary Stats -->
-        <div class="returns-summary">
-          <div class="summary-item">
-            <div class="summary-label">إجمالي العمليات</div>
-            <div class="summary-value" id="retOps_total_count">—</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">إجمالي الأصناف</div>
-            <div class="summary-value" id="retOps_total_items">—</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">إجمالي القيمة</div>
-            <div class="summary-value" id="retOps_total_amount" style="color:var(--red);">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab 2: Returned Products -->
-      <div id="returnsTabProducts" class="returns-tab-content">
-        
-        <!-- Filters -->
-        <div class="returns-filters">
-          <div class="form-group">
-            <label>بحث بالمنتج</label>
-            <input type="text" id="retDrawer_product" class="form-control" placeholder="ابحث عن منتج..." oninput="applyProductsFilters()" />
-          </div>
-          <div class="form-group" style="align-self:end;">
-            <button class="btn btn-outline btn-sm" onclick="clearProductsFilters()" style="width:100%;">
-              ✕ مسح
-            </button>
-          </div>
-        </div>
-
-        <!-- Products Table -->
-        <div class="returns-table-wrap">
-          <table class="returns-table">
-            <thead>
-              <tr>
-                <th style="text-align:right;width:40%;">المنتج</th>
-                <th style="text-align:center;width:20%;">الكمية المرتجعة</th>
-                <th style="text-align:center;width:20%;">القيمة</th>
-                <th style="text-align:center;width:20%;">نسبة المرتجع</th>
-              </tr>
-            </thead>
-            <tbody id="returnsProductsTable">
-              <tr><td colspan="4" style="padding:40px;text-align:center;color:#999;">لا توجد بيانات</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Summary -->
-        <div class="returns-summary">
-          <div class="summary-item">
-            <div class="summary-label">عدد المنتجات</div>
-            <div class="summary-value" id="retProds_total_count">—</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">إجمالي الكمية</div>
-            <div class="summary-value" id="retProds_total_qty">—</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">إجمالي القيمة</div>
-            <div class="summary-value" id="retProds_total_amount" style="color:var(--red);">—</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

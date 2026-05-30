@@ -4658,7 +4658,7 @@ function buildPrintHTML(iv, items) {
       '<td class="name">'+safe(n.name||'—')+'</td>' +
       '<td class="c">'+fmtN(n.qty)+'</td>' +
       '<td class="r">'+fmtN(n.price)+'</td>' +
-      '<td class="r disc">'+fmtN(disc)+'</td>' +
+      '<td class="r disc">'+fmtN(n.discountValue)+'</td>' +
       '<td class="r">'+fmtN(gross)+'</td>' +
       '<td class="r net">'+fmtN(net)+'</td>' +
     '</tr>';
@@ -4772,7 +4772,7 @@ function buildPrintHTML(iv, items) {
       '<th>المنتج</th>' +
       '<th class="c">الكمية</th>' +
       '<th class="r">السعر</th>' +
-      '<th class="r">الخصم</th>' +
+      '<th class="r">خصم القطعة</th>' +
       '<th class="r">الإجمالي</th>' +
       '<th class="r">الصافي</th>' +
     '</tr></thead>' +

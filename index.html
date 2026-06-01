@@ -6247,7 +6247,7 @@ on conflict do nothing;
         <div class="ra-tbl-wrap" style="max-height:460px;">
           <table>
             <thead><tr>
-              <th>التاريخ</th><th>رقم المرتجع</th><th>العميل</th><th>المنتج</th><th>الكمية</th><th>القيمة</th>
+              <th>التاريخ</th><th>رقم المرتجع</th><th>العميل</th><th>عدد الأصناف</th><th>إجمالي المرتجع</th><th>تفاصيل</th>
             </tr></thead>
             <tbody id="raLogBody"><tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
           </table>
@@ -6258,6 +6258,20 @@ on conflict do nothing;
   </div>
 
   
+  <!-- RETURN DETAIL MODAL (grouped products, invoice-style) -->
+  <div id="raDetailModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:3000;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;">
+    <div style="background:var(--black-2,#161616);border:1px solid var(--w08);border-radius:var(--radius);max-width:720px;width:100%;box-shadow:var(--shadow);padding:24px;position:relative;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--w08);">
+        <h2 id="raDetailTitle" style="margin:0;color:var(--gold);font-size:18px;">تفاصيل المرتجع</h2>
+        <button onclick="window.ReturnsAnalytics.closeReturnDetail()" style="background:none;border:none;color:var(--w60);font-size:24px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div id="raDetailBody"></div>
+      <div style="margin-top:18px;text-align:left;">
+        <button class="btn btn-outline" onclick="window.ReturnsAnalytics.closeReturnDetail()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- RETURNS ANALYTICS — standalone script (runs after DOM + globals exist) -->
   <script>
   /* ========== RETURNS ANALYTICS — ISOLATED NAMESPACE ========== */
@@ -6352,7 +6366,7 @@ on conflict do nothing;
           prodStats[name].qty += qty;
           prodStats[name].value += lineTotal;
 
-          logRows.push({ date: ret.date||ret.createdAt, number: ret.number, channel: ret.channel, product: name, qty: qty, total: lineTotal });
+          logRows.push({ id: ret.id, date: ret.date||ret.createdAt, number: ret.number, channel: ret.channel, product: name, qty: qty, price: price, total: lineTotal, notes: ret.notes||'' });
         });
       }
 
@@ -6392,14 +6406,28 @@ on conflict do nothing;
 
       var logBody = document.getElementById('raLogBody');
       if (logBody) {
-        logBody.innerHTML = logRows.map(function(r){
+        /* Group rows by return operation (id ← number) — display only */
+        var groups = {};
+        var order = [];
+        logRows.forEach(function(r){
+          var key = String(r.id || r.number || '');
+          if (!groups[key]) { groups[key] = { key:key, number:r.number, date:r.date, channel:r.channel, notes:r.notes, items:[], count:0, total:0 }; order.push(key); }
+          groups[key].items.push({ product:r.product, qty:r.qty, price:r.price, total:r.total });
+          groups[key].count += 1;
+          groups[key].total += r.total;
+        });
+        /* Store for details lookup (isolated) */
+        window.ReturnsAnalytics._logGroups = groups;
+
+        logBody.innerHTML = order.map(function(key){
+          var g = groups[key];
           return '<tr>' +
-            '<td>'+fmtDateStr(r.date)+'</td>' +
-            '<td class="num">'+escapeHtml(r.number||'—')+'</td>' +
-            '<td>'+(r.channel?'<span class="badge">'+escapeHtml(r.channel)+'</span>':'<span class="muted">—</span>')+'</td>' +
-            '<td>'+escapeHtml(r.product)+'</td>' +
-            '<td class="num">'+r.qty.toFixed(2)+'</td>' +
-            '<td class="num">'+fmt(r.total)+' ج.م</td>' +
+            '<td>'+fmtDateStr(g.date)+'</td>' +
+            '<td class="num">'+escapeHtml(g.number||'—')+'</td>' +
+            '<td>'+(g.channel?'<span class="badge">'+escapeHtml(g.channel)+'</span>':'<span class="muted">—</span>')+'</td>' +
+            '<td class="num">'+g.count+'</td>' +
+            '<td class="num gold">'+fmt(g.total)+' ج.م</td>' +
+            '<td><button class="btn btn-outline btn-sm" onclick="window.ReturnsAnalytics.showReturnDetail(\''+encodeURIComponent(key)+'\')">👁</button></td>' +
           '</tr>';
         }).join('') || '<tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">لا توجد مرتجعات</td></tr>';
       }
@@ -6456,6 +6484,53 @@ on conflict do nothing;
 (function(){
   if (!window.ReturnsAnalytics) return;
   var RA = window.ReturnsAnalytics;
+
+  /* ---- grouped return detail modal (invoice-style) ---- */
+  RA.showReturnDetail = function(encKey){
+    var key = decodeURIComponent(encKey);
+    var groups = RA._logGroups || {};
+    var g = groups[key];
+    if (!g){ return; }
+    var rows = g.items.map(function(it){
+      return '<tr>' +
+        '<td>'+_xmlEscHtml(it.product)+'</td>' +
+        '<td class="num">'+(parseFloat(it.qty)||0).toFixed(2)+'</td>' +
+        '<td class="num">'+_fmtSafe(it.price)+' ج.م</td>' +
+        '<td class="num gold">'+_fmtSafe(it.total)+' ج.م</td>' +
+      '</tr>';
+    }).join('');
+    var html =
+      '<div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px;font-size:13px;">' +
+        '<div><div style="color:var(--w60);font-size:11px;">رقم المرتجع</div><div style="color:var(--red);font-weight:700;">'+_xmlEscHtml(g.number||'—')+'</div></div>' +
+        '<div><div style="color:var(--w60);font-size:11px;">التاريخ</div><div>'+(typeof fmtDateStr==='function'?fmtDateStr(g.date):_xmlEscHtml(g.date))+'</div></div>' +
+        '<div><div style="color:var(--w60);font-size:11px;">العميل</div><div>'+(g.channel?'<span class="badge">'+_xmlEscHtml(g.channel)+'</span>':'—')+'</div></div>' +
+        '<div><div style="color:var(--w60);font-size:11px;">عدد الأصناف</div><div>'+g.count+'</div></div>' +
+        '<div><div style="color:var(--w60);font-size:11px;">إجمالي المرتجع</div><div class="gold" style="font-weight:700;">'+_fmtSafe(g.total)+' ج.م</div></div>' +
+      '</div>' +
+      '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+        '<thead><tr>' +
+          '<th style="text-align:right;padding:8px;">المنتج</th>' +
+          '<th style="text-align:center;padding:8px;">الكمية</th>' +
+          '<th style="text-align:right;padding:8px;">السعر</th>' +
+          '<th style="text-align:right;padding:8px;">الإجمالي</th>' +
+        '</tr></thead>' +
+        '<tbody>'+rows+'</tbody>' +
+      '</table></div>' +
+      (g.notes ? '<div style="margin-top:14px;padding:12px;background:var(--black-3,#1c1c1c);border-radius:8px;font-size:13px;"><div style="color:var(--w60);font-size:11px;margin-bottom:4px;">ملاحظات</div>'+_xmlEscHtml(g.notes)+'</div>' : '');
+
+    var titleEl = document.getElementById('raDetailTitle');
+    var bodyEl  = document.getElementById('raDetailBody');
+    if (titleEl) titleEl.textContent = 'تفاصيل المرتجع — ' + (g.number||'');
+    if (bodyEl)  bodyEl.innerHTML = html;
+    var modal = document.getElementById('raDetailModal');
+    if (modal) modal.style.display = 'flex';
+  };
+  RA.closeReturnDetail = function(){
+    var modal = document.getElementById('raDetailModal');
+    if (modal) modal.style.display = 'none';
+  };
+  function _xmlEscHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function _fmtSafe(n){ return (typeof fmt==='function') ? fmt(n) : (parseFloat(n)||0).toFixed(2); }
 
   /* ---- tiny utilities ---- */
   function _utf8(str){

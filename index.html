@@ -596,6 +596,34 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
   body > *:not(#printFrame) { display: none !important; }
   #printFrame { display: block !important; position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 99999; }
 }
+
+/* Returns Analytics Modal */
+#returnsAnalyticsModal{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;opacity:0;transition:opacity .25s ease;overflow-y:auto;}
+#returnsAnalyticsModal.ra-show{opacity:1;}
+#returnsAnalyticsModal .ra-content{background:var(--black-2,#161616);border:1px solid var(--w08);border-radius:var(--radius);max-width:1280px;width:100%;box-shadow:var(--shadow);transform:translateY(-18px);transition:transform .25s ease;padding:24px;}
+#returnsAnalyticsModal.ra-show .ra-content{transform:translateY(0);}
+#returnsAnalyticsModal .ra-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--w08);}
+#returnsAnalyticsModal .ra-head h2{margin:0;color:var(--gold);font-size:20px;}
+#returnsAnalyticsModal .ra-close{background:none;border:none;color:var(--w60);font-size:26px;cursor:pointer;line-height:1;transition:color .2s;}
+#returnsAnalyticsModal .ra-close:hover{color:var(--red);}
+#returnsAnalyticsModal .ra-section{background:var(--black-3,#1c1c1c);border:1px solid var(--w08);border-radius:var(--radius-sm);padding:16px;margin-bottom:18px;}
+#returnsAnalyticsModal .ra-section h3{margin:0 0 14px;font-size:15px;color:var(--gold-light,var(--gold));}
+#returnsAnalyticsModal .ra-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+#returnsAnalyticsModal .ra-filters label{display:block;font-size:12px;color:var(--w60);margin-bottom:5px;}
+#returnsAnalyticsModal .ra-filters input,#returnsAnalyticsModal .ra-filters select{width:100%;padding:9px;border:1px solid var(--w20);border-radius:6px;background:var(--black-1,#0e0e0e);color:var(--white);font-family:'Cairo',sans-serif;}
+#returnsAnalyticsModal .ra-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+#returnsAnalyticsModal .ra-stat{background:var(--black-3,#1c1c1c);border:1px solid var(--w08);border-radius:var(--radius-sm);padding:14px;border-right:3px solid var(--gold);}
+#returnsAnalyticsModal .ra-stat .lbl{font-size:11px;color:var(--w60);margin-bottom:6px;}
+#returnsAnalyticsModal .ra-stat .val{font-size:18px;font-weight:700;color:var(--white);}
+#returnsAnalyticsModal .ra-stat.red{border-right-color:var(--red);} #returnsAnalyticsModal .ra-stat.red .val{color:var(--red);}
+#returnsAnalyticsModal .ra-stat.green{border-right-color:var(--green);} #returnsAnalyticsModal .ra-stat.green .val{color:var(--green);}
+#returnsAnalyticsModal .ra-stat.gold{border-right-color:var(--gold);} #returnsAnalyticsModal .ra-stat.gold .val{color:var(--gold);}
+#returnsAnalyticsModal .ra-charts{display:grid;grid-template-columns:2fr 1fr;gap:18px;}
+@media(max-width:768px){#returnsAnalyticsModal .ra-charts{grid-template-columns:1fr;}}
+#returnsAnalyticsModal table{width:100%;border-collapse:collapse;font-size:13px;}
+#returnsAnalyticsModal thead th{position:sticky;top:0;background:var(--black-1,#0e0e0e);text-align:right;padding:9px;color:var(--gold);border-bottom:2px solid var(--gold);font-size:12px;}
+#returnsAnalyticsModal tbody td{padding:8px 9px;border-bottom:1px solid var(--w08);}
+#returnsAnalyticsModal .ra-tbl-wrap{max-height:380px;overflow-y:auto;border-radius:6px;}
 </style>
 </head>
 <body>
@@ -913,7 +941,7 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="kpi-card"><div class="kpi-icon">🗂️</div><div class="kpi-label">أصناف مختلفة</div><div class="kpi-value" id="kpi_skus">—</div><div class="kpi-sub">صنف</div></div>
       <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-label">متوسط الفاتورة</div><div class="kpi-value" id="kpi_avg">—</div><div class="kpi-sub">ج.م</div></div>
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">أفضل عميل</div><div class="kpi-value" id="kpi_top_ch" style="font-size:15px;margin-top:4px;">—</div><div class="kpi-sub" id="kpi_top_ch_val"></div></div>
-      <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">ج.م</div></div>
+      <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);cursor:pointer;" onclick="window.ReturnsAnalytics.open()" title="اضغط لعرض تحليل المرتجعات"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">اضغط للتفاصيل 📊</div></div>
       <div class="kpi-card kpi-highlight"><div class="kpi-icon">💎</div><div class="kpi-label">الصافي الحقيقي</div><div class="kpi-value" id="kpi_true_net">—</div><div class="kpi-sub">بعد المرتجعات</div></div>
     </div>
 
@@ -4658,7 +4686,7 @@ function buildPrintHTML(iv, items) {
       '<td class="name">'+safe(n.name||'—')+'</td>' +
       '<td class="c">'+fmtN(n.qty)+'</td>' +
       '<td class="r">'+fmtN(n.price)+'</td>' +
-      '<td class="r disc">'+fmtN(n.discountValue)+'</td>' +
+      '<td class="r disc">'+fmtN(disc)+'</td>' +
       '<td class="r">'+fmtN(gross)+'</td>' +
       '<td class="r net">'+fmtN(net)+'</td>' +
     '</tr>';
@@ -4772,7 +4800,7 @@ function buildPrintHTML(iv, items) {
       '<th>المنتج</th>' +
       '<th class="c">الكمية</th>' +
       '<th class="r">السعر</th>' +
-      '<th class="r">خصم القطعة</th>' +
+      '<th class="r">الخصم</th>' +
       '<th class="r">الإجمالي</th>' +
       '<th class="r">الصافي</th>' +
     '</tr></thead>' +
@@ -5244,13 +5272,15 @@ async function renderReturnsList() {
     });
   }
 
-  /* [تعديل] ترتيب المرتجعات تصاعدياً حسب التاريخ (Chronological) */
+  /* [تعديل] ترتيب المرتجعات تنازلياً — الأحدث أولاً (Newest first) */
   returns.sort(function(a, b) {
     var da = normDateStr(a.date) || normDateStr(a.return_date) || '';
     var db = normDateStr(b.date) || normDateStr(b.return_date) || '';
-    if (da < db) return -1;
-    if (da > db) return  1;
-    return 0;
+    if (da !== db) return da < db ? 1 : -1;   /* أحدث تاريخ في الأعلى */
+    /* نفس التاريخ → الأحدث إنشاءً أولاً */
+    var ca = new Date(a.createdAt || a.date || 0).getTime();
+    var cb = new Date(b.createdAt || b.date || 0).getTime();
+    return cb - ca;
   });
 
   if (count) count.textContent = returns.length + ' مرتجع';
@@ -6062,6 +6092,7 @@ function invDetailScroll(dir) {
   /* Seed demo data first — always safe */
   seedDemoData();
 
+
   /* Start app — UI is already visible, bootstrap runs in background */
   bootstrap();
 })();
@@ -6145,5 +6176,622 @@ on conflict do nothing;
 
 ============================================================ -->
 
-</body>
+
+  <!-- RETURNS ANALYTICS MODAL (isolated) -->
+  <div id="returnsAnalyticsModal">
+    <div class="ra-content">
+      <div class="ra-head">
+        <h2>📊 تحليل المرتجعات</h2>
+        <button class="ra-close" onclick="window.ReturnsAnalytics.close()">✕</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="ra-section">
+        <h3>🔍 الفلاتر</h3>
+        <div class="ra-filters">
+          <div><label>من تاريخ</label><input type="date" id="raFilterFrom" onchange="window.ReturnsAnalytics.refresh()"></div>
+          <div><label>إلى تاريخ</label><input type="date" id="raFilterTo" onchange="window.ReturnsAnalytics.refresh()"></div>
+          <div><label>العميل</label><select id="raFilterCustomer" onchange="window.ReturnsAnalytics.refresh()"></select></div>
+          <div><label>بحث منتج (اسم/باركود)</label><input type="text" id="raFilterProduct" placeholder="ابحث..." oninput="window.ReturnsAnalytics.refresh()"></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-export btn-sm" onclick="window.ReturnsAnalytics.exportCSV()">⬇️ تصدير CSV</button>
+          <button class="btn btn-sm" onclick="window.ReturnsAnalytics.exportXLSX()" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light,#e6d18a) 100%);color:#1a1a1a;font-weight:700;border:none;">📊 تصدير Excel (XLSX)</button>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="ra-section">
+        <h3>📈 ملخص المرتجعات</h3>
+        <div class="ra-stats">
+          <div class="ra-stat red"><div class="lbl">إجمالي المرتجعات</div><div class="val" id="raStatTotal">—</div></div>
+          <div class="ra-stat gold"><div class="lbl">عدد عمليات المرتجع</div><div class="val" id="raStatOps">—</div></div>
+          <div class="ra-stat green"><div class="lbl">صافي المبيعات بعد المرتجع</div><div class="val" id="raStatNet">—</div></div>
+          <div class="ra-stat gold"><div class="lbl">أكثر عميل مرتجعات</div><div class="val" id="raStatCust" style="font-size:14px;">—</div></div>
+          <div class="ra-stat red"><div class="lbl">أكثر منتج مرتجع</div><div class="val" id="raStatProduct" style="font-size:14px;">—</div></div>
+          <div class="ra-stat gold"><div class="lbl">نسبة المرتجع من المبيعات</div><div class="val" id="raStatPct">—</div></div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="ra-section">
+        <h3>📊 الرسوم البيانية</h3>
+        <div class="ra-charts">
+          <div>
+            <div style="font-size:12px;color:var(--w60);margin-bottom:8px;">المرتجعات اليومية</div>
+            <div class="bar-chart-area" id="raDailyChart"><div class="empty" style="width:100%;"><p>لا توجد بيانات</p></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--w60);margin-bottom:8px;">المبيعات مقابل المرتجعات</div>
+            <div class="bar-chart-area" id="raSalesVsReturns" style="justify-content:center;gap:30px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Returned Products -->
+      <div class="ra-section">
+        <h3>🏆 الأصناف الأكثر مرتجعات</h3>
+        <div class="ra-tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>المنتج</th><th>عدد المرتجعات</th><th>الكمية المرتجعة</th><th>قيمة المرتجعات</th>
+            </tr></thead>
+            <tbody id="raTopProductsBody"><tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Returns Log -->
+      <div class="ra-section">
+        <h3>📋 سجل المرتجعات التفصيلي</h3>
+        <div class="ra-tbl-wrap" style="max-height:460px;">
+          <table>
+            <thead><tr>
+              <th>التاريخ</th><th>رقم المرتجع</th><th>العميل</th><th>المنتج</th><th>الكمية</th><th>القيمة</th>
+            </tr></thead>
+            <tbody id="raLogBody"><tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  
+  <!-- RETURNS ANALYTICS — standalone script (runs after DOM + globals exist) -->
+  <script>
+  /* ========== RETURNS ANALYTICS — ISOLATED NAMESPACE ========== */
+  window.ReturnsAnalytics = {
+    cache: { returns: [], invoices: [], totalSales: 0 },
+
+    open: async function() {
+      var modal = document.getElementById('returnsAnalyticsModal');
+      if (!modal) { alert('Returns Analytics modal not found in DOM'); return; }
+      modal.style.display = 'flex';
+      /* Force reflow so the CSS transition runs, then reveal — no rAF dependency */
+      void modal.offsetWidth;
+      modal.classList.add('ra-show');
+      try {
+        await window.ReturnsAnalytics.loadData();
+        await window.ReturnsAnalytics.populateCustomers();
+        await window.ReturnsAnalytics.refresh();
+      } catch (err) {
+        console.error('[ReturnsAnalytics] open error:', err);
+      }
+    },
+
+    close: function() {
+      var modal = document.getElementById('returnsAnalyticsModal');
+      if (!modal) return;
+      modal.classList.remove('ra-show');
+      setTimeout(function(){ modal.style.display = 'none'; }, 250);
+    },
+
+    loadData: async function() {
+      var returns = await DB.getReturns();
+      var invoices = await DB.getInvoices();
+      var totalSales = invoices.reduce(function(s, iv){ return s + (parseFloat(iv.netTotal)||0); }, 0);
+      window.ReturnsAnalytics.cache = { returns: returns, invoices: invoices, totalSales: totalSales };
+    },
+
+    populateCustomers: async function() {
+      var sel = document.getElementById('raFilterCustomer');
+      if (!sel) return;
+      var customers = {};
+      window.ReturnsAnalytics.cache.returns.forEach(function(r){ if (r.channel) customers[r.channel] = true; });
+      sel.innerHTML = '<option value="">جميع العملاء</option>';
+      Object.keys(customers).sort().forEach(function(name){
+        var o = document.createElement('option');
+        o.value = name; o.textContent = name;
+        sel.appendChild(o);
+      });
+    },
+
+    refresh: async function() {
+      var fromDate = (document.getElementById('raFilterFrom')||{}).value || '';
+      var toDate = (document.getElementById('raFilterTo')||{}).value || '';
+      var customer = (document.getElementById('raFilterCustomer')||{}).value || '';
+      var search = ((document.getElementById('raFilterProduct')||{}).value || '').toLowerCase().trim();
+
+      var returns = window.ReturnsAnalytics.cache.returns.filter(function(r){
+        var d = String(r.date || r.createdAt || '').substring(0,10);
+        if (fromDate && d < fromDate) return false;
+        if (toDate && d > toDate) return false;
+        if (customer && r.channel !== customer) return false;
+        return true;
+      });
+
+      var totalAmount = 0, ops = returns.length;
+      var custStats = {}, prodStats = {}, daily = {}, logRows = [];
+
+      for (var i = 0; i < returns.length; i++) {
+        var ret = returns[i];
+        var dkey = String(ret.date || ret.createdAt || '').substring(0,10);
+        if (!daily[dkey]) daily[dkey] = { count: 0, value: 0 };
+        daily[dkey].count++;
+        if (ret.channel) {
+          if (!custStats[ret.channel]) custStats[ret.channel] = 0;
+        }
+        var items = await DB.getReturnItems(ret.id);
+        (items||[]).forEach(function(it){
+          var qty = parseFloat(it.qty)||0;
+          var price = parseFloat(it.price)||0;
+          var lineTotal = (parseFloat(it.total)||0) || (qty*price);
+          var name = it.name || it.barcode || '—';
+          var bc = it.barcode || '';
+
+          var match = !search || name.toLowerCase().includes(search) || bc.toLowerCase().includes(search);
+          if (!match) return;
+
+          totalAmount += lineTotal;
+          daily[dkey].value += lineTotal;
+          if (ret.channel) custStats[ret.channel] = (custStats[ret.channel]||0) + lineTotal;
+
+          if (!prodStats[name]) prodStats[name] = { count: 0, qty: 0, value: 0 };
+          prodStats[name].count++;
+          prodStats[name].qty += qty;
+          prodStats[name].value += lineTotal;
+
+          logRows.push({ date: ret.date||ret.createdAt, number: ret.number, channel: ret.channel, product: name, qty: qty, total: lineTotal });
+        });
+      }
+
+      var totalSales = window.ReturnsAnalytics.cache.totalSales;
+      var netAfter = totalSales - totalAmount;
+      var pct = totalSales > 0 ? ((totalAmount/totalSales)*100).toFixed(2) : '0';
+
+      var topCust = '—', topCustVal = 0;
+      Object.keys(custStats).forEach(function(c){ if (custStats[c] > topCustVal){ topCust = c; topCustVal = custStats[c]; } });
+
+      var topProds = Object.entries(prodStats).map(function(e){
+        return { name: e[0], count: e[1].count, qty: e[1].qty, value: e[1].value };
+      }).sort(function(a,b){ return b.count - a.count; });
+
+      var mostProd = topProds.length ? topProds[0].name : '—';
+
+      var setT = function(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; };
+      setT('raStatTotal', fmt(totalAmount) + ' ج.م');
+      setT('raStatOps', ops);
+      setT('raStatNet', fmt(netAfter) + ' ج.م');
+      setT('raStatCust', topCust);
+      setT('raStatProduct', mostProd);
+      setT('raStatPct', pct + '%');
+
+      var topBody = document.getElementById('raTopProductsBody');
+      if (topBody) {
+        topBody.innerHTML = topProds.slice(0,15).map(function(p, idx){
+          return '<tr>' +
+            '<td class="muted">'+(idx+1)+'</td>' +
+            '<td>'+escapeHtml(p.name)+'</td>' +
+            '<td class="num">'+p.count+'</td>' +
+            '<td class="num">'+p.qty.toFixed(2)+'</td>' +
+            '<td class="num gold">'+fmt(p.value)+' ج.م</td>' +
+          '</tr>';
+        }).join('') || '<tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">لا توجد بيانات</td></tr>';
+      }
+
+      var logBody = document.getElementById('raLogBody');
+      if (logBody) {
+        logBody.innerHTML = logRows.map(function(r){
+          return '<tr>' +
+            '<td>'+fmtDateStr(r.date)+'</td>' +
+            '<td class="num">'+escapeHtml(r.number||'—')+'</td>' +
+            '<td>'+(r.channel?'<span class="badge">'+escapeHtml(r.channel)+'</span>':'<span class="muted">—</span>')+'</td>' +
+            '<td>'+escapeHtml(r.product)+'</td>' +
+            '<td class="num">'+r.qty.toFixed(2)+'</td>' +
+            '<td class="num">'+fmt(r.total)+' ج.م</td>' +
+          '</tr>';
+        }).join('') || '<tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">لا توجد مرتجعات</td></tr>';
+      }
+
+      window.ReturnsAnalytics.renderDailyChart(daily);
+      window.ReturnsAnalytics.renderSalesVsReturns(totalSales, totalAmount);
+    },
+
+    renderDailyChart: function(daily) {
+      var wrap = document.getElementById('raDailyChart');
+      if (!wrap) return;
+      var keys = Object.keys(daily).filter(function(k){ return k && k !== '—'; }).sort();
+      if (keys.length > 30) keys = keys.slice(keys.length-30);
+      if (keys.length === 0) { wrap.innerHTML = '<div class="empty" style="width:100%;margin:auto;"><p>لا توجد بيانات</p></div>'; return; }
+      var maxVal = Math.max.apply(null, keys.map(function(k){ return daily[k].value; })) || 1;
+      var maxH = 130;
+      wrap.innerHTML = keys.map(function(k){
+        var val = daily[k].value;
+        var h = Math.max(6, Math.round((val/maxVal)*maxH));
+        return '<div class="bar-col">' +
+          '<div class="bar" style="height:'+h+'px;background:linear-gradient(180deg,var(--red) 0%,rgba(224,82,82,0.5) 100%);">' +
+            '<span class="bar-tip">'+fmt(val)+'</span>' +
+          '</div>' +
+          '<span class="bar-lbl">'+k.substring(5)+'</span>' +
+        '</div>';
+      }).join('');
+    },
+
+    renderSalesVsReturns: function(sales, returns) {
+      var wrap = document.getElementById('raSalesVsReturns');
+      if (!wrap) return;
+      var maxVal = Math.max(sales, returns) || 1;
+      var maxH = 130;
+      var salesH = Math.max(6, Math.round((sales/maxVal)*maxH));
+      var retH = Math.max(6, Math.round((returns/maxVal)*maxH));
+      wrap.innerHTML =
+        '<div class="bar-col" style="flex:1;">' +
+          '<div class="bar" style="height:'+salesH+'px;background:linear-gradient(180deg,var(--green) 0%,rgba(82,183,136,0.5) 100%);">' +
+            '<span class="bar-tip">'+fmt(sales)+'</span>' +
+          '</div>' +
+          '<span class="bar-lbl">المبيعات</span>' +
+        '</div>' +
+        '<div class="bar-col" style="flex:1;">' +
+          '<div class="bar" style="height:'+retH+'px;background:linear-gradient(180deg,var(--red) 0%,rgba(224,82,82,0.5) 100%);">' +
+            '<span class="bar-tip">'+fmt(returns)+'</span>' +
+          '</div>' +
+          '<span class="bar-lbl">المرتجعات</span>' +
+        '</div>';
+    }
+  };
+  /* ========== END RETURNS ANALYTICS ========== */
+
+/* ========== RETURNS ANALYTICS — XLSX EXPORT (isolated add-on) ========== */
+(function(){
+  if (!window.ReturnsAnalytics) return;
+  var RA = window.ReturnsAnalytics;
+
+  /* ---- tiny utilities ---- */
+  function _utf8(str){
+    if (window.TextEncoder) return new TextEncoder().encode(str);
+    var out = [], i, c;
+    for (i=0;i<str.length;i++){
+      c = str.charCodeAt(i);
+      if (c<0x80) out.push(c);
+      else if (c<0x800){ out.push(0xC0|(c>>6),0x80|(c&0x3F)); }
+      else { out.push(0xE0|(c>>12),0x80|((c>>6)&0x3F),0x80|(c&0x3F)); }
+    }
+    return new Uint8Array(out);
+  }
+  var _crcTable = (function(){
+    var t = [], c, n, k;
+    for (n=0;n<256;n++){ c=n; for(k=0;k<8;k++){ c = c&1 ? (0xEDB88320^(c>>>1)) : (c>>>1); } t[n]=c>>>0; }
+    return t;
+  })();
+  function _crc32(bytes){
+    var crc = 0xFFFFFFFF;
+    for (var i=0;i<bytes.length;i++) crc = (crc>>>8) ^ _crcTable[(crc ^ bytes[i]) & 0xFF];
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  function _xmlEsc(s){
+    return String(s==null?'':s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  }
+  function _colLetter(n){ /* 1-based */
+    var s=''; while(n>0){ var m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s;
+  }
+
+  /* ---- minimal STORE-method ZIP writer ---- */
+  function _zip(files){
+    var chunks = [], central = [], offset = 0;
+    function pushU16(arr,v){ arr.push(v&0xFF,(v>>>8)&0xFF); }
+    function pushU32(arr,v){ arr.push(v&0xFF,(v>>>8)&0xFF,(v>>>16)&0xFF,(v>>>24)&0xFF); }
+    files.forEach(function(f){
+      var nameBytes = _utf8(f.name);
+      var data = f.data;
+      var crc = _crc32(data);
+      var local = [];
+      pushU32(local,0x04034b50); pushU16(local,20); pushU16(local,0x0800); pushU16(local,0); /* method 0 store */
+      pushU16(local,0); pushU16(local,0); /* time,date */
+      pushU32(local,crc); pushU32(local,data.length); pushU32(local,data.length);
+      pushU16(local,nameBytes.length); pushU16(local,0);
+      var localHead = new Uint8Array(local);
+      chunks.push(localHead, nameBytes, data);
+      var cd = [];
+      pushU32(cd,0x02014b50); pushU16(cd,20); pushU16(cd,20); pushU16(cd,0x0800); pushU16(cd,0);
+      pushU16(cd,0); pushU16(cd,0); pushU32(cd,crc); pushU32(cd,data.length); pushU32(cd,data.length);
+      pushU16(cd,nameBytes.length); pushU16(cd,0); pushU16(cd,0); pushU16(cd,0); pushU16(cd,0);
+      pushU32(cd,0); pushU32(cd,offset);
+      central.push(new Uint8Array(cd), nameBytes);
+      offset += localHead.length + nameBytes.length + data.length;
+    });
+    var cdStart = offset, cdSize = 0;
+    central.forEach(function(c){ cdSize += c.length; });
+    var eocd = [];
+    pushU32(eocd,0x06054b50); pushU16(eocd,0); pushU16(eocd,0);
+    pushU16(eocd,files.length); pushU16(eocd,files.length);
+    pushU32(eocd,cdSize); pushU32(eocd,cdStart); pushU16(eocd,0);
+    var all = chunks.concat(central, [new Uint8Array(eocd)]);
+    var total = all.reduce(function(s,a){return s+a.length;},0);
+    var out = new Uint8Array(total), p=0;
+    all.forEach(function(a){ out.set(a,p); p+=a.length; });
+    return out;
+  }
+
+  /* ---- styles.xml (gold/black theme, bold headers, currency, borders) ---- */
+  function _stylesXml(){
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+'<numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00&quot; ج.م&quot;"/></numFmts>' +
+'<fonts count="4">' +
+  '<font><sz val="11"/><name val="Calibri"/></font>' +
+  '<font><b/><sz val="11"/><color rgb="FF1A1A1A"/><name val="Calibri"/></font>' +
+  '<font><b/><sz val="15"/><color rgb="FFC9A84C"/><name val="Calibri"/></font>' +
+  '<font><b/><sz val="11"/><color rgb="FF1A1A1A"/><name val="Calibri"/></font>' +
+'</fonts>' +
+'<fills count="4">' +
+  '<fill><patternFill patternType="none"/></fill>' +
+  '<fill><patternFill patternType="gray125"/></fill>' +
+  '<fill><patternFill patternType="solid"><fgColor rgb="FFC9A84C"/><bgColor indexed="64"/></patternFill></fill>' +
+  '<fill><patternFill patternType="solid"><fgColor rgb="FFF7F1DE"/><bgColor indexed="64"/></patternFill></fill>' +
+'</fills>' +
+'<borders count="2">' +
+  '<border><left/><right/><top/><bottom/><diagonal/></border>' +
+  '<border><left style="thin"><color rgb="FFD9D9D9"/></left><right style="thin"><color rgb="FFD9D9D9"/></right><top style="thin"><color rgb="FFD9D9D9"/></top><bottom style="thin"><color rgb="FFD9D9D9"/></bottom><diagonal/></border>' +
+'</borders>' +
+'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+'<cellXfs count="7">' +
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +                                                   /* 0 default */
+  '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' + /* 1 header */
+  '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' + /* 2 title */
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>' + /* 3 text */
+  '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>' +            /* 4 currency */
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' + /* 5 number/center */
+  '<xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>' + /* 6 label */
+'</cellXfs>' +
+'<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+'</styleSheet>';
+  }
+
+  /* ---- worksheet builder ----
+     sheet = { name, cols:[w,...], freeze:N, rows:[ {cells:[{v,s,t}], merge:'A1:F1'} ] } */
+  function _sheetXml(sheet){
+    var cols = '';
+    if (sheet.cols && sheet.cols.length){
+      cols = '<cols>';
+      sheet.cols.forEach(function(w,i){ cols += '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'; });
+      cols += '</cols>';
+    }
+    var merges = [];
+    var rowsXml = sheet.rows.map(function(row, ri){
+      var r = ri+1;
+      var cells = row.cells.map(function(cell, ci){
+        var ref = _colLetter(ci+1)+r;
+        var s = cell.s != null ? cell.s : 0;
+        if (cell.t === 'n'){
+          var num = (cell.v===''||cell.v==null||isNaN(cell.v)) ? 0 : cell.v;
+          return '<c r="'+ref+'" s="'+s+'"><v>'+num+'</v></c>';
+        }
+        return '<c r="'+ref+'" s="'+s+'" t="inlineStr"><is><t xml:space="preserve">'+_xmlEsc(cell.v)+'</t></is></c>';
+      }).join('');
+      if (row.merge) merges.push(row.merge);
+      return '<row r="'+r+'">'+cells+'</row>';
+    }).join('');
+    var freeze = '';
+    if (sheet.freeze){
+      freeze = '<pane ySplit="'+sheet.freeze+'" topLeftCell="A'+(sheet.freeze+1)+'" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A'+(sheet.freeze+1)+'" sqref="A'+(sheet.freeze+1)+'"/>';
+    }
+    var mergeXml = merges.length ? '<mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>';}).join('')+'</mergeCells>' : '';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+'<sheetViews><sheetView rightToLeft="1" workbookViewId="0">'+freeze+'</sheetView></sheetViews>' +
+'<sheetFormatPr defaultRowHeight="16"/>' +
+cols +
+'<sheetData>'+rowsXml+'</sheetData>' +
+mergeXml +
+'</worksheet>';
+  }
+
+  function _sanitizeName(n){
+    return String(n).replace(/[:\\\/?*\[\]]/g,' ').substring(0,31) || 'Sheet';
+  }
+
+  RA._buildXLSX = function(sheets){
+    var files = [];
+    /* content types */
+    var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+'<Default Extension="xml" ContentType="application/xml"/>' +
+'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>';
+    sheets.forEach(function(s,i){ ct += '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; });
+    ct += '</Types>';
+    files.push({name:'[Content_Types].xml', data:_utf8(ct)});
+
+    files.push({name:'_rels/.rels', data:_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+'</Relationships>')});
+
+    var sheetsXml = sheets.map(function(s,i){ return '<sheet name="'+_xmlEsc(_sanitizeName(s.name))+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>'; }).join('');
+    files.push({name:'xl/workbook.xml', data:_utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+'<sheets>'+sheetsXml+'</sheets></workbook>')});
+
+    var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+    sheets.forEach(function(s,i){ rels += '<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>'; });
+    rels += '<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>';
+    rels += '</Relationships>';
+    files.push({name:'xl/_rels/workbook.xml.rels', data:_utf8(rels)});
+
+    files.push({name:'xl/styles.xml', data:_utf8(_stylesXml())});
+    sheets.forEach(function(s,i){ files.push({name:'xl/worksheets/sheet'+(i+1)+'.xml', data:_utf8(_sheetXml(s))}); });
+
+    return _zip(files);
+  };
+
+  /* ---- gather currently-filtered returns data (independent of refresh) ---- */
+  RA._gather = async function(){
+    var fromDate = (document.getElementById('raFilterFrom')||{}).value || '';
+    var toDate   = (document.getElementById('raFilterTo')||{}).value || '';
+    var customer = (document.getElementById('raFilterCustomer')||{}).value || '';
+    var search   = ((document.getElementById('raFilterProduct')||{}).value || '').toLowerCase().trim();
+
+    var cache = RA.cache || {returns:[],invoices:[],totalSales:0};
+    var returns = (cache.returns||[]).filter(function(r){
+      var d = String(r.date || r.createdAt || '').substring(0,10);
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      if (customer && r.channel !== customer) return false;
+      return true;
+    });
+
+    var totalAmount=0, ops=returns.length, custStats={}, prodStats={}, daily={}, logRows=[];
+    for (var i=0;i<returns.length;i++){
+      var ret = returns[i];
+      var dkey = String(ret.date || ret.createdAt || '').substring(0,10);
+      if (!daily[dkey]) daily[dkey] = {count:0, value:0};
+      daily[dkey].count++;
+      var items = await DB.getReturnItems(ret.id);
+      (items||[]).forEach(function(it){
+        var qty=parseFloat(it.qty)||0, price=parseFloat(it.price)||0;
+        var lineTotal=(parseFloat(it.total)||0)||(qty*price);
+        var name=it.name||it.barcode||'—', bc=it.barcode||'';
+        if (search && !(name.toLowerCase().includes(search) || bc.toLowerCase().includes(search))) return;
+        totalAmount+=lineTotal; daily[dkey].value+=lineTotal;
+        if (ret.channel) custStats[ret.channel]=(custStats[ret.channel]||0)+lineTotal;
+        if (!prodStats[name]) prodStats[name]={count:0,qty:0,value:0};
+        prodStats[name].count++; prodStats[name].qty+=qty; prodStats[name].value+=lineTotal;
+        logRows.push({number:ret.number, date:ret.date||ret.createdAt, channel:ret.channel, product:name, qty:qty, total:lineTotal, notes:ret.notes||''});
+      });
+    }
+    var totalSales = cache.totalSales||0;
+    var netAfter = totalSales-totalAmount;
+    var pct = totalSales>0 ? ((totalAmount/totalSales)*100) : 0;
+    var topCust='—', topV=0;
+    Object.keys(custStats).forEach(function(c){ if(custStats[c]>topV){topCust=c;topV=custStats[c];} });
+    var topProducts = Object.entries(prodStats).map(function(e){return {name:e[0],count:e[1].count,qty:e[1].qty,value:e[1].value};}).sort(function(a,b){return b.count-a.count;});
+    var mostProd = topProducts.length?topProducts[0].name:'—';
+
+    return {
+      filters:{fromDate:fromDate||'—', toDate:toDate||'—', customer:customer||'الكل', search:search||'—'},
+      totalAmount:totalAmount, ops:ops, netAfter:netAfter, pct:pct,
+      topCust:topCust, mostProd:mostProd, topProducts:topProducts, logRows:logRows, daily:daily
+    };
+  };
+
+  /* ---- professional XLSX export ---- */
+  RA.exportXLSX = async function(){
+    try {
+      var d = await RA._gather();
+      var H = 1, R = 3, C = 4, N = 5, L = 6, T = 2; /* style ids */
+
+      /* Sheet 1: Summary */
+      var s1 = { name:'Returns Summary', cols:[34,26], freeze:1, rows:[] };
+      s1.rows.push({ cells:[{v:'📊 ملخص تحليل المرتجعات', s:T},{v:'', s:T}], merge:'A1:B1' });
+      function kv(label,val,style){ s1.rows.push({cells:[{v:label,s:L},{v:val,s:style!=null?style:R, t:(style===C?'n':'s')}]}); }
+      kv('إجمالي قيمة المرتجعات', d.totalAmount, C);
+      kv('عدد عمليات المرتجع', d.ops, N); s1.rows[s1.rows.length-1].cells[1].t='n';
+      kv('صافي المبيعات بعد المرتجع', d.netAfter, C);
+      kv('نسبة المرتجع من المبيعات', d.pct.toFixed(2)+'%');
+      kv('أكثر عميل مرتجعات', d.topCust);
+      kv('أكثر منتج مرتجع', d.mostProd);
+      s1.rows.push({cells:[{v:'',s:0},{v:'',s:0}]});
+      s1.rows.push({cells:[{v:'الفلاتر المطبّقة',s:H},{v:'',s:H}], merge:'A'+(s1.rows.length+1)+':B'+(s1.rows.length+1)});
+      kv('من تاريخ', d.filters.fromDate);
+      kv('إلى تاريخ', d.filters.toDate);
+      kv('العميل', d.filters.customer);
+      kv('بحث المنتج', d.filters.search);
+
+      /* Sheet 2: Top Returned Products */
+      var s2 = { name:'Top Returned Products', cols:[34,16,18,20], freeze:1, rows:[] };
+      s2.rows.push({cells:[
+        {v:'اسم المنتج',s:H},{v:'عدد المرتجعات',s:H},{v:'الكمية المرتجعة',s:H},{v:'قيمة المرتجعات',s:H}
+      ]});
+      d.topProducts.forEach(function(p){
+        s2.rows.push({cells:[
+          {v:p.name,s:R},{v:p.count,s:N,t:'n'},{v:Number(p.qty.toFixed(2)),s:N,t:'n'},{v:Number(p.value.toFixed(2)),s:C,t:'n'}
+        ]});
+      });
+      if (d.topProducts.length===0) s2.rows.push({cells:[{v:'لا توجد بيانات',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R}]});
+
+      /* Sheet 3: Returns Log */
+      var s3 = { name:'Returns Log', cols:[16,14,22,30,12,16,24], freeze:1, rows:[] };
+      s3.rows.push({cells:[
+        {v:'رقم المرتجع',s:H},{v:'التاريخ',s:H},{v:'العميل',s:H},{v:'المنتج',s:H},{v:'الكمية',s:H},{v:'الإجمالي',s:H},{v:'ملاحظات',s:H}
+      ]});
+      d.logRows.forEach(function(r){
+        var dt = String(r.date||'').substring(0,10);
+        s3.rows.push({cells:[
+          {v:r.number||'—',s:R},{v:dt,s:R},{v:r.channel||'—',s:R},{v:r.product,s:R},
+          {v:Number(r.qty.toFixed(2)),s:N,t:'n'},{v:Number(r.total.toFixed(2)),s:C,t:'n'},{v:r.notes||'',s:R}
+        ]});
+      });
+      if (d.logRows.length===0) s3.rows.push({cells:[{v:'لا توجد مرتجعات',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R}]});
+
+      /* Sheet 4: Charts Data */
+      var s4 = { name:'Charts Data', cols:[18,18,20], freeze:1, rows:[] };
+      s4.rows.push({cells:[{v:'التاريخ',s:H},{v:'عدد المرتجعات',s:H},{v:'قيمة المرتجعات',s:H}]});
+      Object.keys(d.daily).sort().forEach(function(k){
+        s4.rows.push({cells:[{v:k,s:R},{v:d.daily[k].count,s:N,t:'n'},{v:Number(d.daily[k].value.toFixed(2)),s:C,t:'n'}]});
+      });
+      s4.rows.push({cells:[{v:'',s:0},{v:'',s:0},{v:'',s:0}]});
+      s4.rows.push({cells:[{v:'المبيعات مقابل المرتجعات',s:H},{v:'',s:H},{v:'',s:H}], merge:'A'+(s4.rows.length+1)+':C'+(s4.rows.length+1)});
+      s4.rows.push({cells:[{v:'إجمالي المبيعات',s:L},{v:Number(((RA.cache&&RA.cache.totalSales)||0).toFixed(2)),s:C,t:'n'},{v:'',s:0}]});
+      s4.rows.push({cells:[{v:'إجمالي المرتجعات',s:L},{v:Number(d.totalAmount.toFixed(2)),s:C,t:'n'},{v:'',s:0}]});
+
+      var bytes = RA._buildXLSX([s1,s2,s3,s4]);
+      var blob = new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'returns_analytics_' + new Date().toISOString().split('T')[0] + '.xlsx';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      if (typeof toast === 'function') toast('✅ تم تصدير ملف Excel', 'ok');
+    } catch (err){
+      console.error('[ReturnsAnalytics] XLSX export error:', err);
+      if (typeof toast === 'function') toast('❌ فشل تصدير Excel', 'err');
+    }
+  };
+
+  /* ---- CSV export (modal-scoped, uses same filtered data) ---- */
+  RA.exportCSV = async function(){
+    try {
+      var d = await RA._gather();
+      var lines = [];
+      lines.push('رقم المرتجع,التاريخ,العميل,المنتج,الكمية,الإجمالي,ملاحظات');
+      d.logRows.forEach(function(r){
+        var dt = String(r.date||'').substring(0,10);
+        function q(x){ x=String(x==null?'':x); return /[",\n]/.test(x) ? '"'+x.replace(/"/g,'""')+'"' : x; }
+        lines.push([q(r.number||''),q(dt),q(r.channel||''),q(r.product),r.qty.toFixed(2),r.total.toFixed(2),q(r.notes||'')].join(','));
+      });
+      var csv = '\uFEFF' + lines.join('\n'); /* BOM for Arabic */
+      var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'returns_' + new Date().toISOString().split('T')[0] + '.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      if (typeof toast === 'function') toast('✅ تم تصدير CSV', 'ok');
+    } catch (err){
+      console.error('[ReturnsAnalytics] CSV export error:', err);
+    }
+  };
+})();
+/* ========== END XLSX EXPORT ADD-ON ========== */
+
+  console.log("[ReturnsAnalytics] namespace ready:", typeof window.ReturnsAnalytics);
+  </script>
+
+  </body>
 </html>

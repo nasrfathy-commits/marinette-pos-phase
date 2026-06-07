@@ -624,6 +624,27 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
 #returnsAnalyticsModal thead th{position:sticky;top:0;background:var(--black-1,#0e0e0e);text-align:right;padding:9px;color:var(--gold);border-bottom:2px solid var(--gold);font-size:12px;}
 #returnsAnalyticsModal tbody td{padding:8px 9px;border-bottom:1px solid var(--w08);}
 #returnsAnalyticsModal .ra-tbl-wrap{max-height:380px;overflow-y:auto;border-radius:6px;}
+
+/* Invoice Payment Status — isolated styles */
+.ip-toggle-btn{padding:8px 16px;border:1px solid var(--w20);background:var(--black-3,#1c1c1c);color:var(--w60);border-radius:6px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s ease;}
+.ip-toggle-btn:hover{border-color:var(--gold);color:var(--white);}
+.ip-toggle-btn.ip-active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light,#e6d18a) 100%);color:#1a1a1a;border-color:var(--gold);font-weight:700;box-shadow:0 0 0 2px var(--gold-dim,rgba(201,168,76,0.18));}
+.ip-toggle-btn[data-pay="pending"].ip-active{background:linear-gradient(135deg,#E05252 0%,#FF8866 100%);color:#fff;border-color:#E05252;box-shadow:0 0 0 2px rgba(224,82,82,0.2);}
+
+.ip-filter-btn{padding:6px 12px;border:1px solid var(--w20);background:var(--black-3,#1c1c1c);color:var(--w60);border-radius:6px;font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;transition:all .15s ease;}
+.ip-filter-btn:hover{border-color:var(--gold-border,rgba(201,168,76,0.45));color:var(--white);}
+.ip-filter-btn.ip-active{background:var(--gold);color:#1a1a1a;border-color:var(--gold);font-weight:700;}
+
+.ip-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.3px;}
+.ip-badge-paid{background:rgba(82,183,136,0.15);color:var(--green);border:1px solid rgba(82,183,136,0.35);}
+.ip-badge-pending{background:rgba(224,82,82,0.15);color:var(--red);border:1px solid rgba(224,82,82,0.40);animation:ipPulse 2.4s ease-in-out infinite;}
+@keyframes ipPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,82,82,0.0);}50%{box-shadow:0 0 0 3px rgba(224,82,82,0.18);}}
+
+.ip-detail-block{margin-top:14px;padding:12px 14px;border-radius:8px;border:1px solid var(--w08);background:var(--black-3,#1c1c1c);display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13px;}
+.ip-detail-block .ip-detail-cell{min-width:120px;}
+.ip-detail-block .ip-detail-lbl{font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;}
+.ip-detail-block .ip-detail-val{font-weight:700;}
+.ip-detail-block.is-pending{border-color:rgba(224,82,82,0.35);background:rgba(224,82,82,0.06);}
 </style>
 </head>
 <body>
@@ -663,6 +684,7 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
   <button class="tab-btn"        onclick="showPage('dashboard')" data-page="dashboard">📊 لوحة التحكم</button>
   <button class="tab-btn"        onclick="showPage('returns')"   data-page="returns">↩️ المرتجعات</button>
   <button class="tab-btn"        onclick="showPage('statement')" data-page="statement">📄 كشف الحساب</button>
+  <button class="tab-btn"        onclick="showPage('collections')" data-page="collections">⏳ التحصيلات</button>
   <button class="tab-btn"        onclick="showPage('products')"  data-page="products">📦 المنتجات</button>
   <button class="tab-btn"        onclick="showPage('pricing')"   data-page="pricing">💰 أسعار العملاء</button>
   <button class="tab-btn"        onclick="showPage('channels')"  data-page="channels">🏪 العملاء</button>
@@ -739,6 +761,18 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="tot-item"><div class="tot-label">الصافي النهائي</div><div class="tot-value green num" id="totNet">0.00</div></div>
     </div>
 
+    <!-- Payment Status (isolated, additive) -->
+    <div id="invPaymentStatusWrap" style="margin:14px 0 18px;padding:14px 16px;background:var(--black-2,#161616);border:1px solid var(--w08);border-radius:var(--radius-sm);">
+      <div style="font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">حالة الدفع</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="invPayBtnPaid" class="ip-toggle-btn ip-active" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.setUI('paid')">✅ مدفوعة</button>
+        <button type="button" id="invPayBtnPending" class="ip-toggle-btn" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.setUI('pending')">⏳ غير مدفوعة (آجل)</button>
+      </div>
+      <div id="invPayPendingWarn" style="display:none;margin-top:12px;padding:10px 12px;background:rgba(224,82,82,0.10);border:1px solid rgba(224,82,82,0.35);border-radius:6px;font-size:12px;color:var(--red);">
+        ⚠️ هذه الفاتورة آجل — سيُضاف الصافي بالكامل إلى إجمالي المستحقات
+      </div>
+    </div>
+
     <!-- Editing banner — shown only when editing a saved invoice -->
     <div class="editing-banner" id="editingBanner" style="display:none;">
       <span>✏️ وضع التعديل — تعديل الفاتورة: <strong id="editingBannerNum"></strong></span>
@@ -785,6 +819,12 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       </div>
       <button class="btn btn-outline btn-sm" onclick="renderInvoicesList()">🔄 تحديث</button>
       <span id="invListCount" class="muted small"></span>
+      <!-- Payment status quick filter (isolated, additive) -->
+      <div style="display:inline-flex;gap:4px;margin-right:auto;" id="invPayFilter" data-current="all">
+        <button type="button" class="ip-filter-btn ip-active" data-pay-filter="all" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.setListFilter('all')">الكل</button>
+        <button type="button" class="ip-filter-btn" data-pay-filter="paid" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.setListFilter('paid')">🟢 مدفوعة</button>
+        <button type="button" class="ip-filter-btn" data-pay-filter="pending" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.setListFilter('pending')">🔴 غير مدفوعة</button>
+      </div>
     </div>
 
     <div id="invListWrap"></div>
@@ -859,6 +899,70 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
     </div>
 
     <div id="channelsList"></div>
+  </div>
+
+
+  <!-- =================== PAGE: COLLECTIONS (Phase 1 — read-only) =================== -->
+  <div class="page" id="page-collections">
+    <div class="sec-title">
+      <div class="icon-badge">⏳</div>
+      <h2>التحصيلات</h2>
+      <div class="gold-line"></div>
+    </div>
+
+    <!-- Summary cards (isolated, do not touch dashboard KPI grid) -->
+    <div class="kpi-grid" id="colKpiGrid" style="margin-bottom:18px;">
+      <div class="kpi-card" style="border-color:rgba(255,170,60,0.35);">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">إجمالي المستحقات</div>
+        <div class="kpi-value" id="col_kpi_total" style="color:#FFAA3C;">—</div>
+        <div class="kpi-sub">ج.م</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🧾</div>
+        <div class="kpi-label">عدد الفواتير غير المدفوعة</div>
+        <div class="kpi-value" id="col_kpi_count">—</div>
+        <div class="kpi-sub">فاتورة</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-label">عملاء عليهم مستحقات</div>
+        <div class="kpi-value" id="col_kpi_customers">—</div>
+        <div class="kpi-sub">عميل</div>
+      </div>
+    </div>
+
+    <!-- Per-customer debt summary (populated by CollectionsPayments) -->
+    <div id="colDebtSummary" style="margin-bottom:18px;"></div>
+
+    <!-- Filters -->
+    <div class="search-bar">
+      <input type="text" id="colSearch" placeholder="🔍 بحث برقم الفاتورة أو العميل..." oninput="window.CollectionsModule &amp;&amp; window.CollectionsModule.refresh()" style="max-width:280px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">العميل:</label>
+        <select id="colFilterCustomer" onchange="window.CollectionsModule &amp;&amp; window.CollectionsModule.refresh()"
+                style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                       padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;outline:none;">
+          <option value="">الكل</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">من:</label>
+        <input type="date" id="colFilterFrom" oninput="window.CollectionsModule &amp;&amp; window.CollectionsModule.refresh()"
+               style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                      padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;outline:none;">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">إلى:</label>
+        <input type="date" id="colFilterTo" oninput="window.CollectionsModule &amp;&amp; window.CollectionsModule.refresh()"
+               style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                      padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;outline:none;">
+        <button class="btn btn-outline btn-sm" onclick="window.CollectionsModule &amp;&amp; window.CollectionsModule.clearFilters()" title="مسح الفلاتر">✕</button>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="window.CollectionsModule &amp;&amp; window.CollectionsModule.refresh()">🔄 تحديث</button>
+      <span id="colListCount" class="muted small"></span>
+    </div>
+
+    <div id="colListWrap"></div>
+    <div id="colListEmpty" class="empty" style="display:none;"><div class="empty-icon">✨</div><p>لا توجد فواتير مستحقة الدفع</p></div>
   </div>
 
 
@@ -943,6 +1047,7 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">أفضل عميل</div><div class="kpi-value" id="kpi_top_ch" style="font-size:15px;margin-top:4px;">—</div><div class="kpi-sub" id="kpi_top_ch_val"></div></div>
       <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);cursor:pointer;" onclick="window.ReturnsAnalytics.open()" title="اضغط لعرض تحليل المرتجعات"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">اضغط للتفاصيل 📊</div></div>
       <div class="kpi-card kpi-highlight"><div class="kpi-icon">💎</div><div class="kpi-label">الصافي الحقيقي</div><div class="kpi-value" id="kpi_true_net">—</div><div class="kpi-sub">بعد المرتجعات</div></div>
+      <div class="kpi-card" style="border-color:rgba(255,170,60,0.35);cursor:pointer;" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.openPendingList()" title="اضغط لعرض الفواتير غير المدفوعة"><div class="kpi-icon">⏳</div><div class="kpi-label">إجمالي المستحقات</div><div class="kpi-value" id="kpi_pending_total" style="color:#FFAA3C;">—</div><div class="kpi-sub" id="kpi_pending_count">0 فاتورة</div></div>
     </div>
 
     <!-- Daily Sales Chart -->
@@ -3560,6 +3665,11 @@ async function renderInvoicesList() {
     return 0;
   });
 
+  /* [Payment Status] فلتر إضافي اختياري — لا يؤثر على المنطق الأساسي */
+  if (window.InvoicePayments && typeof window.InvoicePayments.filterInvoices === 'function') {
+    invoices = window.InvoicePayments.filterInvoices(invoices);
+  }
+
   document.getElementById('invListCount').textContent = invoices.length + ' فاتورة';
 
   if (invoices.length===0) {
@@ -3574,6 +3684,7 @@ async function renderInvoicesList() {
         '<div class="inv-list-num">'+escapeHtml(iv.number||'—')+'</div>' +
         '<div class="inv-list-date">'+fmtDateStr(iv.date||iv.createdAt)+'</div>' +
         (iv.channel ? '<div style="margin-top:4px;"><span class="badge">'+escapeHtml(iv.channel)+'</span></div>' : '') +
+        ((window.InvoicePayments && window.InvoicePayments.renderBadge) ? '<div style="margin-top:4px;">'+window.InvoicePayments.renderBadge(iv)+'</div>' : '') +
       '</div>' +
       '<div class="inv-list-amounts">' +
         '<div><div style="font-size:10px;color:var(--w30);margin-bottom:2px;">إجمالي</div>' +
@@ -4678,7 +4789,7 @@ function buildPrintHTML(iv, items) {
   var rows = items.map(function(it,i) {
     var n     = normalizeItem(it);
     var gross = n.qty * n.price;
-    var disc  = n.discount;              /* qty * discountValue — never per-piece */
+    var disc  = n.discount;              /* qty * discountValue — line total (used for net calc) */
     var net   = gross - disc;
     return '<tr class="'+(i%2===0?'even':'')+'">' +
       '<td class="c">'+(i+1)+'</td>' +
@@ -4686,7 +4797,7 @@ function buildPrintHTML(iv, items) {
       '<td class="name">'+safe(n.name||'—')+'</td>' +
       '<td class="c">'+fmtN(n.qty)+'</td>' +
       '<td class="r">'+fmtN(n.price)+'</td>' +
-      '<td class="r disc">'+fmtN(disc)+'</td>' +
+      '<td class="r disc">'+fmtN(n.discountValue)+'</td>' +
       '<td class="r">'+fmtN(gross)+'</td>' +
       '<td class="r net">'+fmtN(net)+'</td>' +
     '</tr>';
@@ -6866,6 +6977,977 @@ mergeXml +
 /* ========== END XLSX EXPORT ADD-ON ========== */
 
   console.log("[ReturnsAnalytics] namespace ready:", typeof window.ReturnsAnalytics);
+  </script>
+
+  
+  <!-- INVOICE PAYMENT STATUS — isolated module (Supabase-backed, localStorage fallback) -->
+  <script>
+  (function(){
+    var STORE_KEY_LS = 'marinette_invoice_payments_v1';   /* localStorage fallback key */
+    var FILTER_KEY   = 'marinette_invlist_pay_filter_v1';
+
+    function _normId(id){ return id == null ? '' : String(id).trim(); }
+    function _safeFmt(n){ return (typeof fmt === 'function') ? fmt(n) : (parseFloat(n)||0).toFixed(2); }
+    function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    /* ---- Supabase helper ---- */
+    function _sb(){ return (window.APP && APP.mode === 'live' && APP.sb) ? APP.sb : null; }
+
+    /* ---- localStorage helpers (demo/offline fallback only) ---- */
+    function _lsLoad(){ try { return JSON.parse(localStorage.getItem(STORE_KEY_LS) || '{}') || {}; } catch(e){ return {}; } }
+    function _lsSave(map){ try { localStorage.setItem(STORE_KEY_LS, JSON.stringify(map)); } catch(e){} }
+
+    var IP = {
+      _uiStatus: 'paid',
+      _cache: {},           /* in-memory: key=normId, val={paymentStatus, paidAmount, remainingAmount} */
+      _cacheLoaded: false,
+
+      /* ---- Load ALL payment records into cache from Supabase (called once at startup) ---- */
+      loadAll: async function(){
+        var sb = _sb();
+        if (!sb){
+          /* Demo mode: warm cache from localStorage */
+          IP._cache = _lsLoad();
+          IP._cacheLoaded = true;
+          return;
+        }
+        try {
+          var res = await sb.from('invoice_payments').select('invoice_id,payment_status,paid_amount,remaining_amount');
+          if (res.error) throw res.error;
+          var fresh = {};
+          (res.data || []).forEach(function(row){
+            fresh[_normId(row.invoice_id)] = {
+              paymentStatus: row.payment_status === 'pending' ? 'pending' : 'paid',
+              paidAmount:    parseFloat(row.paid_amount)    || 0,
+              remainingAmount: parseFloat(row.remaining_amount) || 0
+            };
+          });
+          IP._cache = fresh;
+          IP._cacheLoaded = true;
+        } catch(e){
+          console.error('[InvoicePayments] loadAll:', e);
+          IP._cache = _lsLoad();  /* graceful fallback */
+          IP._cacheLoaded = true;
+        }
+      },
+
+      /* ---- Storage API (cache-first, async Supabase persist) ---- */
+      get: function(invoiceId){
+        if (!invoiceId) return {paymentStatus:'paid', paidAmount:null, remainingAmount:0};
+        var key = _normId(invoiceId);
+        var rec = IP._cache[key];
+        /* normalised-key scan — catches whitespace-padded historical keys */
+        if (!rec){
+          for (var k in IP._cache){
+            if (Object.prototype.hasOwnProperty.call(IP._cache, k) && _normId(k) === key){ rec = IP._cache[k]; break; }
+          }
+        }
+        if (!rec) return {paymentStatus:'paid', paidAmount:null, remainingAmount:0};
+        return {paymentStatus: rec.paymentStatus === 'pending' ? 'pending' : 'paid',
+                paidAmount: rec.paidAmount, remainingAmount: rec.remainingAmount};
+      },
+
+      set: function(invoiceId, status, netTotal){
+        if (!invoiceId) return;
+        var key = _normId(invoiceId);
+        var net = parseFloat(netTotal) || 0;
+        var rec = (status === 'pending')
+          ? {paymentStatus:'pending', paidAmount:0, remainingAmount:net}
+          : {paymentStatus:'paid', paidAmount:net, remainingAmount:0};
+        IP._cache[key] = rec;
+        var sb = _sb();
+        if (sb){
+          sb.from('invoice_payments').upsert({
+            invoice_id: key, payment_status: rec.paymentStatus,
+            paid_amount: rec.paidAmount, remaining_amount: rec.remainingAmount,
+            updated_at: new Date().toISOString()
+          }).then(function(r){ if (r.error) console.error('[InvoicePayments] set:', r.error); })
+            .catch(function(e){ console.error('[InvoicePayments] set:', e); });
+        } else {
+          /* localStorage fallback */
+          var m = _lsLoad(); m[key] = rec;
+          if (String(invoiceId) !== key && Object.prototype.hasOwnProperty.call(m, invoiceId)) delete m[invoiceId];
+          _lsSave(m);
+        }
+      },
+
+      /* ---- Partial-payment accumulation (called from CollectionsPayments.savePayment) ---- */
+      setPartial: function(invoiceId, paidAmount, remainingAmount){
+        if (!invoiceId) return;
+        var EPS = 0.005;
+        var key = _normId(invoiceId);
+        var rec = {
+          paymentStatus: (parseFloat(remainingAmount) <= EPS) ? 'paid' : 'pending',
+          paidAmount:    parseFloat(parseFloat(paidAmount).toFixed(2)),
+          remainingAmount: parseFloat(parseFloat(remainingAmount).toFixed(2))
+        };
+        IP._cache[key] = rec;
+        var sb = _sb();
+        if (sb){
+          sb.from('invoice_payments').upsert({
+            invoice_id: key, payment_status: rec.paymentStatus,
+            paid_amount: rec.paidAmount, remaining_amount: rec.remainingAmount,
+            updated_at: new Date().toISOString()
+          }).then(function(r){ if (r.error) console.error('[InvoicePayments] setPartial:', r.error); })
+            .catch(function(e){ console.error('[InvoicePayments] setPartial:', e); });
+        } else {
+          var m = _lsLoad(); m[key] = rec; _lsSave(m);
+        }
+      },
+
+      remove: function(invoiceId){
+        if (!invoiceId) return;
+        var key = _normId(invoiceId);
+        delete IP._cache[key];
+        var sb = _sb();
+        if (sb){
+          sb.from('invoice_payments').delete().eq('invoice_id', key)
+            .then(function(r){ if (r.error) console.error('[InvoicePayments] remove:', r.error); })
+            .catch(function(e){ console.error('[InvoicePayments] remove:', e); });
+        } else {
+          var m = _lsLoad();
+          if (m[key]){ delete m[key]; _lsSave(m); }
+        }
+      },
+
+      /* ---- Resolve payment record against an invoice object (for display) ---- */
+      _resolve: function(iv){
+        var rec = IP.get(iv && iv.id);
+        var net = parseFloat(iv && iv.netTotal)||0;
+        if (rec.paymentStatus === 'pending'){
+          return {status:'pending', paid:0, remaining: rec.remainingAmount!=null ? rec.remainingAmount : net};
+        }
+        return {status:'paid', paid: rec.paidAmount!=null ? rec.paidAmount : net, remaining: 0};
+      },
+
+      /* ---- Badge HTML for cards/lists ---- */
+      renderBadge: function(iv){
+        var r = IP._resolve(iv);
+        if (r.status === 'pending') return '<span class="ip-badge ip-badge-pending">🔴 غير مدفوعة</span>';
+        return '<span class="ip-badge ip-badge-paid">🟢 مدفوعة</span>';
+      },
+
+      /* ---- New-invoice form UI ---- */
+      setUI: function(status){
+        IP._uiStatus = (status === 'pending') ? 'pending' : 'paid';
+        var p = document.getElementById('invPayBtnPaid');
+        var n = document.getElementById('invPayBtnPending');
+        var w = document.getElementById('invPayPendingWarn');
+        if (p) p.classList.toggle('ip-active', IP._uiStatus === 'paid');
+        if (n){
+          n.classList.toggle('ip-active', IP._uiStatus === 'pending');
+          n.setAttribute('data-pay', 'pending');
+        }
+        if (p) p.setAttribute('data-pay','paid');
+        if (w) w.style.display = (IP._uiStatus === 'pending') ? 'block' : 'none';
+      },
+      resetUI: function(){ IP.setUI('paid'); },
+      loadUIFor: function(invoiceId){
+        var rec = IP.get(invoiceId);
+        IP.setUI(rec.paymentStatus);
+      },
+
+      /* ---- List filter (All/Paid/Pending) ---- */
+      _currentFilter: (function(){
+        try { return localStorage.getItem(FILTER_KEY) || 'all'; } catch(e){ return 'all'; }
+      })(),
+      setListFilter: function(v){
+        IP._currentFilter = (v==='paid'||v==='pending') ? v : 'all';
+        try { localStorage.setItem(FILTER_KEY, IP._currentFilter); } catch(e){}
+        /* sync button states */
+        var btns = document.querySelectorAll('#invPayFilter .ip-filter-btn');
+        btns.forEach(function(b){ b.classList.toggle('ip-active', b.getAttribute('data-pay-filter') === IP._currentFilter); });
+        if (typeof renderInvoicesList === 'function') renderInvoicesList();
+      },
+      _syncFilterButtons: function(){
+        var btns = document.querySelectorAll('#invPayFilter .ip-filter-btn');
+        btns.forEach(function(b){ b.classList.toggle('ip-active', b.getAttribute('data-pay-filter') === IP._currentFilter); });
+      },
+      filterInvoices: function(invoices){
+        if (IP._currentFilter === 'all') return invoices;
+        return invoices.filter(function(iv){ return IP._resolve(iv).status === IP._currentFilter; });
+      },
+
+      /* ---- Aggregation for the dashboard KPI ---- */
+      aggregatePending: function(invoices){
+        var total = 0, count = 0;
+        (invoices||[]).forEach(function(iv){
+          var r = IP._resolve(iv);
+          if (r.status === 'pending'){ count++; total += r.remaining; }
+        });
+        return {totalUnpaid: total, pendingCount: count};
+      },
+
+      /* ---- Quick pending list view (KPI card click) ---- */
+      openPendingList: function(){
+        IP.setListFilter('pending');
+        if (typeof showPage === 'function') showPage('invoices');
+      }
+    };
+
+    window.InvoicePayments = IP;
+
+    /* ============ Wrapping existing functions (non-invasive) ============ */
+
+    /* 1) Wrap DB.saveInvoice — capture saved id and persist payment status */
+    function _hookSave(){
+      if (!window.DB || typeof DB.saveInvoice !== 'function' || DB._ipWrapped) return false;
+      var orig = DB.saveInvoice;
+      DB.saveInvoice = async function(inv, items, existingId){
+        var savedId = await orig.call(DB, inv, items, existingId);
+        try {
+          var net = parseFloat(inv && inv.netTotal) || 0;
+          IP.set(savedId, IP._uiStatus, net);
+        } catch(e){ console.warn('[InvoicePayments] save hook:', e); }
+        return savedId;
+      };
+      DB._ipWrapped = true;
+      return true;
+    }
+
+    /* 2) Wrap DB.deleteInvoice — clean up payment record */
+    function _hookDelete(){
+      if (!window.DB || typeof DB.deleteInvoice !== 'function' || DB._ipDelWrapped) return false;
+      var orig = DB.deleteInvoice;
+      DB.deleteInvoice = async function(id){
+        var r;
+        try { r = await orig.call(DB, id); } finally { try { IP.remove(id); } catch(e){} }
+        return r;
+      };
+      DB._ipDelWrapped = true;
+      return true;
+    }
+
+    /* 3) Wrap initInvoice — reset toggle to "Paid" on new invoice */
+    function _hookInit(){
+      if (typeof window.initInvoice !== 'function' || window.initInvoice._ipWrapped) return false;
+      var orig = window.initInvoice;
+      window.initInvoice = function(){
+        var r = orig.apply(this, arguments);
+        try { IP.resetUI(); } catch(e){}
+        return r;
+      };
+      window.initInvoice._ipWrapped = true;
+      return true;
+    }
+
+    /* 4) Wrap editInvoice — load existing payment status into toggle */
+    function _hookEdit(){
+      if (typeof window.editInvoice !== 'function' || window.editInvoice._ipWrapped) return false;
+      var orig = window.editInvoice;
+      window.editInvoice = async function(id){
+        var r = await orig.apply(this, arguments);
+        try { IP.loadUIFor(id); } catch(e){}
+        return r;
+      };
+      window.editInvoice._ipWrapped = true;
+      return true;
+    }
+
+    /* 5) Wrap openInvDetail — append payment info block to the detail modal */
+    function _hookDetail(){
+      if (typeof window.openInvDetail !== 'function' || window.openInvDetail._ipWrapped) return false;
+      var orig = window.openInvDetail;
+      window.openInvDetail = async function(id){
+        var r = await orig.apply(this, arguments);
+        try {
+          var iv = (typeof DASH !== 'undefined' && DASH.currentInv && DASH.currentInv.id === id) ? DASH.currentInv : null;
+          if (!iv){
+            var all = await DB.getInvoices();
+            iv = all.find(function(x){ return x.id === id; });
+          }
+          if (!iv) return r;
+          var resv = IP._resolve(iv);
+          var statusLabel = resv.status === 'pending' ? '🔴 غير مدفوعة (آجل)' : '🟢 مدفوعة';
+          var statusColor = resv.status === 'pending' ? 'var(--red)' : 'var(--green)';
+          var html =
+            '<div id="invoicePaymentInfoBlock" class="ip-detail-block' + (resv.status==='pending'?' is-pending':'') + '">' +
+              '<div class="ip-detail-cell"><div class="ip-detail-lbl">حالة الدفع</div><div class="ip-detail-val" style="color:'+statusColor+';">'+statusLabel+'</div></div>' +
+              '<div class="ip-detail-cell"><div class="ip-detail-lbl">المدفوع</div><div class="ip-detail-val">'+_safeFmt(resv.paid)+' ج.م</div></div>' +
+              '<div class="ip-detail-cell"><div class="ip-detail-lbl">المتبقي</div><div class="ip-detail-val" style="color:'+(resv.remaining>0?'var(--red)':'var(--w60)')+';">'+_safeFmt(resv.remaining)+' ج.م</div></div>' +
+            '</div>';
+          var body = document.getElementById('invDetailBody');
+          if (body) {
+            var old = document.getElementById('invoicePaymentInfoBlock');
+            if (old) old.remove();
+            body.insertAdjacentHTML('beforeend', html);
+          }
+        } catch(e){ console.warn('[InvoicePayments] detail hook:', e); }
+        return r;
+      };
+      window.openInvDetail._ipWrapped = true;
+      return true;
+    }
+
+    /* 6) Wrap loadDashboard — populate the new "Total Pending Payments" KPI */
+    function _hookDashboard(){
+      if (typeof window.loadDashboard !== 'function' || window.loadDashboard._ipWrapped) return false;
+      var orig = window.loadDashboard;
+      window.loadDashboard = async function(){
+        var r = await orig.apply(this, arguments);
+        try {
+          var invs = await DB.getInvoices();
+          var agg = IP.aggregatePending(invs);
+          var el1 = document.getElementById('kpi_pending_total');
+          var el2 = document.getElementById('kpi_pending_count');
+          if (el1) el1.textContent = _safeFmt(agg.totalUnpaid) + ' ج.م';
+          if (el2) el2.textContent = agg.pendingCount + ' فاتورة';
+        } catch(e){ console.warn('[InvoicePayments] dashboard hook:', e); }
+        return r;
+      };
+      window.loadDashboard._ipWrapped = true;
+      return true;
+    }
+
+    /* Install all hooks — retry briefly until target functions exist */
+    function _install(){
+      _hookSave(); _hookDelete(); _hookInit(); _hookEdit(); _hookDetail(); _hookDashboard();
+      IP._syncFilterButtons();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _install);
+    else _install();
+    /* Defensive retries (functions may be defined inside an IIFE that runs after this script) */
+    var tries = 0;
+    var iv = setInterval(function(){
+      _install();
+      tries++;
+      var done = (window.DB && DB._ipWrapped && DB._ipDelWrapped &&
+                  window.initInvoice && window.initInvoice._ipWrapped &&
+                  window.editInvoice && window.editInvoice._ipWrapped &&
+                  window.openInvDetail && window.openInvDetail._ipWrapped &&
+                  window.loadDashboard && window.loadDashboard._ipWrapped);
+      if (done || tries > 40) clearInterval(iv);
+    }, 75);
+
+    console.log('[InvoicePayments] module ready');
+    /* Pre-load all payment records into cache (runs once; retries until APP.sb is available) */
+    (function _preload(attempt){
+      if (window.APP && (APP.mode === 'live' ? APP.sb : true)){
+        IP.loadAll().catch(function(e){ console.error('[InvoicePayments] preload:', e); });
+      } else if (attempt < 80){
+        setTimeout(function(){ _preload(attempt+1); }, 100);
+      }
+    })(0);
+  })();
+  </script>
+
+  
+  <!-- COLLECTIONS — Phase 1 read-only module (isolated) -->
+  <script>
+  (function(){
+    function _safeFmt(n){ return (typeof fmt === 'function') ? fmt(n) : (parseFloat(n)||0).toFixed(2); }
+    function _esc(s){ return (typeof escapeHtml === 'function') ? escapeHtml(s) : String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function _fmtDate(d){ return (typeof fmtDateStr === 'function') ? fmtDateStr(d) : String(d||'').substring(0,10); }
+    function _getInvDate(iv){ return (typeof getInvDate === 'function') ? getInvDate(iv) : String((iv && (iv.date||iv.createdAt)) || '').substring(0,10); }
+
+    var COL = {
+      _customerListCache: null,
+
+      clearFilters: function(){
+        var ids = ['colSearch','colFilterCustomer','colFilterFrom','colFilterTo'];
+        ids.forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; });
+        COL.refresh();
+      },
+
+      _populateCustomerSelect: function(invoices){
+        var sel = document.getElementById('colFilterCustomer');
+        if (!sel) return;
+        var current = sel.value;
+        var set = {};
+        invoices.forEach(function(iv){ if (iv.channel) set[iv.channel] = true; });
+        var list = Object.keys(set).sort();
+        /* Only rebuild if the list changed */
+        var sig = list.join('|');
+        if (COL._customerListCache === sig) return;
+        COL._customerListCache = sig;
+        sel.innerHTML = '<option value="">الكل</option>';
+        list.forEach(function(name){
+          var opt = document.createElement('option');
+          opt.value = name; opt.textContent = name;
+          sel.appendChild(opt);
+        });
+        if (current) sel.value = current;
+      },
+
+      refresh: async function(){
+        var wrap = document.getElementById('colListWrap');
+        var empty = document.getElementById('colListEmpty');
+        if (!wrap) return;
+
+        wrap.innerHTML = '<div style="padding:20px;color:var(--w60);font-size:13px;text-align:center;">⏳ جاري التحميل...</div>';
+
+        var invoices = [];
+        try { invoices = await DB.getInvoices(); } catch(e){ console.warn('[Collections] getInvoices:', e); invoices = []; }
+        if (!Array.isArray(invoices)) invoices = [];
+
+        /* Resolve payment state via existing InvoicePayments module */
+        var IP = window.InvoicePayments;
+        var unpaid = invoices.filter(function(iv){
+          if (!IP || typeof IP._resolve !== 'function') return false;
+          return IP._resolve(iv).status === 'pending';
+        });
+
+        /* === Diagnostic logs (essential — kept for support) === */
+        console.log('[Collections] total invoices loaded:', invoices.length);
+        console.log('[Collections] pending invoices count:', unpaid.length);
+        if (invoices.length > 0 && IP && typeof IP._resolve === 'function'){
+          var sample = invoices[0];
+          console.log('[Collections] sample resolved payment for', (sample && sample.id), ':', IP._resolve(sample));
+        }
+
+        /* Populate customer dropdown from FULL unpaid set (before filtering) */
+        COL._populateCustomerSelect(unpaid);
+
+        /* Apply filters */
+        var q = ((document.getElementById('colSearch')||{}).value || '').trim().toLowerCase();
+        var cust = (document.getElementById('colFilterCustomer')||{}).value || '';
+        var fFrom = ((document.getElementById('colFilterFrom')||{}).value || '').trim();
+        var fTo = ((document.getElementById('colFilterTo')||{}).value || '').trim();
+
+        var filtered = unpaid.filter(function(iv){
+          if (q && (iv.number||'').toLowerCase().indexOf(q) === -1 && (iv.channel||'').toLowerCase().indexOf(q) === -1) return false;
+          if (cust && iv.channel !== cust) return false;
+          if (fFrom || fTo){
+            var d = _getInvDate(iv);
+            if (!d) return false;
+            if (fFrom && d < fFrom) return false;
+            if (fTo && d > fTo) return false;
+          }
+          return true;
+        });
+
+        /* Sort newest first (by date desc) */
+        filtered.sort(function(a,b){
+          var da = _getInvDate(a) || '';
+          var db = _getInvDate(b) || '';
+          if (da > db) return -1;
+          if (da < db) return 1;
+          return 0;
+        });
+
+        /* Summary cards reflect the FILTERED set so totals match what is visible */
+        var totalDue = 0;
+        var customers = {};
+        filtered.forEach(function(iv){
+          var r = IP._resolve(iv);
+          totalDue += (parseFloat(r.remaining) || 0);
+          if (iv.channel) customers[iv.channel] = true;
+        });
+        var setT = function(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; };
+        setT('col_kpi_total', _safeFmt(totalDue));
+        setT('col_kpi_count', filtered.length);
+        setT('col_kpi_customers', Object.keys(customers).length);
+        setT('colListCount', filtered.length + ' فاتورة');
+
+        if (filtered.length === 0){
+          wrap.innerHTML = '';
+          if (empty) empty.style.display = 'block';
+          return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        wrap.innerHTML = filtered.map(function(iv){
+          var esc = _esc(iv.id);
+          var r = IP._resolve(iv);
+          var remaining = parseFloat(r.remaining) || 0;
+          var net = parseFloat(iv.netTotal) || 0;
+          var badge = (IP && IP.renderBadge) ? IP.renderBadge(iv) : '';
+          return '<div class="inv-list-item" onclick="openInvDetail(\''+esc+'\')">' +
+            '<div class="inv-list-meta">' +
+              '<div class="inv-list-num">'+_esc(iv.number||'—')+'</div>' +
+              '<div class="inv-list-date">'+_fmtDate(iv.date||iv.createdAt)+'</div>' +
+              (iv.channel ? '<div style="margin-top:4px;"><span class="badge">'+_esc(iv.channel)+'</span></div>' : '') +
+              '<div style="margin-top:4px;">'+badge+'</div>' +
+            '</div>' +
+            '<div class="inv-list-amounts">' +
+              '<div><div style="font-size:10px;color:var(--w30);margin-bottom:2px;">إجمالي الفاتورة</div>' +
+              '<div class="num" style="font-size:13px;color:var(--gold-light);">'+_safeFmt(net)+' ج.م</div></div>' +
+              '<div><div style="font-size:10px;color:var(--w30);margin-bottom:2px;">المتبقي</div>' +
+              '<div class="num" style="font-size:15px;color:var(--red);font-weight:700;">'+_safeFmt(remaining)+' ج.م</div></div>' +
+            '</div>' +
+            '<div class="inv-list-actions" onclick="event.stopPropagation()">' +
+              '<button class="btn btn-outline btn-sm" onclick="openInvDetail(\''+esc+'\')" title="عرض تفاصيل الفاتورة">👁 تفاصيل</button>' +
+              '<button class="btn btn-sm ip-collect-btn" onclick="window.CollectionsPayments && window.CollectionsPayments.openModal(\''+esc+'\')" title="تسجيل دفعة" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light,#e6d18a) 100%);color:#1a1a1a;font-weight:700;border:none;margin-right:4px;">➕ تسجيل دفعة</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    };
+
+    window.CollectionsModule = COL;
+
+    /* Wrap showPage so opening "collections" triggers refresh — non-invasive */
+    function _hookShowPage(){
+      if (typeof window.showPage !== 'function' || window.showPage._colWrapped) return false;
+      var orig = window.showPage;
+      window.showPage = function(id){
+        var r = orig.apply(this, arguments);
+        try { if (id === 'collections') COL.refresh(); } catch(e){ console.warn('[Collections] refresh:', e); }
+        return r;
+      };
+      window.showPage._colWrapped = true;
+      return true;
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _hookShowPage);
+    else _hookShowPage();
+    var tries = 0;
+    var iv = setInterval(function(){
+      _hookShowPage();
+      tries++;
+      if ((window.showPage && window.showPage._colWrapped) || tries > 40) clearInterval(iv);
+    }, 75);
+
+    console.log('[CollectionsModule] ready');
+  })();
+  </script>
+
+  
+  <!-- COLLECTIONS PAYMENT MODAL (Phase 2 — isolated) -->
+  <div id="collectionsPaymentModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:3500;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;opacity:0;transition:opacity .22s ease;">
+    <div id="collectionsPaymentInner" style="background:var(--black-2,#161616);border:1px solid var(--w08);border-radius:var(--radius);max-width:560px;width:100%;box-shadow:var(--shadow);padding:22px;transform:translateY(-14px);transition:transform .22s ease;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--w08);">
+        <h2 style="margin:0;color:var(--gold);font-size:17px;">➕ تسجيل دفعة</h2>
+        <button onclick="window.CollectionsPayments &amp;&amp; window.CollectionsPayments.closeModal()" style="background:none;border:none;color:var(--w60);font-size:24px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+
+      <div id="cpInfoBlock" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;font-size:13px;">
+        <div><div style="font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">رقم الفاتورة</div><div id="cpInvNumber" class="num" style="color:var(--gold-light);font-weight:700;">—</div></div>
+        <div><div style="font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">العميل</div><div id="cpCustomer" style="font-weight:700;">—</div></div>
+        <div><div style="font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">إجمالي الفاتورة</div><div id="cpInvTotal" class="num" style="color:var(--gold-light);font-weight:700;">—</div></div>
+        <div><div style="font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">المدفوع سابقاً</div><div id="cpAlreadyPaid" class="num" style="color:var(--green);font-weight:700;">—</div></div>
+        <div style="grid-column:1/-1;background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.30);border-radius:6px;padding:10px;"><div style="font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">المتبقي</div><div id="cpRemaining" class="num" style="color:var(--red);font-weight:800;font-size:18px;">—</div></div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--gold);margin-bottom:6px;">المبلغ المراد تحصيله (ج.م)</label>
+        <input id="cpAmountInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"
+               style="width:100%;padding:11px 14px;border:1px solid var(--gold-border,rgba(201,168,76,0.45));border-radius:var(--radius-sm);background:var(--black-1,#0e0e0e);color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;outline:none;">
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="window.CollectionsPayments &amp;&amp; window.CollectionsPayments.setAmountFull()">💯 المبلغ كامل</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="window.CollectionsPayments &amp;&amp; window.CollectionsPayments.setAmountHalf()">½ النصف</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+        <button class="btn btn-outline" onclick="window.CollectionsPayments &amp;&amp; window.CollectionsPayments.closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="window.CollectionsPayments &amp;&amp; window.CollectionsPayments.savePayment()">💾 حفظ الدفعة</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- COLLECTIONS PAYMENTS — Phase 2 (isolated) -->
+  <script>
+  (function(){
+
+    function _safeFmt(n){ return (typeof fmt === 'function') ? fmt(n) : (parseFloat(n)||0).toFixed(2); }
+    function _safeToast(msg, type){ if (typeof toast === 'function') toast(msg, type); else console.log('[toast]', msg); }
+    function _esc(s){ return (typeof escapeHtml === 'function') ? escapeHtml(s) : String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function _normId(id){ return id == null ? '' : String(id).trim(); }
+    function _now(){ return new Date(); }
+    function _pad(n){ return n < 10 ? '0'+n : ''+n; }
+    function _dateStr(d){ return d.getFullYear()+'-'+_pad(d.getMonth()+1)+'-'+_pad(d.getDate()); }
+    function _timeStr(d){ return _pad(d.getHours())+':'+_pad(d.getMinutes()); }
+    var EPS = 0.005; /* float tolerance for "fully paid" */
+
+    /* ========== Payment History Module (Supabase-backed) ========== */
+    var PH = {
+      _sb: function(){ return (window.APP && APP.mode === 'live' && APP.sb) ? APP.sb : null; },
+
+      add: async function(rec){
+        if (!rec || !rec.invoiceId) return;
+        var sb = PH._sb();
+        var d = rec.paymentDate && rec.paymentTime
+          ? new Date(rec.paymentDate + 'T' + rec.paymentTime)
+          : _now();
+        if (sb){
+          try {
+            var res = await sb.from('payment_history').insert({
+              invoice_id:        _normId(rec.invoiceId),
+              amount:            parseFloat(rec.amount)            || 0,
+              previous_remaining: parseFloat(rec.previousRemaining) || 0,
+              new_remaining:     parseFloat(rec.newRemaining)      || 0
+              /* created_at auto-set by Supabase */
+            });
+            if (res.error) throw res.error;
+          } catch(e){ console.error('[PaymentHistoryModule] add:', e); }
+        } else {
+          /* localStorage fallback */
+          var KEY = 'marinette_payment_history_v1';
+          try {
+            var arr = JSON.parse(localStorage.getItem(KEY) || '[]') || [];
+            arr.push({ invoiceId: _normId(rec.invoiceId), customerName: rec.customerName || '',
+              amount: parseFloat(rec.amount)||0, previousRemaining: parseFloat(rec.previousRemaining)||0,
+              newRemaining: parseFloat(rec.newRemaining)||0, paymentDate: rec.paymentDate || _dateStr(d),
+              paymentTime: rec.paymentTime || _timeStr(d), ts: d.getTime() });
+            localStorage.setItem(KEY, JSON.stringify(arr));
+          } catch(e){ console.error('[PaymentHistoryModule] add (ls):', e); }
+        }
+      },
+
+      getForInvoice: async function(invoiceId){
+        var nid = _normId(invoiceId);
+        var sb = PH._sb();
+        if (sb){
+          try {
+            var res = await sb.from('payment_history')
+              .select('id,invoice_id,amount,previous_remaining,new_remaining,created_at')
+              .eq('invoice_id', nid)
+              .order('created_at', {ascending: false});
+            if (res.error) throw res.error;
+            return (res.data || []).map(function(row){
+              var d = new Date(row.created_at);
+              return {
+                invoiceId:         row.invoice_id,
+                amount:            parseFloat(row.amount)            || 0,
+                previousRemaining: parseFloat(row.previous_remaining) || 0,
+                newRemaining:      parseFloat(row.new_remaining)      || 0,
+                paymentDate:       _dateStr(d),
+                paymentTime:       _timeStr(d),
+                ts:                d.getTime()
+              };
+            });
+          } catch(e){
+            console.error('[PaymentHistoryModule] getForInvoice:', e);
+            return [];
+          }
+        } else {
+          /* localStorage fallback */
+          var KEY = 'marinette_payment_history_v1';
+          try {
+            var arr = JSON.parse(localStorage.getItem(KEY) || '[]') || [];
+            return arr.filter(function(r){ return _normId(r.invoiceId) === nid; })
+                      .sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+          } catch(e){ return []; }
+        }
+      },
+
+      removeForInvoice: async function(invoiceId){
+        var nid = _normId(invoiceId);
+        var sb = PH._sb();
+        if (sb){
+          try {
+            var res = await sb.from('payment_history').delete().eq('invoice_id', nid);
+            if (res.error) throw res.error;
+          } catch(e){ console.error('[PaymentHistoryModule] removeForInvoice:', e); }
+        } else {
+          var KEY = 'marinette_payment_history_v1';
+          try {
+            var arr = JSON.parse(localStorage.getItem(KEY) || '[]') || [];
+            localStorage.setItem(KEY, JSON.stringify(arr.filter(function(r){ return _normId(r.invoiceId) !== nid; })));
+          } catch(e){ console.error('[PaymentHistoryModule] removeForInvoice (ls):', e); }
+        }
+      }
+    };
+    window.PaymentHistoryModule = PH;
+
+    /* ========== Collections Payments Module ========== */
+    var CP = {
+      _currentInvoice: null,
+
+      /* ---- Modal lifecycle ---- */
+      openModal: async function(invoiceId){
+        var IP = window.InvoicePayments;
+        if (!IP){ _safeToast('وحدة الدفع غير متاحة', 'err'); return; }
+        var invoices = [];
+        try { invoices = await DB.getInvoices(); } catch(e){}
+        var iv = (invoices||[]).find(function(x){ return _normId(x.id) === _normId(invoiceId); });
+        if (!iv){ _safeToast('الفاتورة غير موجودة', 'err'); return; }
+
+        var resv = IP._resolve(iv);
+        if (resv.status !== 'pending'){
+          _safeToast('هذه الفاتورة مدفوعة بالكامل', 'ok');
+          return;
+        }
+
+        CP._currentInvoice = iv;
+        var net = parseFloat(iv.netTotal) || 0;
+
+        var setT = function(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; };
+        setT('cpInvNumber', iv.number || '—');
+        setT('cpCustomer', iv.channel || '—');
+        setT('cpInvTotal', _safeFmt(net) + ' ج.م');
+        setT('cpAlreadyPaid', _safeFmt(resv.paid) + ' ج.م');
+        setT('cpRemaining', _safeFmt(resv.remaining) + ' ج.م');
+
+        var input = document.getElementById('cpAmountInput');
+        if (input){
+          input.value = '';
+          input.setAttribute('max', String(resv.remaining));
+          setTimeout(function(){ input.focus(); }, 100);
+        }
+
+        var modal = document.getElementById('collectionsPaymentModal');
+        if (modal){
+          modal.style.display = 'flex';
+          void modal.offsetWidth; /* force reflow */
+          modal.style.opacity = '1';
+          var inner = document.getElementById('collectionsPaymentInner');
+          if (inner) inner.style.transform = 'translateY(0)';
+        }
+      },
+
+      closeModal: function(){
+        var modal = document.getElementById('collectionsPaymentModal');
+        if (modal){
+          modal.style.opacity = '0';
+          var inner = document.getElementById('collectionsPaymentInner');
+          if (inner) inner.style.transform = 'translateY(-14px)';
+          setTimeout(function(){ modal.style.display = 'none'; }, 220);
+        }
+        CP._currentInvoice = null;
+      },
+
+      setAmountFull: function(){
+        var iv = CP._currentInvoice; if (!iv) return;
+        var resv = window.InvoicePayments._resolve(iv);
+        var el = document.getElementById('cpAmountInput');
+        if (el) el.value = (parseFloat(resv.remaining)||0).toFixed(2);
+      },
+      setAmountHalf: function(){
+        var iv = CP._currentInvoice; if (!iv) return;
+        var resv = window.InvoicePayments._resolve(iv);
+        var el = document.getElementById('cpAmountInput');
+        if (el) el.value = ((parseFloat(resv.remaining)||0) / 2).toFixed(2);
+      },
+
+      /* ---- Save with full validation + accumulation + auto-complete ---- */
+      savePayment: async function(){
+        var iv = CP._currentInvoice;
+        if (!iv){ _safeToast('لا توجد فاتورة محددة', 'err'); return; }
+        var IP = window.InvoicePayments;
+        if (!IP){ _safeToast('وحدة الدفع غير متاحة', 'err'); return; }
+
+        var input = document.getElementById('cpAmountInput');
+        var raw = input ? input.value : '';
+        var amount = parseFloat(raw);
+
+        /* ---- Validation ---- */
+        if (raw === '' || raw == null){ _safeToast('من فضلك أدخل المبلغ', 'err'); return; }
+        if (isNaN(amount) || !isFinite(amount)){ _safeToast('قيمة غير صحيحة', 'err'); return; }
+        if (amount <= 0){ _safeToast('المبلغ يجب أن يكون أكبر من صفر', 'err'); return; }
+
+        var resv = IP._resolve(iv);
+        var remaining = parseFloat(resv.remaining) || 0;
+        var alreadyPaid = parseFloat(resv.paid) || 0;
+        var net = parseFloat(iv.netTotal) || 0;
+
+        if (amount > remaining + EPS){
+          _safeToast('المبلغ أكبر من المتبقي (' + _safeFmt(remaining) + ' ج.م)', 'err');
+          return;
+        }
+
+        /* ---- Apply (accumulate, never overwrite) ---- */
+        var newPaid = alreadyPaid + amount;
+        var newRemaining = remaining - amount;
+        if (newRemaining < EPS) newRemaining = 0;
+
+        /* Persist via InvoicePayments.setPartial — updates cache + Supabase */
+        try {
+          IP.setPartial(iv.id, newPaid, newRemaining);
+        } catch(e){
+          console.error('[CollectionsPayments] persist failed:', e);
+          _safeToast('فشل حفظ الدفعة', 'err');
+          return;
+        }
+
+        /* ---- Log payment history (Supabase-backed via PH.add) ---- */
+        var d = _now();
+        await PH.add({
+          invoiceId: iv.id,
+          customerName: iv.channel || '',
+          amount: amount,
+          previousRemaining: remaining,
+          newRemaining: newRemaining,
+          paymentDate: _dateStr(d),
+          paymentTime: _timeStr(d)
+        });
+
+        /* ---- Close + refresh views ---- */
+        CP.closeModal();
+        if (newRemaining <= EPS){
+          _safeToast('✅ تم تحصيل المبلغ كاملاً — الفاتورة مدفوعة', 'ok');
+        } else {
+          _safeToast('✅ تم تسجيل الدفعة (المتبقي: ' + _safeFmt(newRemaining) + ' ج.م)', 'ok');
+        }
+
+        /* Refresh affected views without touching their internals */
+        try { if (window.CollectionsModule && window.CollectionsModule.refresh) await window.CollectionsModule.refresh(); } catch(e){}
+        try { if (window.loadDashboard) await window.loadDashboard(); } catch(e){}
+        try { if (typeof renderInvoicesList === 'function') renderInvoicesList(); } catch(e){}
+      },
+
+      /* ---- Customer-debt aggregation (no statement-page touched) ---- */
+      renderCustomerDebts: async function(){
+        var wrap = document.getElementById('colDebtSummary');
+        if (!wrap) return;
+        var IP = window.InvoicePayments;
+        if (!IP){ wrap.innerHTML = ''; return; }
+        var invoices = [];
+        try { invoices = await DB.getInvoices(); } catch(e){ invoices = []; }
+        var debts = {};
+        invoices.forEach(function(iv){
+          var r = IP._resolve(iv);
+          if (r.status === 'pending'){
+            var name = iv.channel || '(بدون عميل)';
+            if (!debts[name]) debts[name] = { total:0, count:0 };
+            debts[name].total += (parseFloat(r.remaining)||0);
+            debts[name].count += 1;
+          }
+        });
+        var list = Object.keys(debts).map(function(name){ return {name:name, total:debts[name].total, count:debts[name].count}; })
+                                     .sort(function(a,b){ return b.total - a.total; });
+        if (list.length === 0){ wrap.innerHTML = ''; return; }
+
+        wrap.innerHTML =
+          '<div style="background:var(--black-2,#161616);border:1px solid var(--w08);border-radius:var(--radius-sm);padding:14px 16px;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+              '<div style="font-size:13px;font-weight:700;color:var(--gold);">👥 إجمالي مستحقات كل عميل</div>' +
+              '<div style="font-size:11px;color:var(--w60);">' + list.length + ' عميل</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;">' +
+              list.map(function(c){
+                return '<div style="background:var(--black-3,#1c1c1c);border:1px solid var(--w08);border-radius:6px;padding:10px 12px;border-right:3px solid var(--red);">' +
+                  '<div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:4px;">' + _esc(c.name) + '</div>' +
+                  '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+                    '<div style="font-size:15px;font-weight:800;color:var(--red);">' + _safeFmt(c.total) + ' ج.م</div>' +
+                    '<div style="font-size:10px;color:var(--w60);">' + c.count + ' فاتورة</div>' +
+                  '</div>' +
+                '</div>';
+              }).join('') +
+            '</div>' +
+          '</div>';
+      },
+
+      /* ---- Build payment history HTML for the invoice detail modal ---- */
+      renderHistoryHTML: async function(invoiceId){
+        var rows = await PH.getForInvoice(invoiceId);
+        if (!rows || rows.length === 0) return '';
+        var body = rows.map(function(r){
+          return '<tr>' +
+            '<td style="padding:6px 8px;">' + _esc(r.paymentDate) + '</td>' +
+            '<td style="padding:6px 8px;color:var(--w60);">' + _esc(r.paymentTime) + '</td>' +
+            '<td class="num" style="padding:6px 8px;color:var(--green);font-weight:700;">' + _safeFmt(r.amount) + ' ج.م</td>' +
+            '<td class="num" style="padding:6px 8px;color:' + ((parseFloat(r.newRemaining)||0) > EPS ? 'var(--red)' : 'var(--w60)') + ';">' + _safeFmt(r.newRemaining) + ' ج.م</td>' +
+          '</tr>';
+        }).join('');
+        return '<div id="invoicePaymentHistoryBlock" style="margin-top:14px;padding:12px 14px;background:var(--black-3,#1c1c1c);border:1px solid var(--w08);border-radius:8px;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+            '<div style="font-size:12px;font-weight:700;color:var(--gold);">💳 سجل الدفعات</div>' +
+            '<div style="font-size:10px;color:var(--w60);">' + rows.length + ' دفعة</div>' +
+          '</div>' +
+          '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+            '<thead><tr style="border-bottom:1px solid var(--w08);color:var(--w60);">' +
+              '<th style="text-align:right;padding:6px 8px;font-weight:600;">التاريخ</th>' +
+              '<th style="text-align:right;padding:6px 8px;font-weight:600;">الوقت</th>' +
+              '<th style="text-align:right;padding:6px 8px;font-weight:600;">المبلغ المحصّل</th>' +
+              '<th style="text-align:right;padding:6px 8px;font-weight:600;">المتبقي بعد الدفعة</th>' +
+            '</tr></thead>' +
+            '<tbody>' + body + '</tbody>' +
+          '</table>' +
+        '</div>';
+      }
+    };
+    window.CollectionsPayments = CP;
+
+    /* ========== Wrappers (additive — never modify existing code) ========== */
+
+    /* Wrap IP._resolve so pending invoices with partial payments surface the actual `paid` amount */
+    function _hookResolve(){
+      var IP = window.InvoicePayments;
+      if (!IP || typeof IP._resolve !== 'function' || IP._resolve._cpWrapped) return false;
+      var orig = IP._resolve;
+      IP._resolve = function(iv){
+        var r = orig.apply(this, arguments);
+        if (r && r.status === 'pending' && iv && iv.id){
+          var rec = IP.get(iv.id);
+          if (rec && rec.paidAmount != null && rec.paidAmount > 0){
+            r.paid = rec.paidAmount;
+            if (rec.remainingAmount != null) r.remaining = rec.remainingAmount;
+          }
+        }
+        return r;
+      };
+      IP._resolve._cpWrapped = true;
+      return true;
+    }
+
+    /* Wrap openInvDetail to append payment history below the existing payment block */
+    function _hookDetail(){
+      if (typeof window.openInvDetail !== 'function' || window.openInvDetail._cpWrapped) return false;
+      var orig = window.openInvDetail;
+      window.openInvDetail = async function(id){
+        var r = await orig.apply(this, arguments);
+        try {
+          var html = await CP.renderHistoryHTML(id);
+          if (html){
+            var body = document.getElementById('invDetailBody');
+            if (body) {
+              var old = document.getElementById('invoicePaymentHistoryBlock');
+              if (old) old.remove();
+              body.insertAdjacentHTML('beforeend', html);
+            }
+          }
+        } catch(e){ console.warn('[CollectionsPayments] detail hook:', e); }
+        return r;
+      };
+      window.openInvDetail._cpWrapped = true;
+      return true;
+    }
+
+    /* Wrap CollectionsModule.refresh to also render the customer-debt section */
+    function _hookCollectionsRefresh(){
+      var COL = window.CollectionsModule;
+      if (!COL || typeof COL.refresh !== 'function' || COL.refresh._cpWrapped) return false;
+      var orig = COL.refresh;
+      COL.refresh = async function(){
+        var r = await orig.apply(this, arguments);
+        try { await CP.renderCustomerDebts(); } catch(e){ console.warn('[CollectionsPayments] debts hook:', e); }
+        return r;
+      };
+      COL.refresh._cpWrapped = true;
+      return true;
+    }
+
+    /* Wrap DB.deleteInvoice to also clean up payment history */
+    function _hookDelete(){
+      if (!window.DB || typeof DB.deleteInvoice !== 'function' || DB._cpDelWrapped) return false;
+      var orig = DB.deleteInvoice;
+      DB.deleteInvoice = async function(id){
+        var r;
+        try { r = await orig.call(DB, id); } finally { try { PH.removeForInvoice(id); } catch(e){} }
+        return r;
+      };
+      DB._cpDelWrapped = true;
+      return true;
+    }
+
+    function _install(){
+      _hookResolve(); _hookDetail(); _hookCollectionsRefresh(); _hookDelete();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _install);
+    else _install();
+    var tries = 0;
+    var iv = setInterval(function(){
+      _install();
+      tries++;
+      var allDone = (window.InvoicePayments && window.InvoicePayments._resolve && window.InvoicePayments._resolve._cpWrapped) &&
+                    (window.openInvDetail && window.openInvDetail._cpWrapped) &&
+                    (window.CollectionsModule && window.CollectionsModule.refresh && window.CollectionsModule.refresh._cpWrapped) &&
+                    (window.DB && window.DB._cpDelWrapped);
+      if (allDone || tries > 60) clearInterval(iv);
+    }, 75);
+
+    /* Close modal on Escape key (UX nicety, isolated) */
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape'){
+        var m = document.getElementById('collectionsPaymentModal');
+        if (m && m.style.display === 'flex') CP.closeModal();
+      }
+    });
+
+    console.log('[CollectionsPayments] ready');
+  })();
   </script>
 
   </body>

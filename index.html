@@ -2587,6 +2587,13 @@ async function activateLiveMode() {
   await loadInitialData();
   populateChannelSelect();
   renderProductsTable();
+  /* Force InvoicePayments to reload from Supabase now that APP.sb is confirmed ready.
+     Reset cache state so ensureLoaded runs a fresh Supabase fetch. */
+  if (window.InvoicePayments){
+    window.InvoicePayments._cacheLoaded = false;
+    window.InvoicePayments._loadingPromise = null;
+    window.InvoicePayments.ensureLoaded();
+  }
 }
 
 async function loadInitialData() {
@@ -3153,6 +3160,9 @@ function deleteInvRow(id) {
 /* ---- Scroll-preserving render wrapper ---- */
 function renderInvoiceTableKeepScroll() {
   var page = document.getElementById('page-invoice');
+  /* Guard: skip the entire render if the invoice page DOM isn't mounted —
+     prevents stale onblur/onchange callbacks from throwing after navigation */
+  if (!document.getElementById('invBody')) return;
   var sy   = page ? page.scrollTop : window.pageYOffset;
   renderInvoiceTable();
   if (page) page.scrollTop = sy; else window.scrollTo(0, sy);
@@ -3232,30 +3242,29 @@ function onInvInputEnter(e, id, field, type) {
   e.preventDefault();
   var v = e.target.value;
 
-  /* 1. نفذ الحفظ كما كان */
+  /* Capture column position BEFORE the commit (which may re-render and detach e.target) */
+  var startTd = e.target.closest('td');
+  var startTr = e.target.closest('tr');
+  var colIndex = (startTd && startTr) ? Array.prototype.indexOf.call(startTr.cells, startTd) : -1;
+
+  /* 1. Commit value — this triggers a tbody re-render */
   if (type==='qty' || type==='price') commitItemQtyPrice(id, field, v);
   else if (type==='discountValue')    commitDiscountValue(id, v);
   else if (type==='discount')         commitTotalDiscount(id, v);
 
-  /* 2. [تعديل] انتقل للخانة التي تحتها في نفس العمود */
-  var currentInput = e.target;
-  var currentTd    = currentInput.closest('td');
-  var currentTr    = currentInput.closest('tr');
-  if (currentTd && currentTr) {
-    var colIndex = Array.prototype.indexOf.call(currentTr.cells, currentTd);
-    var nextTr   = currentTr.nextElementSibling;
-    if (nextTr) {
-      var nextTd    = nextTr.cells[colIndex];
-      var nextInput = nextTd ? nextTd.querySelector('input') : null;
-      if (nextInput && !nextInput.readOnly) {
-        nextInput.focus();
-        nextInput.select();
-        return; /* لا blur على الحالي — المؤشر انتقل */
-      }
-    }
+  /* 2. Navigate to the input below — look up the REBUILT DOM via data-id,
+        never use the now-detached e.target. */
+  if (colIndex < 0) return;
+  var tbody = document.getElementById('invBody');
+  if (!tbody) return;
+  var sameRow = tbody.querySelector('tr[data-id="' + String(id).replace(/"/g, '\\"') + '"]');
+  if (!sameRow) return;
+  var nextTr  = sameRow.nextElementSibling;
+  if (!nextTr || !nextTr.cells[colIndex]) return;
+  var nextInput = nextTr.cells[colIndex].querySelector('input');
+  if (nextInput && !nextInput.readOnly){
+    try { nextInput.focus(); nextInput.select(); } catch(_e){}
   }
-  /* fallback: blur فقط لو ما في صف تحت */
-  currentInput.blur();
 }
 
 /* ---- Render invoice table ---- */
@@ -3266,11 +3275,35 @@ function renderInvoiceTable() {
   var tbody = document.getElementById('invBody');
   var empty = document.getElementById('invEmpty');
 
+  /* Guard: if the invoice DOM isn't currently mounted (e.g. stale blur
+     callback fires after page transition), silently skip. Prevents
+     "Failed to set the 'innerHTML' property on 'Element'" on null. */
+  if (!tbody) { return; }
+
+  /* === Capture focused input so we can restore it after innerHTML rebuild === */
+  var focusInfo = null;
+  try {
+    var active = document.activeElement;
+    if (active && active.tagName === 'INPUT' && tbody.contains(active)){
+      var row = active.closest('tr');
+      var td  = active.closest('td');
+      if (row && td){
+        focusInfo = {
+          id:    row.getAttribute('data-id'),
+          col:   Array.prototype.indexOf.call(row.cells, td),
+          start: typeof active.selectionStart === 'number' ? active.selectionStart : null,
+          end:   typeof active.selectionEnd   === 'number' ? active.selectionEnd   : null
+        };
+      }
+    }
+  } catch(e){ focusInfo = null; }
+
   if (INV.items.length===0) {
-    tbody.innerHTML=''; empty.style.display='block';
+    tbody.innerHTML='';
+    if (empty) empty.style.display='block';
     renderTotals(); return;
   }
-  empty.style.display='none';
+  if (empty) empty.style.display='none';
 
   tbody.innerHTML = INV.items.map(function(it,i) {
     var gross    = (it.qty||0) * (it.price||0);
@@ -3327,6 +3360,22 @@ function renderInvoiceTable() {
   }).join('');
   renderTotals();
 
+  /* === Restore focus + cursor to the equivalent input in the rebuilt row === */
+  if (focusInfo && focusInfo.id){
+    try {
+      var newRow = tbody.querySelector('tr[data-id="' + focusInfo.id.replace(/"/g,'\\"') + '"]');
+      if (newRow && newRow.cells[focusInfo.col]){
+        var newInput = newRow.cells[focusInfo.col].querySelector('input');
+        if (newInput){
+          newInput.focus();
+          if (focusInfo.start != null && focusInfo.end != null && typeof newInput.setSelectionRange === 'function'){
+            try { newInput.setSelectionRange(focusInfo.start, focusInfo.end); } catch(e){}
+          }
+        }
+      }
+    } catch(e){}
+  }
+
   /* Restore scroll position */
   if (scrollEl) scrollEl.scrollTop = sy; else window.scrollTo(0, sy);
 }
@@ -3334,9 +3383,12 @@ function renderInvoiceTable() {
 /* ---- Render totals ---- */
 function renderTotals() {
   var t = calcTotals(INV.items);
-  document.getElementById('totGross').textContent = fmt(t.gross);
-  document.getElementById('totDisc').textContent  = fmt(t.disc);
-  document.getElementById('totNet').textContent   = fmt(t.net);
+  var g = document.getElementById('totGross');
+  var d = document.getElementById('totDisc');
+  var n = document.getElementById('totNet');
+  if (g) g.textContent = fmt(t.gross);
+  if (d) d.textContent = fmt(t.disc);
+  if (n) n.textContent = fmt(t.net);
   /* totRet removed from invoice screen — see Phase 3 returns module */
 }
 
@@ -3634,6 +3686,11 @@ async function renderInvoicesList() {
   var fTo   = ((document.getElementById('invFilterTo')  ||{}).value||'').trim();
 
   wrap.innerHTML = '<div style="padding:20px;color:var(--w60);font-size:13px;text-align:center;">⏳ جاري التحميل...</div>';
+
+  /* Ensure payment cache is loaded before rendering badges / applying status filter */
+  if (window.InvoicePayments && typeof window.InvoicePayments.ensureLoaded === 'function'){
+    try { await window.InvoicePayments.ensureLoaded(); } catch(e){}
+  }
 
   var invoices = await DB.getInvoices();
 
@@ -7001,73 +7058,155 @@ mergeXml +
       _uiStatus: 'paid',
       _cache: {},           /* in-memory: key=normId, val={paymentStatus, paidAmount, remainingAmount} */
       _cacheLoaded: false,
+      _loadingPromise: null,
 
-      /* ---- Load ALL payment records into cache from Supabase (called once at startup) ---- */
+      /* ---- Idempotent cache loader — all render paths await this before reading cache ---- */
+      ensureLoaded: function(){
+        if (IP._cacheLoaded) return Promise.resolve();
+        if (IP._loadingPromise) return IP._loadingPromise;
+        IP._loadingPromise = (async function(){
+
+          /* Step 1: Wait for bootstrap to make a live/demo decision.
+             APP.mode starts as 'demo'. We must NOT load from localStorage
+             prematurely — wait until either:
+               (a) APP.sb is available  → live mode is confirmed
+               (b) APP.mode stays 'demo' for > 5s  → truly demo, load from LS
+             Poll every 100ms for up to 100 iterations (10s total). */
+          var waited = 0;
+          var MAX_WAIT = 100; /* × 100ms = 10s */
+          while (waited < MAX_WAIT){
+            var hasSb   = !!(window.APP && APP.sb);
+            var isLive  = !!(window.APP && APP.mode === 'live');
+            var isDemo  = !!(window.APP && APP.mode === 'demo') && waited > 20; /* give bootstrap 2s */
+            if (hasSb || isDemo) break;
+            if (waited === 0) console.log('[InvoicePayments] waiting for APP.sb...');
+            await new Promise(function(r){ setTimeout(r, 100); });
+            waited++;
+          }
+
+          if (window.APP && APP.sb){
+            console.log('[InvoicePayments] connected to Supabase');
+          } else {
+            console.log('[InvoicePayments] APP.sb not available after wait — demo mode confirmed');
+          }
+
+          await IP.loadAll();
+
+        })().then(function(){
+          IP._loadingPromise = null;
+        }).catch(function(e){
+          console.error('[InvoicePayments] ensureLoaded failed:', e);
+          IP._loadingPromise = null;
+          IP._cacheLoaded = false;
+        });
+        return IP._loadingPromise;
+      },
+
+      /* ---- Load ALL payment records from Supabase into cache ---- */
       loadAll: async function(){
         var sb = _sb();
+
+        /* === LIVE MODE: Supabase is the ONLY source of truth ===
+           Never fall back to localStorage while in live mode. */
         if (!sb){
-          /* Demo mode: warm cache from localStorage */
+          if (window.APP && APP.mode === 'live'){
+            /* sb missing but mode=live — race still possible, surface it */
+            console.error('[InvoicePayments] loadAll: APP.mode=live but APP.sb is null. Aborting load.');
+            IP._cacheLoaded = false;
+            return;
+          }
+          /* Genuinely demo/offline */
           IP._cache = _lsLoad();
           IP._cacheLoaded = true;
+          console.log('[InvoicePayments] loadAll → localStorage (demo). rows:', Object.keys(IP._cache).length);
           return;
         }
+
+        /* sb is available → always read from Supabase */
         try {
-          var res = await sb.from('invoice_payments').select('invoice_id,payment_status,paid_amount,remaining_amount');
+          var res = await sb.from('invoice_payments')
+            .select('invoice_id,payment_status,paid_amount,remaining_amount');
           if (res.error) throw res.error;
           var fresh = {};
           (res.data || []).forEach(function(row){
             fresh[_normId(row.invoice_id)] = {
-              paymentStatus: row.payment_status === 'pending' ? 'pending' : 'paid',
-              paidAmount:    parseFloat(row.paid_amount)    || 0,
+              paymentStatus:   row.payment_status === 'pending' ? 'pending' : 'paid',
+              paidAmount:      parseFloat(row.paid_amount)      || 0,
               remainingAmount: parseFloat(row.remaining_amount) || 0
             };
           });
           IP._cache = fresh;
           IP._cacheLoaded = true;
+          var pendingCount = Object.keys(fresh).filter(function(k){ return fresh[k].paymentStatus === 'pending'; }).length;
+          console.log('[InvoicePayments] loaded from Supabase rows:', (res.data||[]).length, '| pending:', pendingCount);
         } catch(e){
-          console.error('[InvoicePayments] loadAll:', e);
-          IP._cache = _lsLoad();  /* graceful fallback */
-          IP._cacheLoaded = true;
+          console.error('[InvoicePayments] loadAll Supabase error:', e);
+          /* Do NOT set _cacheLoaded — leave false so ensureLoaded can retry */
+          IP._cacheLoaded = false;
         }
       },
 
-      /* ---- Storage API (cache-first, async Supabase persist) ---- */
+      /* ---- Storage API (cache-first read) ---- */
       get: function(invoiceId){
-        if (!invoiceId) return {paymentStatus:'paid', paidAmount:null, remainingAmount:0};
+        /* Callers MUST have awaited ensureLoaded() before calling get().
+           Return paymentStatus:null when no row exists so the UI never
+           silently treats a missing row as "paid". */
+        if (!invoiceId) return {paymentStatus:null, paidAmount:null, remainingAmount:0};
         var key = _normId(invoiceId);
         var rec = IP._cache[key];
-        /* normalised-key scan — catches whitespace-padded historical keys */
+        /* Normalised-key scan — catches whitespace-padded or type-mismatched keys */
         if (!rec){
           for (var k in IP._cache){
             if (Object.prototype.hasOwnProperty.call(IP._cache, k) && _normId(k) === key){ rec = IP._cache[k]; break; }
           }
         }
-        if (!rec) return {paymentStatus:'paid', paidAmount:null, remainingAmount:0};
-        return {paymentStatus: rec.paymentStatus === 'pending' ? 'pending' : 'paid',
-                paidAmount: rec.paidAmount, remainingAmount: rec.remainingAmount};
+        if (!rec){
+          /* No row in invoice_payments — do NOT default to paid */
+          return {paymentStatus:null, paidAmount:null, remainingAmount:0};
+        }
+        return {
+          paymentStatus:   rec.paymentStatus === 'pending' ? 'pending' : 'paid',
+          paidAmount:      rec.paidAmount,
+          remainingAmount: rec.remainingAmount
+        };
       },
 
       set: function(invoiceId, status, netTotal){
-        if (!invoiceId) return;
+        if (!invoiceId) return Promise.resolve(false);
         var key = _normId(invoiceId);
         var net = parseFloat(netTotal) || 0;
-        var rec = (status === 'pending')
+        var normStatus = (status === 'pending') ? 'pending' : 'paid';
+        var rec = (normStatus === 'pending')
           ? {paymentStatus:'pending', paidAmount:0, remainingAmount:net}
           : {paymentStatus:'paid', paidAmount:net, remainingAmount:0};
+        /* Write to cache immediately so any in-flight read sees the new value */
         IP._cache[key] = rec;
         var sb = _sb();
+        console.log('[PAYMENT SAVE] IP.set entry | id:', invoiceId, '| status:', normStatus, '| sb available:', !!sb, '| APP.mode:', (window.APP && APP.mode));
         if (sb){
-          sb.from('invoice_payments').upsert({
+          return sb.from('invoice_payments').upsert({
             invoice_id: key, payment_status: rec.paymentStatus,
             paid_amount: rec.paidAmount, remaining_amount: rec.remainingAmount,
             updated_at: new Date().toISOString()
-          }).then(function(r){ if (r.error) console.error('[InvoicePayments] set:', r.error); })
-            .catch(function(e){ console.error('[InvoicePayments] set:', e); });
-        } else {
-          /* localStorage fallback */
+          }).then(function(r){
+            if (r && r.error){
+              console.error('[PAYMENT SAVE]', invoiceId, normStatus, 'supabase error:', r.error);
+              throw r.error;
+            }
+            console.log('[PAYMENT SAVE]', invoiceId, normStatus, 'persisted (supabase)');
+            return true;
+          });
+        }
+        /* localStorage fallback */
+        try {
           var m = _lsLoad(); m[key] = rec;
           if (String(invoiceId) !== key && Object.prototype.hasOwnProperty.call(m, invoiceId)) delete m[invoiceId];
           _lsSave(m);
+          console.log('[PAYMENT SAVE]', invoiceId, normStatus, 'persisted (localStorage)');
+          return Promise.resolve(true);
+        } catch(e){
+          console.error('[PAYMENT SAVE]', invoiceId, normStatus, 'localStorage error:', e);
+          return Promise.reject(e);
         }
       },
 
@@ -7117,14 +7256,20 @@ mergeXml +
         if (rec.paymentStatus === 'pending'){
           return {status:'pending', paid:0, remaining: rec.remainingAmount!=null ? rec.remainingAmount : net};
         }
-        return {status:'paid', paid: rec.paidAmount!=null ? rec.paidAmount : net, remaining: 0};
+        if (rec.paymentStatus === 'paid'){
+          return {status:'paid', paid: rec.paidAmount!=null ? rec.paidAmount : net, remaining: 0};
+        }
+        /* null — no row in invoice_payments (cache loaded but no entry for this invoice) */
+        return {status:'unknown', paid:0, remaining: net};
       },
 
       /* ---- Badge HTML for cards/lists ---- */
       renderBadge: function(iv){
         var r = IP._resolve(iv);
         if (r.status === 'pending') return '<span class="ip-badge ip-badge-pending">🔴 غير مدفوعة</span>';
-        return '<span class="ip-badge ip-badge-paid">🟢 مدفوعة</span>';
+        if (r.status === 'paid')    return '<span class="ip-badge ip-badge-paid">🟢 مدفوعة</span>';
+        /* unknown: no payment row yet — do not silently show paid */
+        return '<span class="ip-badge" style="background:rgba(180,180,180,0.12);color:var(--w60);border:1px solid var(--w20);">⏳ —</span>';
       },
 
       /* ---- New-invoice form UI ---- */
@@ -7144,7 +7289,9 @@ mergeXml +
       resetUI: function(){ IP.setUI('paid'); },
       loadUIFor: function(invoiceId){
         var rec = IP.get(invoiceId);
-        IP.setUI(rec.paymentStatus);
+        /* null means no payment row found — fall back to paid (new invoice / no record yet) */
+        IP.setUI(rec.paymentStatus || 'paid');
+        console.log('[InvoicePayments] loadUIFor', invoiceId, '→', rec.paymentStatus || 'paid (no row)');
       },
 
       /* ---- List filter (All/Paid/Pending) ---- */
@@ -7194,14 +7341,28 @@ mergeXml +
       if (!window.DB || typeof DB.saveInvoice !== 'function' || DB._ipWrapped) return false;
       var orig = DB.saveInvoice;
       DB.saveInvoice = async function(inv, items, existingId){
+        /* Read the DOM toggle directly as source-of-truth — prevents any drift
+           between IP._uiStatus and what the user actually selected */
+        var intendedStatus = (function(){
+          try {
+            var btn = document.getElementById('invPayBtnPending');
+            if (btn && btn.classList.contains('ip-active')) return 'pending';
+          } catch(e){}
+          return IP._uiStatus || 'paid';
+        })();
+        console.log('[PAYMENT SAVE] hook fired | intended:', intendedStatus, '| editing:', !!existingId);
         var savedId = await orig.call(DB, inv, items, existingId);
+        console.log('[PAYMENT SAVE] savedId:', savedId);
         try {
           var net = parseFloat(inv && inv.netTotal) || 0;
-          IP.set(savedId, IP._uiStatus, net);
-        } catch(e){ console.warn('[InvoicePayments] save hook:', e); }
+          /* AWAIT — guarantees Supabase row written before UI refreshes */
+          var ok = await IP.set(savedId, intendedStatus, net);
+          console.log('[PAYMENT SAVE] IP.set resolved:', ok);
+        } catch(e){ console.warn('[PAYMENT SAVE] IP.set failed:', e); }
         return savedId;
       };
       DB._ipWrapped = true;
+      console.log('[InvoicePayments] DB.saveInvoice wrapper attached');
       return true;
     }
 
@@ -7237,7 +7398,12 @@ mergeXml +
       var orig = window.editInvoice;
       window.editInvoice = async function(id){
         var r = await orig.apply(this, arguments);
-        try { IP.loadUIFor(id); } catch(e){}
+        try {
+          /* Await cache before reading status — prevents default-paid overwrite */
+          await IP.ensureLoaded();
+          IP.loadUIFor(id);
+          console.log('[InvoicePayments] edit loaded status for', id, ':', IP.get(id).paymentStatus);
+        } catch(e){}
         return r;
       };
       window.editInvoice._ipWrapped = true;
@@ -7251,6 +7417,7 @@ mergeXml +
       window.openInvDetail = async function(id){
         var r = await orig.apply(this, arguments);
         try {
+          await IP.ensureLoaded();
           var iv = (typeof DASH !== 'undefined' && DASH.currentInv && DASH.currentInv.id === id) ? DASH.currentInv : null;
           if (!iv){
             var all = await DB.getInvoices();
@@ -7286,6 +7453,7 @@ mergeXml +
       window.loadDashboard = async function(){
         var r = await orig.apply(this, arguments);
         try {
+          await IP.ensureLoaded();
           var invs = await DB.getInvoices();
           var agg = IP.aggregatePending(invs);
           var el1 = document.getElementById('kpi_pending_total');
@@ -7320,14 +7488,8 @@ mergeXml +
     }, 75);
 
     console.log('[InvoicePayments] module ready');
-    /* Pre-load all payment records into cache (runs once; retries until APP.sb is available) */
-    (function _preload(attempt){
-      if (window.APP && (APP.mode === 'live' ? APP.sb : true)){
-        IP.loadAll().catch(function(e){ console.error('[InvoicePayments] preload:', e); });
-      } else if (attempt < 80){
-        setTimeout(function(){ _preload(attempt+1); }, 100);
-      }
-    })(0);
+    /* Kick off cache load; ensureLoaded waits for APP.sb in live mode and is dedup-safe */
+    IP.ensureLoaded().catch(function(e){ console.error('[InvoicePayments] initial load:', e); });
   })();
   </script>
 
@@ -7376,6 +7538,11 @@ mergeXml +
 
         wrap.innerHTML = '<div style="padding:20px;color:var(--w60);font-size:13px;text-align:center;">⏳ جاري التحميل...</div>';
 
+        /* Wait for payment cache before filtering — prevents pending showing as paid on refresh */
+        if (window.InvoicePayments && typeof window.InvoicePayments.ensureLoaded === 'function'){
+          try { await window.InvoicePayments.ensureLoaded(); } catch(e){}
+        }
+
         var invoices = [];
         try { invoices = await DB.getInvoices(); } catch(e){ console.warn('[Collections] getInvoices:', e); invoices = []; }
         if (!Array.isArray(invoices)) invoices = [];
@@ -7386,6 +7553,22 @@ mergeXml +
           if (!IP || typeof IP._resolve !== 'function') return false;
           return IP._resolve(iv).status === 'pending';
         });
+
+        /* === Diagnostic logs === */
+        console.log('[Collections] total invoices loaded:', invoices.length);
+        console.log('[Collections] pending invoices count:', unpaid.length);
+        if (IP){
+          var cacheKeys = Object.keys(IP._cache || {});
+          var cachePending = cacheKeys.filter(function(k){ return IP._cache[k] && IP._cache[k].paymentStatus === 'pending'; }).length;
+          console.log('[Collections] payment cache loaded:', IP._cacheLoaded, '| rows:', cacheKeys.length, '| pending rows:', cachePending);
+          if (invoices.length > 0 && cacheKeys.length === 0){
+            console.warn('[Collections] payment cache empty — invoice_payments table may have no rows. Check [PAYMENT SAVE] logs from save time.');
+          }
+        }
+        if (invoices.length > 0 && IP && typeof IP._resolve === 'function'){
+          var sample = invoices[0];
+          console.log('[Collections] sample resolved for', sample && sample.id, ':', IP._resolve(sample));
+        }
 
         /* === Diagnostic logs (essential — kept for support) === */
         console.log('[Collections] total invoices loaded:', invoices.length);

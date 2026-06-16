@@ -625,6 +625,32 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
 #returnsAnalyticsModal tbody td{padding:8px 9px;border-bottom:1px solid var(--w08);}
 #returnsAnalyticsModal .ra-tbl-wrap{max-height:380px;overflow-y:auto;border-radius:6px;}
 
+/* === CATEGORY ANALYTICS MODAL — visual parity with Returns Analytics === */
+#categoryAnalyticsModal{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:3000;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;opacity:0;transition:opacity .25s ease;overflow-y:auto;}
+#categoryAnalyticsModal.ca-show{opacity:1;}
+#categoryAnalyticsModal .ra-content{background:var(--black-2,#161616);border:1px solid var(--w08);border-radius:var(--radius);max-width:1280px;width:100%;box-shadow:var(--shadow);transform:translateY(-18px);transition:transform .25s ease;padding:24px;}
+#categoryAnalyticsModal.ca-show .ra-content{transform:translateY(0);}
+#categoryAnalyticsModal .ra-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--w08);}
+#categoryAnalyticsModal .ra-head h2{margin:0;color:var(--gold);font-size:20px;}
+#categoryAnalyticsModal .ra-close{background:none;border:none;color:var(--w60);font-size:26px;cursor:pointer;line-height:1;transition:color .2s;}
+#categoryAnalyticsModal .ra-close:hover{color:var(--red);}
+#categoryAnalyticsModal .ra-section{background:var(--black-3,#1c1c1c);border:1px solid var(--w08);border-radius:var(--radius-sm);padding:16px;margin-bottom:18px;}
+#categoryAnalyticsModal .ra-section h3{margin:0 0 14px;font-size:15px;color:var(--gold-light,var(--gold));}
+#categoryAnalyticsModal .ra-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+#categoryAnalyticsModal .ra-filters label{display:block;font-size:12px;color:var(--w60);margin-bottom:5px;}
+#categoryAnalyticsModal .ra-filters input,#categoryAnalyticsModal .ra-filters select{width:100%;padding:9px;border:1px solid var(--w20);border-radius:6px;background:var(--black-1,#0e0e0e);color:var(--white);font-family:'Cairo',sans-serif;}
+#categoryAnalyticsModal .ra-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+#categoryAnalyticsModal .ra-stat{background:var(--black-3,#1c1c1c);border:1px solid var(--w08);border-radius:var(--radius-sm);padding:14px;border-right:3px solid var(--gold);}
+#categoryAnalyticsModal .ra-stat .lbl{font-size:11px;color:var(--w60);margin-bottom:6px;}
+#categoryAnalyticsModal .ra-stat .val{font-size:18px;font-weight:700;color:var(--white);}
+#categoryAnalyticsModal .ra-stat.red{border-right-color:var(--red);} #categoryAnalyticsModal .ra-stat.red .val{color:var(--red);}
+#categoryAnalyticsModal .ra-stat.green{border-right-color:var(--green);} #categoryAnalyticsModal .ra-stat.green .val{color:var(--green);}
+#categoryAnalyticsModal .ra-stat.gold{border-right-color:var(--gold);} #categoryAnalyticsModal .ra-stat.gold .val{color:var(--gold);}
+#categoryAnalyticsModal table{width:100%;border-collapse:collapse;font-size:13px;}
+#categoryAnalyticsModal thead th{position:sticky;top:0;background:var(--black-1,#0e0e0e);text-align:right;padding:9px;color:var(--gold);border-bottom:2px solid var(--gold);font-size:12px;}
+#categoryAnalyticsModal tbody td{padding:8px 9px;border-bottom:1px solid var(--w08);}
+#categoryAnalyticsModal .ra-tbl-wrap{max-height:380px;overflow-y:auto;border-radius:6px;}
+
 /* Invoice Payment Status — isolated styles */
 .ip-toggle-btn{padding:8px 16px;border:1px solid var(--w20);background:var(--black-3,#1c1c1c);color:var(--w60);border-radius:6px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s ease;}
 .ip-toggle-btn:hover{border-color:var(--gold);color:var(--white);}
@@ -851,6 +877,14 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
         <div class="form-group"><label>السعر (ج.م)</label><input type="number" id="fp_price" placeholder="0.00" min="0" step="0.01"></div>
         <div class="form-group"><label>خصم القطعة (ج.م)</label><input type="number" id="fp_discount" placeholder="0" min="0" step="0.01"></div>
         <div class="form-group"><label>سعر التكلفة (ج.م) <span style="color:var(--w30);font-size:10px;">اختياري — للربحية</span></label><input type="number" id="fp_cost" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="form-group"><label>القسم</label>
+          <select id="fp_category" style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;outline:none;width:100%;">
+            <option value="Bakery">Bakery</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Frozen">Frozen</option>
+            <option value="Ready Products">Ready Products</option>
+          </select>
+        </div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="saveProduct()">
@@ -863,12 +897,32 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
 
     <div class="search-bar">
       <input type="text" id="productSearch" placeholder="🔍 بحث بالاسم أو الباركود..." oninput="renderProductsTable()" style="max-width:320px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">القسم:</label>
+        <select id="productCategoryFilter" onchange="renderProductsTable()"
+                style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                       padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;outline:none;">
+          <option value="">الكل</option>
+          <option value="Bakery">Bakery</option>
+          <option value="Desserts">Desserts</option>
+          <option value="Frozen">Frozen</option>
+          <option value="Ready Products">Ready Products</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <label style="font-size:11px;font-weight:600;color:var(--w60);white-space:nowrap;">العميل:</label>
+        <select id="productCustomerFilter" onchange="renderProductsTable()"
+                style="background:var(--black-5);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+                       padding:8px 12px;color:var(--gold-light);font-family:'Cairo',sans-serif;font-size:13px;outline:none;min-width:160px;">
+          <option value="">جميع العملاء</option>
+        </select>
+      </div>
       <span id="prodCount" class="muted small"></span>
     </div>
 
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>#</th><th>الباركود / الكود</th><th>اسم المنتج</th><th>السعر</th><th>خصم القطعة</th><th>التكلفة</th><th>إجراءات</th></tr></thead>
+        <thead id="productsHead"><tr><th>#</th><th>الباركود / الكود</th><th>اسم المنتج</th><th>السعر</th><th>خصم القطعة</th><th>التكلفة</th><th>القسم</th><th>إجراءات</th></tr></thead>
         <tbody id="productsBody"></tbody>
       </table>
     </div>
@@ -1048,6 +1102,7 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
       <div class="kpi-card" style="border-color:rgba(224,82,82,0.35);cursor:pointer;" onclick="window.ReturnsAnalytics.open()" title="اضغط لعرض تحليل المرتجعات"><div class="kpi-icon">↩️</div><div class="kpi-label">إجمالي المرتجعات</div><div class="kpi-value" id="kpi_returns" style="color:var(--red);">—</div><div class="kpi-sub">اضغط للتفاصيل 📊</div></div>
       <div class="kpi-card kpi-highlight"><div class="kpi-icon">💎</div><div class="kpi-label">الصافي الحقيقي</div><div class="kpi-value" id="kpi_true_net">—</div><div class="kpi-sub">بعد المرتجعات</div></div>
       <div class="kpi-card" style="border-color:rgba(255,170,60,0.35);cursor:pointer;" onclick="window.InvoicePayments &amp;&amp; window.InvoicePayments.openPendingList()" title="اضغط لعرض الفواتير غير المدفوعة"><div class="kpi-icon">⏳</div><div class="kpi-label">إجمالي المستحقات</div><div class="kpi-value" id="kpi_pending_total" style="color:#FFAA3C;">—</div><div class="kpi-sub" id="kpi_pending_count">0 فاتورة</div></div>
+      <div class="kpi-card" style="border-color:rgba(212,175,55,0.40);cursor:pointer;" onclick="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.open()" title="اضغط لعرض تحليل الأقسام"><div class="kpi-icon">📊</div><div class="kpi-label">تحليل الأقسام</div><div class="kpi-value" style="font-size:22px;color:var(--gold);margin-top:6px;">—</div><div class="kpi-sub">اضغط للتفاصيل 📊</div></div>
     </div>
 
     <!-- Daily Sales Chart -->
@@ -1079,6 +1134,7 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
         <div id="channelBreakdownWrap"></div>
       </div>
     </div>
+
 
     <!-- Sub report tabs -->
     <div style="margin-top:24px;">
@@ -1668,9 +1724,28 @@ var DB = {
       try {
         var res = await APP.sb.from('products').select('*').eq('is_active', true).order('product_name');
         if (res.error) throw res.error;
+        /* One-shot probe: explicitly verify the `category` column exists in the products table */
+        if (!DB._categoryProbed){
+          DB._categoryProbed = true;
+          try {
+            var probe = await APP.sb.from('products').select('category').limit(1);
+            console.log('[Category] column probe response:', probe);
+            if (probe.error){
+              console.error('[Category] ❌ products.category column is NOT available. Run this SQL in Supabase:');
+              console.error("ALTER TABLE products ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'Bakery' CHECK (category IN ('Bakery','Desserts','Frozen','Ready Products'));");
+              console.error('[Category] probe error object:', JSON.stringify(probe.error, null, 2));
+              if (typeof toast === 'function') toast('⚠️ عمود "category" غير موجود في جدول products. راجع الكونسول.', 'err');
+            } else {
+              console.log('[Category] ✓ column exists. Sample row:', probe.data);
+            }
+          } catch(pe){
+            console.error('[Category] probe threw:', pe);
+          }
+        }
         return (res.data || []).map(function(p) {
           return { id: p.id, product_code: p.barcode, barcode: p.barcode, name: p.product_name,
-                   price: p.price, discountValue: parseFloat(p.discount_value) || 0 };
+                   price: p.price, discountValue: parseFloat(p.discount_value) || 0,
+                   category: (['Desserts','Frozen','Ready Products'].indexOf(p.category) !== -1) ? p.category : 'Bakery' };
         });
       } catch(e) { console.warn('DB.getProducts:', e); return localGet(K.PRODUCTS); }
     }
@@ -1678,23 +1753,50 @@ var DB = {
   },
 
   saveProduct: async function(product) {
-    /* product: { id?, barcode, name, price, discountValue } */
+    /* product: { id?, barcode, name, price, discountValue, category } */
+    var category = (['Desserts','Frozen','Ready Products'].indexOf(product.category) !== -1) ? product.category : 'Bakery';
     if (APP.mode === 'live') {
+      var row = { barcode: product.barcode, product_name: product.name, price: product.price,
+                  discount_value: product.discountValue || 0, is_active: true, category: category };
+      var queryPath = product.id
+        ? "products.update(id=" + product.id + ").select().single()"
+        : "products.insert().select().single()";
+      console.log('[DB.saveProduct]', queryPath, '| payload:', row);
       try {
-        var row = { barcode: product.barcode, product_name: product.name, price: product.price,
-                    discount_value: product.discountValue || 0, is_active: true };
         var res = product.id
           ? await APP.sb.from('products').update(row).eq('id', product.id).select().single()
           : await APP.sb.from('products').insert(row).select().single();
-        if (res.error) throw res.error;
+        console.log('[DB.saveProduct] full response:', res);
+        if (res.error){
+          /* Surface the real error — do NOT silently fall through to localStorage */
+          console.error('[DB.saveProduct] ❌ FAILED at:', queryPath);
+          console.error('[DB.saveProduct] error object:', JSON.stringify(res.error, null, 2));
+          console.error('[DB.saveProduct] error fields → code:', res.error.code, '| message:', res.error.message, '| details:', res.error.details, '| hint:', res.error.hint);
+          var msg = res.error.message || 'خطأ غير معروف من Supabase';
+          /* Detect the most likely cause: missing column */
+          if (/column .*category.* does not exist|could not find.*category/i.test(msg)){
+            toast('⚠️ عمود "category" غير موجود — راجع الكونسول لتنفيذ ALTER TABLE', 'err');
+          } else {
+            toast('⚠️ فشل حفظ المنتج في Supabase: ' + msg, 'err');
+          }
+          return null;
+        }
         var p = res.data;
+        console.log('[DB.saveProduct] ✓ saved to Supabase. category persisted:', p.category);
         return { id: p.id, product_code: p.barcode, barcode: p.barcode, name: p.product_name,
-                 price: p.price, discountValue: parseFloat(p.discount_value) || 0 };
-      } catch(e) { console.warn('DB.saveProduct:', e); toast('⚠️ خطأ في الاتصال - تم الحفظ محلياً', 'err'); }
+                 price: p.price, discountValue: parseFloat(p.discount_value) || 0,
+                 category: (['Desserts','Frozen','Ready Products'].indexOf(p.category) !== -1) ? p.category : 'Bakery' };
+      } catch(e){
+        /* Network / unexpected exception — also surface it, no silent fallback */
+        console.error('[DB.saveProduct] ❌ threw at', queryPath, ':', e);
+        toast('⚠️ خطأ في الاتصال بـ Supabase: ' + (e && e.message ? e.message : e), 'err');
+        return null;
+      }
     }
-    /* Demo / fallback */
+    /* Demo / offline mode only — localStorage path */
     var all = localGet(K.PRODUCTS);
     if (!product.product_code) product.product_code = product.barcode;
+    product.category = category;
     if (product.id) {
       var idx = all.findIndex(function(p){ return p.id === product.id; });
       if (idx > -1) { all[idx] = product; }
@@ -2115,35 +2217,24 @@ var DB = {
           .from('invoice_items')
           .select('*', { count: 'exact' })
           .limit(10000);
-        
+
         if (res.error) throw res.error;
-        
-        console.log('=== DB.getAllInvoiceItems DEBUG ===');
-        console.log('Response status:', res.status);
-        console.log('Total rows in table (count):', res.count);
-        console.log('Rows returned in this response:', (res.data || []).length);
-        
+
         /* If 206 status, need pagination loop */
         if (res.status === 206 && res.count > (res.data || []).length) {
-          console.warn('Status 206 detected! Need pagination loop.');
-          console.warn('Total items:', res.count, 'Returned:', res.data.length);
-          
           var allData = res.data ? res.data.slice() : [];
           var offset = 1000;
-          
+
           while (offset < res.count) {
             var nextRes = await APP.sb
               .from('invoice_items')
               .select('*')
               .range(offset, offset + 999);
-            
+
             if (nextRes.error) {
-              console.warn('Pagination error at offset', offset, ':', nextRes.error);
               break;
             }
-            
-            console.log('Fetched batch at offset', offset, ':', (nextRes.data || []).length, 'items');
-            
+
             if (nextRes.data && nextRes.data.length > 0) {
               allData = allData.concat(nextRes.data);
               offset += 1000;
@@ -2151,13 +2242,10 @@ var DB = {
               break;
             }
           }
-          
-          console.log('Final total after pagination:', allData.length);
+
           res.data = allData;
-        } else {
-          console.log('Status 200/201 - Full content returned');
         }
-        
+
         var mapped = (res.data || []).map(function(r) {
           var qty          = parseFloat(r.quantity)       || 0;
           var price        = parseFloat(r.price)          || 0;
@@ -2189,13 +2277,10 @@ var DB = {
             net_total            : parseFloat(r.net_total) || parseFloat((qty * price - lineDisc).toFixed(2)),
           };
         });
-        
-        console.log('Final total invoice_items loaded:', mapped.length);
-        
+
         return mapped;
-      } catch(e) { 
-        console.error('DB.getAllInvoiceItems: Critical error from Supabase:', e); 
-        return localGet(K.INV_ITEMS); 
+      } catch(e) {
+        return localGet(K.INV_ITEMS);
       }
     }
     /* localStorage: add net field on the fly */
@@ -2796,13 +2881,88 @@ function showPage(id) {
    ============================================================ */
 
 function renderProductsTable() {
+  /* === Customer dropdown population — read-only, uses existing APP.channels === */
+  (function _populateProductCustomerSelect(){
+    var sel = document.getElementById('productCustomerFilter');
+    if (!sel) return;
+    var channels = (window.APP && Array.isArray(APP.channels)) ? APP.channels : [];
+    var names = channels.map(function(c){ return c && c.name ? String(c.name) : ''; }).filter(Boolean).sort();
+    var existing = [];
+    for (var i = 0; i < sel.options.length; i++){
+      if (sel.options[i].value !== '') existing.push(sel.options[i].value);
+    }
+    var same = existing.length === names.length && existing.every(function(v, i){ return v === names[i]; });
+    if (same) return;
+    var current = sel.value || '';
+    sel.innerHTML = '<option value="">جميع العملاء</option>';
+    names.forEach(function(name){
+      var o = document.createElement('option');
+      o.value = name; o.textContent = name;
+      sel.appendChild(o);
+    });
+    if (current && names.indexOf(current) !== -1) sel.value = current;
+  })();
+
   var query = (document.getElementById('productSearch').value||'').trim().toLowerCase();
+  var catFilterEl = document.getElementById('productCategoryFilter');
+  var catFilter = catFilterEl ? catFilterEl.value : '';
+  var custFilterEl = document.getElementById('productCustomerFilter');
+  var custFilter = custFilterEl ? (custFilterEl.value || '') : '';
+
+  /* Build a fast lookup of customer prices for the selected customer (one pass, no per-row DB call).
+     Keyed by product_code AND barcode (covers both because they're the same value in this codebase). */
+  var custPriceMap = null;
+  if (custFilter){
+    custPriceMap = {};
+    var allPrices = (window.APP && Array.isArray(APP.customerPrices)) ? APP.customerPrices : [];
+    allPrices.forEach(function(r){
+      if (r && r.channel_name === custFilter && r.product_code){
+        custPriceMap[String(r.product_code).trim()] = {
+          price: parseFloat(r.price) || 0,
+          discount_value: parseFloat(r.discount_value) || 0
+        };
+      }
+    });
+  }
+
   var products = APP.products.filter(function(p) {
-    if (!query) return true;
-    return p.name.toLowerCase().indexOf(query)>-1 || p.barcode.toLowerCase().indexOf(query)>-1;
+    if (query && p.name.toLowerCase().indexOf(query)===-1 && p.barcode.toLowerCase().indexOf(query)===-1) return false;
+    if (catFilter){
+      var pc = (['Desserts','Frozen','Ready Products'].indexOf(p.category) !== -1) ? p.category : 'Bakery';
+      if (pc !== catFilter) return false;
+    }
+    /* Customer selected: show ALL products (linked + unlinked) — no longer filtered to linked-only */
+    return true;
   });
 
   document.getElementById('prodCount').textContent = products.length + ' منتج';
+
+  /* === Toggle the "سعر العميل" and "الحالة" columns in the thead based on customer filter === */
+  var head = document.getElementById('productsHead');
+  if (head){
+    var headRow = head.querySelector('tr');
+    var existingCustTh = head.querySelector('th.prod-cust-price-th');
+    var existingStatusTh = head.querySelector('th.prod-cust-status-th');
+    if (custFilter){
+      if (!existingCustTh && headRow){
+        var newTh = document.createElement('th');
+        newTh.className = 'prod-cust-price-th';
+        newTh.textContent = 'سعر العميل';
+        headRow.insertBefore(newTh, headRow.lastElementChild);
+      }
+      if (!existingStatusTh && headRow){
+        var newStatusTh = document.createElement('th');
+        newStatusTh.className = 'prod-cust-status-th';
+        newStatusTh.textContent = 'الحالة';
+        /* Insert status column right before the actions column (after price column if present) */
+        headRow.insertBefore(newStatusTh, headRow.lastElementChild);
+      }
+    } else {
+      if (existingCustTh) existingCustTh.parentNode.removeChild(existingCustTh);
+      if (existingStatusTh) existingStatusTh.parentNode.removeChild(existingStatusTh);
+    }
+  }
+
   var tbody = document.getElementById('productsBody');
   var empty = document.getElementById('productsEmpty');
 
@@ -2812,6 +2972,43 @@ function renderProductsTable() {
   tbody.innerHTML = products.map(function(p,i) {
     var esc = escapeHtml(p.id);
     var costDisp = p.costPrice > 0 ? fmt(p.costPrice)+' ج.م' : '<span class="muted">—</span>';
+    var cat = (['Desserts','Frozen','Ready Products'].indexOf(p.category) !== -1) ? p.category : 'Bakery';
+    var catSelect =
+      '<select class="prod-cat-select" data-id="'+esc+'" onchange="changeProductCategory(\''+esc+'\', this.value)"' +
+      ' style="background:var(--black-5);border:1px solid var(--w20);border-radius:6px;padding:5px 8px;color:var(--gold-light);font-family:\'Cairo\',sans-serif;font-size:12px;outline:none;">' +
+        '<option value="Bakery"'        + (cat==='Bakery'        ?' selected':'') + '>Bakery</option>'        +
+        '<option value="Desserts"'      + (cat==='Desserts'      ?' selected':'') + '>Desserts</option>'      +
+        '<option value="Frozen"'        + (cat==='Frozen'        ?' selected':'') + '>Frozen</option>'        +
+        '<option value="Ready Products"'+ (cat==='Ready Products'?' selected':'') + '>Ready Products</option>' +
+      '</select>';
+
+    /* Customer price + status cells — only inserted when filtering by customer */
+    var custPriceCell = '';
+    var custStatusCell = '';
+    var custActionBtn = '';
+    if (custFilter){
+      var code = String(p.product_code || p.barcode || '').trim();
+      var cp = (custPriceMap && custPriceMap[code]) ? custPriceMap[code] : null;
+      var isLinked = !!cp;
+
+      if (cp){
+        var dvLine = cp.discount_value > 0
+          ? '<div class="muted" style="font-size:10px;margin-top:2px;">خصم: '+fmt(cp.discount_value)+' ج.م</div>'
+          : '';
+        custPriceCell = '<td class="num" style="color:var(--green);font-weight:700;">'+fmt(cp.price)+' ج.م'+dvLine+'</td>';
+      } else {
+        custPriceCell = '<td class="num muted">—</td>';
+      }
+
+      custStatusCell = isLinked
+        ? '<td><span style="color:var(--green);font-weight:600;font-size:12px;">✓ مرتبط</span></td>'
+        : '<td><span class="muted" style="font-size:12px;">✗ غير مرتبط</span></td>';
+
+      custActionBtn = isLinked
+        ? '<button class="btn btn-outline btn-sm" onclick="unlinkProductFromCustomer(\''+esc+'\')">➖ إلغاء ربط</button>'
+        : '<button class="btn btn-outline btn-sm" onclick="linkProductToCustomer(\''+esc+'\')">➕ ربط</button>';
+    }
+
     return '<tr id="prod-row-'+esc+'">' +
       '<td class="muted">'+(i+1)+'</td>' +
       '<td><span class="num">'+escapeHtml(p.barcode)+'</span></td>' +
@@ -2819,12 +3016,98 @@ function renderProductsTable() {
       '<td class="num gold">'+fmt(p.price)+' ج.م</td>' +
       '<td class="num" style="color:var(--gold);">'+fmt(p.discountValue||0)+' ج.م</td>' +
       '<td class="num muted">'+costDisp+'</td>' +
+      '<td>'+catSelect+'</td>' +
+      custPriceCell +
+      custStatusCell +
       '<td><div class="td-actions">' +
+        custActionBtn +
         '<button class="btn btn-outline btn-sm" onclick="editProduct(\''+esc+'\')">✏️ تعديل</button>' +
         '<button class="btn btn-danger btn-sm" onclick="confirmDeleteProduct(\''+esc+'\')">🗑 حذف</button>' +
       '</div></td>' +
     '</tr>';
   }).join('');
+}
+
+/* === Customer Product Assignment (Phase 3.2) — link/unlink a product to the currently selected customer === */
+async function linkProductToCustomer(productId) {
+  var custFilterEl = document.getElementById('productCustomerFilter');
+  var customer = custFilterEl ? (custFilterEl.value || '') : '';
+  if (!customer) return; /* safety: button only renders when a customer is selected */
+
+  var p = APP.products.find(function(x){ return x.id === productId; });
+  if (!p) return;
+  var code = String(p.product_code || p.barcode || '').trim();
+  if (!code) { toast('⚠️ المنتج بدون كود/باركود صالح', 'err'); return; }
+
+  /* Guard against duplicate link (defensive — UI shouldn't allow this, but double-check before insert) */
+  var already = (APP.customerPrices || []).find(function(r){
+    return r.channel_name === customer && r.product_code === code;
+  });
+  if (already) { toast('ℹ️ المنتج مرتبط بالفعل بهذا العميل', 'ok'); return; }
+
+  try {
+    await DB.saveCustomerPrice({ product_code: code, channel_name: customer, price: p.price, discount_value: 0 });
+    APP.customerPrices = await DB.getCustomerPrices();
+    toast('✅ تم ربط المنتج بـ ' + customer, 'ok');
+    renderProductsTable();
+  } catch(e){
+    console.warn('linkProductToCustomer:', e);
+    toast('⚠️ تعذّر ربط المنتج', 'err');
+  }
+}
+
+async function unlinkProductFromCustomer(productId) {
+  var custFilterEl = document.getElementById('productCustomerFilter');
+  var customer = custFilterEl ? (custFilterEl.value || '') : '';
+  if (!customer) return;
+
+  var p = APP.products.find(function(x){ return x.id === productId; });
+  if (!p) return;
+  var code = String(p.product_code || p.barcode || '').trim();
+
+  var rec = (APP.customerPrices || []).find(function(r){
+    return r.channel_name === customer && r.product_code === code;
+  });
+  if (!rec) { toast('ℹ️ المنتج غير مرتبط بهذا العميل', 'ok'); renderProductsTable(); return; }
+
+  try {
+    await DB.deleteCustomerPrice(rec.id);
+    APP.customerPrices = await DB.getCustomerPrices();
+    toast('✅ تم إلغاء ربط المنتج عن ' + customer, 'ok');
+    renderProductsTable();
+  } catch(e){
+    console.warn('unlinkProductFromCustomer:', e);
+    toast('⚠️ تعذّر إلغاء الربط', 'err');
+  }
+}
+
+/* Inline category change handler — saves only the category for that product */
+async function changeProductCategory(id, newCategory) {
+  var p = APP.products.find(function(x){ return x.id===id; });
+  if (!p) return;
+  if (['Bakery','Desserts','Frozen','Ready Products'].indexOf(newCategory) === -1){
+    toast('⚠️ قيمة قسم غير صحيحة', 'err'); return;
+  }
+  console.log('[changeProductCategory] id:', id, '| from:', p.category, '→ to:', newCategory);
+  var updated = { id: p.id, barcode: p.barcode, product_code: p.product_code || p.barcode,
+                  name: p.name, price: p.price, discountValue: p.discountValue || 0,
+                  costPrice: p.costPrice || 0, category: newCategory };
+  try {
+    var saved = await DB.saveProduct(updated);
+    if (!saved){
+      /* DB.saveProduct already logged the exact error and showed a toast — revert UI */
+      console.warn('[changeProductCategory] save returned null — leaving in-memory category unchanged');
+      var sel = document.querySelector('select.prod-cat-select[data-id="' + id + '"]');
+      if (sel) sel.value = p.category || 'Bakery';
+      return;
+    }
+    APP.products = await DB.getProducts();
+    p.category = newCategory;
+    toast('✅ تم تحديث القسم: ' + newCategory, 'ok');
+  } catch(e){
+    console.error('[changeProductCategory] threw:', e);
+    toast('⚠️ تعذّر حفظ القسم: ' + (e && e.message ? e.message : e), 'err');
+  }
 }
 
 async function saveProduct() {
@@ -2833,6 +3116,9 @@ async function saveProduct() {
   var price         = parseFloat(document.getElementById('fp_price').value)||0;
   var discountValue = parseFloat(document.getElementById('fp_discount').value)||0;
   var costPrice     = parseFloat((document.getElementById('fp_cost')||{}).value)||0;
+  var categoryEl    = document.getElementById('fp_category');
+  var category      = categoryEl ? categoryEl.value : 'Bakery';
+  if (['Bakery','Desserts','Frozen','Ready Products'].indexOf(category) === -1) category = 'Bakery';
 
   if (!barcode) { toast('⚠️ أدخل الباركود / الكود','err'); return; }
   if (!name)    { toast('⚠️ أدخل اسم المنتج','err'); return; }
@@ -2848,10 +3134,15 @@ async function saveProduct() {
   if (dupCheck) { toast('⚠️ هذا الكود / الباركود موجود بالفعل: ' + escapeHtml(dupCheck.name),'err'); return; }
 
   var product = { barcode:barcode, product_code:barcode, name:name, price:price,
-                  discountValue:discountValue, costPrice:costPrice };
+                  discountValue:discountValue, costPrice:costPrice, category:category };
   if (editingProductId) product.id = editingProductId;
 
-  await DB.saveProduct(product);
+  var saved = await DB.saveProduct(product);
+  if (!saved && APP.mode === 'live'){
+    /* DB.saveProduct already logged the exact failure and showed a specific toast */
+    console.warn('[saveProduct form] save returned null — aborting UI update');
+    return;
+  }
   APP.products = await DB.getProducts();
   APP.customerPrices = await DB.getCustomerPrices();
   toast(editingProductId ? '✅ تم تعديل المنتج' : '✅ تم إضافة المنتج — لا تنسَ إضافة أسعار العملاء 💰', 'ok');
@@ -2868,6 +3159,11 @@ function editProduct(id) {
   document.getElementById('fp_discount').value = p.discountValue || 0;
   var costEl = document.getElementById('fp_cost');
   if (costEl) costEl.value = p.costPrice || 0;
+  var catEl = document.getElementById('fp_category');
+  if (catEl) {
+    var pc = (['Desserts','Frozen','Ready Products'].indexOf(p.category) !== -1) ? p.category : 'Bakery';
+    catEl.value = pc;
+  }
   editingProductId = id;
   document.getElementById('prodBtnText').textContent = 'حفظ التعديلات';
   document.getElementById('prodBtnIcon').textContent = '💾';
@@ -2896,6 +3192,8 @@ function clearProductForm() {
   document.getElementById('fp_discount').value = '';
   var costEl = document.getElementById('fp_cost');
   if (costEl) costEl.value = '';
+  var catEl = document.getElementById('fp_category');
+  if (catEl) catEl.value = 'Bakery';
 }
 
 function confirmDeleteProduct(id) {
@@ -4251,57 +4549,6 @@ async function loadDashboard() {
   var allInvoices = await DB.getInvoices();
   var allItems    = await DB.getAllInvoiceItems();
 
-  /* DEBUG: Comprehensive data source logging */
-  console.log('=== loadDashboard DATA SOURCE DEBUG ===');
-  console.log('APP.mode:', APP.mode);
-  console.log('Data Source:', APP.mode === 'live' ? 'Supabase' : 'localStorage');
-  console.log('Total invoices loaded:', allInvoices.length);
-  console.log('Total items loaded:', allItems.length);
-  
-  if (allInvoices.length > 0) {
-    console.log('First invoice:', {
-      id: allInvoices[0].id,
-      number: allInvoices[0].number,
-      createdAt: allInvoices[0].createdAt
-    });
-    console.log('Last invoice:', {
-      id: allInvoices[allInvoices.length - 1].id,
-      number: allInvoices[allInvoices.length - 1].number,
-      createdAt: allInvoices[allInvoices.length - 1].createdAt
-    });
-    
-    /* Check how many items linked to latest invoice */
-    var latestInvId = allInvoices[0].id;
-    var itemsForLatest = allItems.filter(function(it) {
-      return (it.invoiceId || it.invoice_id) === latestInvId;
-    });
-    console.log('Items for latest invoice (', latestInvId, '):', itemsForLatest.length);
-    if (itemsForLatest.length > 0) {
-      console.log('Sample items for latest invoice:', itemsForLatest.slice(0, 2));
-    }
-  }
-  
-  if (allItems.length > 0) {
-    console.log('First item:', {
-      invoiceId: allItems[0].invoiceId,
-      barcode: allItems[0].barcode,
-      qty: allItems[0].qty
-    });
-  }
-  
-  /* Check if invoices are sorted DESC by created_at */
-  var isSortedDesc = true;
-  for (var i = 1; i < allInvoices.length; i++) {
-    var curr = allInvoices[i].createdAt || '';
-    var prev = allInvoices[i-1].createdAt || '';
-    if (curr > prev) {
-      isSortedDesc = false;
-      console.warn('Invoice sort issue: invoice', i, 'is older than', i-1);
-      break;
-    }
-  }
-  console.log('Invoices sorted DESC by createdAt:', isSortedDesc);
-
   /* Map items by invoiceId for quick lookup */
   var itemsByInv = {};
   allItems.forEach(function(it) {
@@ -4339,20 +4586,6 @@ async function loadDashboard() {
     return true;
   });
 
-  console.log('=== FILTERING DETAIL ===');
-  console.log('Filtered invoices count:', filteredInv.length);
-  console.log('Invoice IDs in filter:', Object.keys(filteredInvIds).length);
-  console.log('Items before filter:', allItems.length);
-  console.log('Items after filter:', filteredItems.length);
-  
-  if (filteredInv.length > 0 && allItems.length > 0) {
-    var inv0 = filteredInv[0];
-    var items0 = allItems.filter(function(it) {
-      return (it.invoiceId || it.invoice_id) === inv0.id;
-    });
-    console.log('Sample check - Invoice ID:', inv0.id, 'has items:', items0.length);
-  }
-
   /* If product filter active — restrict invoices to those that contain filtered items */
   if (fProd) {
     var invWithProduct = {};
@@ -4365,11 +4598,6 @@ async function loadDashboard() {
 
   DASH.invoices = filteredInv;
   DASH.items    = filteredItems;
-
-  console.log('=== DASH ASSIGNMENT ===');
-  console.log('DASH.invoices count:', DASH.invoices.length);
-  console.log('DASH.items count:', DASH.items.length);
-  console.log('Filter applied - from:', fFrom, 'to:', fTo, 'channel:', fCh);
 
   /* Fetch returns for same period */
   var allReturns = await DB.getReturns();
@@ -4641,10 +4869,6 @@ function renderProductsReport() {
   var emptyEl = document.getElementById('prodReportEmpty');
   if (!tbody) return;
 
-  console.log('=== renderProductsReport DEBUG ===');
-  console.log('DASH.items passed:', items.length);
-  console.log('First item in DASH.items:', items.length > 0 ? { invoiceId: items[0].invoiceId, barcode: items[0].barcode } : 'none');
-
   /* Aggregate */
   var prod = {};
   items.forEach(function(it) {
@@ -4665,9 +4889,6 @@ function renderProductsReport() {
     var d = it.createdAt ? it.createdAt.substring(0,10) : '';
     if (d > prod[k].lastDate) prod[k].lastDate = d;
   });
-
-  console.log('Total unique products aggregated:', Object.keys(prod).length);
-  console.log('Product aggregation sample:', Object.values(prod).slice(0, 3));
 
   var rows = Object.values(prod).filter(function(p){
     return !query || p.name.toLowerCase().includes(query) || p.barcode.toLowerCase().includes(query);
@@ -4764,29 +4985,18 @@ function renderInvoicesReport() {
 
   /* Items count per invoice from DASH.items */
   var itemCount = {};
-  
-  console.log('=== renderInvoicesReport DEBUG ===');
-  console.log('DASH.items length:', DASH.items.length);
-  
+
   DASH.items.forEach(function(it) {
     var invId = String(it.invoiceId || it.invoice_id || '').trim();
     if (invId) {
       itemCount[invId] = (itemCount[invId] || 0) + 1;
-      console.log('Adding item - invId:', invId, 'count now:', itemCount[invId]);
-    } else {
-      console.warn('Item without invoiceId:', it);
     }
   });
-
-  console.log('itemCount keys:', Object.keys(itemCount));
-  console.log('itemCount:', itemCount);
 
   tbody.innerHTML = rows.map(function(iv,i) {
     var esc = escapeHtml(iv.id);
     var cnt = itemCount[iv.id] || 0;
-    
-    console.log('Invoice:', { id: iv.id, number: iv.number, count: cnt, inItemCount: !!itemCount[iv.id] });
-    
+
     return '<tr>' +
       '<td class="muted">'+(i+1)+'</td>' +
       '<td class="num" style="color:var(--gold-light);">'+escapeHtml(iv.number||'-')+'</td>' +
@@ -8133,5 +8343,496 @@ mergeXml +
   })();
   </script>
 
-  </body>
+  
+  <!-- CATEGORY ANALYTICS — Phase 2, additive, read-only -->
+  <script>
+  (function(){
+    function _safeFmt(n){ return (typeof fmt === 'function') ? fmt(n) : (parseFloat(n)||0).toFixed(2); }
+    function _esc(s){ return (typeof escapeHtml === 'function') ? escapeHtml(s) : String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function _getInvDate(iv){ return (typeof getInvDate === 'function') ? getInvDate(iv) : String((iv && (iv.date||iv.createdAt)) || '').substring(0,10); }
+    function _normCat(c){ return (['Desserts','Frozen','Ready Products'].indexOf(c) !== -1) ? c : 'Bakery'; }
+
+    var CA = {
+      _lastData: null,
+      _refreshSeq: 0,
+
+      /* ---- Modal show/hide (matches Returns Analytics fade-in pattern) ---- */
+      open: function(){
+        var m = document.getElementById('categoryAnalyticsModal');
+        if (!m) return;
+        m.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        /* Trigger CSS transition on the next frame */
+        requestAnimationFrame(function(){ m.classList.add('ca-show'); });
+        try { CA.refresh(); } catch(e){ console.warn('[CategoryAnalytics] open refresh:', e); }
+      },
+      close: function(){
+        var m = document.getElementById('categoryAnalyticsModal');
+        if (!m) return;
+        m.classList.remove('ca-show');
+        document.body.style.overflow = '';
+        setTimeout(function(){ m.style.display = 'none'; }, 250);
+      },
+
+      /* ---- Filter helpers ---- */
+      _readFilters: function(){
+        var catEl  = document.getElementById('ca_category');
+        var custEl = document.getElementById('ca_customer');
+        var fromEl = document.getElementById('ca_from');
+        var toEl   = document.getElementById('ca_to');
+        var rawCat = catEl ? (catEl.value || '') : '';
+        return {
+          /* Empty value = "جميع الأقسام" (all categories) — only normalize when a specific category is chosen */
+          category: rawCat ? _normCat(rawCat) : '',
+          customer: custEl ? (custEl.value || '')  : '',
+          fromDate: fromEl ? (fromEl.value || '')  : '',
+          toDate:   toEl   ? (toEl.value   || '')  : ''
+        };
+      },
+
+      clearDates: function(){
+        var fromEl = document.getElementById('ca_from'); if (fromEl) fromEl.value = '';
+        var toEl   = document.getElementById('ca_to');   if (toEl)   toEl.value   = '';
+        CA.refresh();
+      },
+
+      /* ---- Populate the customer dropdown from invoice channels ----
+         Stable across refreshes: only rebuilds if the unique-customer list changed.
+         Preserves the user's current selection. */
+      _populateCustomerSelect: function(invoices){
+        var sel = document.getElementById('ca_customer');
+        if (!sel) return;
+        var current = sel.value || '';
+        var seen = {};
+        (invoices || []).forEach(function(iv){
+          var ch = iv && iv.channel ? String(iv.channel).trim() : '';
+          if (ch) seen[ch] = true;
+        });
+        var names = Object.keys(seen).sort();
+        /* Skip rebuild if list is unchanged — avoids DOM churn on every refresh */
+        var existing = [];
+        for (var i = 0; i < sel.options.length; i++){
+          if (sel.options[i].value !== '') existing.push(sel.options[i].value);
+        }
+        var same = existing.length === names.length && existing.every(function(v, i){ return v === names[i]; });
+        if (same) return;
+        sel.innerHTML = '<option value="">جميع العملاء</option>';
+        names.forEach(function(name){
+          var o = document.createElement('option');
+          o.value = name; o.textContent = name;
+          sel.appendChild(o);
+        });
+        /* Restore previous selection if it still exists */
+        if (current && names.indexOf(current) !== -1) sel.value = current;
+      },
+
+      /* ---- Compute analytics from existing data only (read-only) ---- */
+      _compute: async function(filters){
+        var invoices = [];
+        try { invoices = await DB.getInvoices(); } catch(e){ console.warn('[CategoryAnalytics] getInvoices:', e); invoices = []; }
+        if (!Array.isArray(invoices)) invoices = [];
+
+        /* Populate customer dropdown from invoice channels (reuses iv.channel — same source Returns Analytics uses) */
+        CA._populateCustomerSelect(invoices);
+
+        /* Date-range + customer filter — uses the SAME date function as Dashboard/Product Report
+           (global getInvDate, via _getInvDate) so date results match the rest of the system. */
+        var inRange = invoices.filter(function(iv){
+          var d = _getInvDate(iv);
+          if (filters.fromDate && (!d || d < filters.fromDate)) return false;
+          if (filters.toDate   && (!d || d > filters.toDate))   return false;
+          if (filters.customer && String(iv.channel || '').trim() !== filters.customer) return false;
+          return true;
+        });
+        var invIds = {};
+        inRange.forEach(function(iv){ invIds[String(iv.id||'').trim()] = true; });
+
+        /* FIX: use DB.getAllInvoiceItems() — the EXACT SAME loader Product Report uses (via
+           loadDashboard() → DASH.items). The previous DB.getInvoiceItems() (no-arg) call used a
+           plain unbounded select with no pagination handling, silently truncating results on
+           large tables and causing both the revenue mismatch and the "date filter returns zero
+           results" symptom (the invoices passed the date filter, but their items were missing
+           from the truncated fetch). getAllInvoiceItems() has the same field mapping plus a
+           206-partial-content pagination loop, guaranteeing the full item set. */
+        var items = [];
+        try { items = await DB.getAllInvoiceItems(); } catch(e){ console.warn('[CategoryAnalytics] getAllInvoiceItems:', e); items = []; }
+        if (!Array.isArray(items)) items = [];
+
+        /* Restrict to items belonging to in-range invoices */
+        items = items.filter(function(it){
+          var iid = String((it.invoiceId || it.invoice_id || '')).trim();
+          return invIds[iid] === true;
+        });
+
+        /* Product→category map from APP.products (already loaded), indexed by barcode */
+        var prodByBarcode = {};
+        (Array.isArray(window.APP && APP.products) ? APP.products : []).forEach(function(p){
+          if (p && p.barcode) prodByBarcode[String(p.barcode).trim()] = p;
+        });
+
+        /* Aggregate per-product, filtered by category — unless "جميع الأقسام" (empty) is selected,
+           in which case no category filtering is applied at all and every category is included. */
+        var byProduct = {};
+        items.forEach(function(it){
+          var bc = String(it.barcode || '').trim();
+          var prod = bc ? prodByBarcode[bc] : null;
+          if (!prod) return;          /* item with no matching product → skip */
+          if (filters.category){
+            var cat = _normCat(prod.category);
+            if (cat !== filters.category) return;
+          }
+          var key = bc || (it.name || '—');
+          if (!byProduct[key]){
+            byProduct[key] = { barcode: bc, name: it.name || prod.name || bc, qty: 0, revenue: 0, category: _normCat(prod.category) };
+          }
+          /* normalizeItem() — the SAME revenue source Product Report uses */
+          var n = normalizeItem(it);
+          byProduct[key].qty     += n.qty;
+          byProduct[key].revenue += (n.qty * n.price) - n.discount;
+        });
+
+        var products = Object.keys(byProduct).map(function(k){ return byProduct[k]; });
+        var totalRevenue = products.reduce(function(s,p){ return s + p.revenue; }, 0);
+        var totalUnits   = products.reduce(function(s,p){ return s + p.qty;     }, 0);
+
+        /* Percentage of category sales — based on revenue */
+        products.forEach(function(p){
+          p.pct = totalRevenue > 0 ? (p.revenue / totalRevenue) * 100 : 0;
+        });
+
+        /* Ranked by REVENUE (changed from quantity per Phase 3.2 requirement).
+           Quantity remains visible on every product object/row — only the sort key changed. */
+        var byRevenue = products.slice().sort(function(a,b){ return b.revenue - a.revenue; });
+        var best  = byRevenue[0] || null;
+        var worst = byRevenue.length > 1 ? byRevenue[byRevenue.length - 1] : null;
+        var top5  = byRevenue.slice(0, 5);
+
+        return {
+          filters: filters,
+          totalRevenue: totalRevenue,
+          totalUnits:   totalUnits,
+          products:     byRevenue,
+          best:  best,
+          worst: worst,
+          top5:  top5
+        };
+      },
+
+      /* ---- Render KPIs + top 5 list (does NOT touch any other dashboard element) ---- */
+      _render: function(d){
+        function setText(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; }
+        setText('ca_total_revenue', _safeFmt(d.totalRevenue));
+        setText('ca_total_units',   _safeFmt(d.totalUnits));
+
+        if (d.best){
+          setText('ca_best_name', d.best.name);
+          setText('ca_best_sub',  _safeFmt(d.best.qty) + ' قطعة — يمثل ' + d.best.pct.toFixed(1) + '% من مبيعات القسم');
+        } else {
+          setText('ca_best_name', '—'); setText('ca_best_sub', '—');
+        }
+        if (d.worst && d.worst !== d.best){
+          setText('ca_worst_name', d.worst.name);
+          setText('ca_worst_sub',  _safeFmt(d.worst.qty) + ' قطعة — يمثل ' + d.worst.pct.toFixed(1) + '% من مبيعات القسم');
+        } else {
+          setText('ca_worst_name', '—'); setText('ca_worst_sub', '—');
+        }
+
+        /* === Top Products table (5 columns: #, Product, Qty Sold, Revenue, %) === */
+        var topBody = document.getElementById('ca_top_products_body');
+        if (topBody){
+          if (d.top5.length === 0){
+            topBody.innerHTML = '<tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">لا توجد بيانات في هذه الفترة</td></tr>';
+          } else {
+            topBody.innerHTML = d.top5.map(function(p, i){
+              return '<tr>' +
+                '<td class="muted">' + (i + 1) + '</td>' +
+                '<td><span style="color:var(--gold-light);font-weight:600;">' + _esc(p.name) + '</span></td>' +
+                '<td class="num">' + _safeFmt(p.qty) + '</td>' +
+                '<td class="num gold">' + _safeFmt(p.revenue) + ' ج.م</td>' +
+                '<td class="num">' + p.pct.toFixed(1) + '%</td>' +
+              '</tr>';
+            }).join('');
+          }
+        }
+
+        /* === Detailed products table (6 columns: #, Product, Qty, Revenue, Avg Price, % of Category Sales) === */
+        var allBody = document.getElementById('ca_all_products_body');
+        if (allBody){
+          if (d.products.length === 0){
+            allBody.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">لا توجد بيانات في هذه الفترة</td></tr>';
+          } else {
+            allBody.innerHTML = d.products.map(function(p, i){
+              var avg = (p.qty > 0) ? (p.revenue / p.qty) : 0;  /* display-only derivation, not aggregation */
+              return '<tr>' +
+                '<td class="muted">' + (i + 1) + '</td>' +
+                '<td>' + _esc(p.name) + '</td>' +
+                '<td class="num">' + _safeFmt(p.qty) + '</td>' +
+                '<td class="num gold">' + _safeFmt(p.revenue) + ' ج.م</td>' +
+                '<td class="num">' + _safeFmt(avg) + ' ج.م</td>' +
+                '<td class="num">' + p.pct.toFixed(1) + '%</td>' +
+              '</tr>';
+            }).join('');
+          }
+        }
+
+        /* Hidden compatibility: keep ca_top5_list in sync if it exists (no visible effect) */
+        var list = document.getElementById('ca_top5_list');
+        if (list){
+          list.innerHTML = d.top5.map(function(p){
+            return '<li>' + _esc(p.name) + ' — ' + _safeFmt(p.qty) + ' (' + p.pct.toFixed(1) + '%)</li>';
+          }).join('');
+        }
+      },
+
+      /* ---- Refresh: only re-render the Category Analytics card ---- */
+      refresh: async function(){
+        var seq = ++CA._refreshSeq;
+        var filters = CA._readFilters();
+        var d;
+        try {
+          d = await CA._compute(filters);
+        } catch(e){
+          console.warn('[CategoryAnalytics] compute failed:', e);
+          return;
+        }
+        /* Drop stale refresh if a newer one already fired (debounce) */
+        if (seq !== CA._refreshSeq) return;
+        CA._lastData = d;
+        CA._render(d);
+      },
+
+      /* ---- XLSX export — uses existing self-contained engine from ReturnsAnalytics ---- */
+      exportXLSX: async function(){
+        try {
+          if (!CA._lastData) await CA.refresh();
+          var d = CA._lastData;
+          if (!d){ if (typeof toast === 'function') toast('⚠️ لا توجد بيانات للتصدير', 'err'); return; }
+
+          var RA = window.ReturnsAnalytics;
+          if (!RA || typeof RA._buildXLSX !== 'function'){
+            console.error('[CategoryAnalytics] ReturnsAnalytics._buildXLSX not available — cannot export');
+            if (typeof toast === 'function') toast('⚠️ محرك التصدير غير متاح', 'err');
+            return;
+          }
+
+          var H = 1, R = 3, C = 4, N = 5, T = 2, L = 6; /* style ids reused from RA stylesheet */
+          var catLabel = d.filters.category || 'All Categories'; /* display-only fallback when جميع الأقسام selected */
+
+          /* Single sheet: Category | Product | Quantity Sold | Revenue | Percentage of Category Sales */
+          var s = { name: 'Category Analysis', cols: [16, 30, 18, 18, 22], freeze: 2, rows: [] };
+          s.rows.push({ cells: [
+            { v: 'Category Analysis — ' + catLabel, s: T },
+            { v: '', s: T }, { v: '', s: T }, { v: '', s: T }, { v: '', s: T }
+          ], merge: 'A1:E1' });
+          s.rows.push({ cells: [
+            { v: 'Category', s: H }, { v: 'Product', s: H },
+            { v: 'Quantity Sold', s: H }, { v: 'Revenue', s: H },
+            { v: 'Percentage of Category Sales', s: H }
+          ]});
+
+          if (d.products.length === 0){
+            s.rows.push({ cells: [
+              { v: catLabel, s: R }, { v: 'No data', s: R },
+              { v: 0, s: N, t: 'n' }, { v: 0, s: C, t: 'n' }, { v: '0%', s: R }
+            ]});
+          } else {
+            d.products.forEach(function(p){
+              s.rows.push({ cells: [
+                { v: d.filters.category ? d.filters.category : (p.category || catLabel), s: R },
+                { v: p.name, s: R },
+                { v: Number(p.qty.toFixed(2)), s: N, t: 'n' },
+                { v: Number(p.revenue.toFixed(2)), s: C, t: 'n' },
+                { v: p.pct.toFixed(2) + '%', s: R }
+              ]});
+            });
+            /* Summary row */
+            s.rows.push({ cells: [{ v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 }] });
+            s.rows.push({ cells: [
+              { v: 'TOTAL', s: L }, { v: '', s: L },
+              { v: Number(d.totalUnits.toFixed(2)), s: N, t: 'n' },
+              { v: Number(d.totalRevenue.toFixed(2)), s: C, t: 'n' },
+              { v: '100%', s: L }
+            ]});
+          }
+
+          /* Footer with filter context (for record-keeping) */
+          s.rows.push({ cells: [{ v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 }] });
+          s.rows.push({ cells: [
+            { v: 'Filters', s: L }, { v: '', s: L },{ v: '', s: L },{ v: '', s: L },{ v: '', s: L }
+          ]});
+          s.rows.push({ cells: [
+            { v: 'Category', s: L }, { v: catLabel, s: R },
+            { v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 }
+          ]});
+          s.rows.push({ cells: [
+            { v: 'Customer', s: L }, { v: d.filters.customer || '(all)', s: R },
+            { v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 }
+          ]});
+          s.rows.push({ cells: [
+            { v: 'From', s: L }, { v: d.filters.fromDate || '(all)', s: R },
+            { v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 }
+          ]});
+          s.rows.push({ cells: [
+            { v: 'To', s: L }, { v: d.filters.toDate || '(all)', s: R },
+            { v: '', s: 0 },{ v: '', s: 0 },{ v: '', s: 0 }
+          ]});
+
+          var bytes = RA._buildXLSX([s]);
+          var blob  = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          var url   = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'category-analysis-' + new Date().toISOString().split('T')[0] + '.xlsx';
+          document.body.appendChild(a); a.click();
+          setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+          if (typeof toast === 'function') toast('✅ تم تصدير ملف Excel', 'ok');
+        } catch(err){
+          console.error('[CategoryAnalytics] exportXLSX:', err);
+          if (typeof toast === 'function') toast('❌ فشل تصدير Excel', 'err');
+        }
+      }
+    };
+
+    window.CategoryAnalytics = CA;
+
+    /* Wrap showPage — when navigating to the dashboard, lazy-refresh the card.
+       Does NOT call loadDashboard or any other module. */
+    function _hookShowPage(){
+      if (typeof window.showPage !== 'function' || window.showPage._caWrapped) return false;
+      var orig = window.showPage;
+      window.showPage = function(id){
+        var r = orig.apply(this, arguments);
+        if (id === 'dashboard'){
+          /* Defer to allow page to become visible first */
+          setTimeout(function(){
+            try { CA.refresh(); } catch(e){ console.warn('[CategoryAnalytics] refresh on showPage:', e); }
+          }, 50);
+        }
+        return r;
+      };
+      window.showPage._caWrapped = true;
+      return true;
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _hookShowPage);
+    else _hookShowPage();
+    /* Retry briefly in case showPage isn't defined yet */
+    var tries = 0;
+    var iv = setInterval(function(){
+      _hookShowPage();
+      tries++;
+      if ((window.showPage && window.showPage._caWrapped) || tries > 40) clearInterval(iv);
+    }, 75);
+
+    /* Esc to close + click-on-overlay to close — UX polish, no logic change */
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape'){
+        var m = document.getElementById('categoryAnalyticsModal');
+        if (m && m.style.display !== 'none' && m.style.display !== '') CA.close();
+      }
+    });
+    var modalRoot = null;
+    function _bindOverlay(){
+      modalRoot = document.getElementById('categoryAnalyticsModal');
+      if (!modalRoot) return false;
+      modalRoot.addEventListener('click', function(e){
+        if (e.target === modalRoot) CA.close();
+      });
+      return true;
+    }
+    if (!_bindOverlay()){
+      var oTries = 0, oIv = setInterval(function(){
+        if (_bindOverlay() || ++oTries > 40) clearInterval(oIv);
+      }, 75);
+    }
+
+    console.log('[CategoryAnalytics] module ready');
+  })();
+  </script>
+
+  
+  <!-- =================== CATEGORY ANALYTICS MODAL (visual parity with Returns Analytics) =================== -->
+  <div id="categoryAnalyticsModal">
+    <div class="ra-content">
+      <div class="ra-head">
+        <h2>📊 تحليل الأقسام</h2>
+        <button class="ra-close" onclick="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.close()">✕</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="ra-section">
+        <h3>🔍 الفلاتر</h3>
+        <div class="ra-filters">
+          <div>
+            <label>القسم</label>
+            <select id="ca_category" onchange="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.refresh()">
+              <option value="" selected>جميع الأقسام</option>
+              <option value="Bakery">Bakery</option>
+              <option value="Desserts">Desserts</option>
+              <option value="Frozen">Frozen</option>
+              <option value="Ready Products">Ready Products</option>
+            </select>
+          </div>
+          <div>
+            <label>العميل</label>
+            <select id="ca_customer" onchange="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.refresh()">
+              <option value="">جميع العملاء</option>
+            </select>
+          </div>
+          <div><label>من تاريخ</label><input type="date" id="ca_from" onchange="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.refresh()"></div>
+          <div><label>إلى تاريخ</label><input type="date" id="ca_to" onchange="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.refresh()"></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.clearDates()">✕ مسح التواريخ</button>
+          <button class="btn btn-outline btn-sm" onclick="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.refresh()">🔄 تحديث</button>
+          <button class="btn btn-sm" onclick="window.CategoryAnalytics &amp;&amp; window.CategoryAnalytics.exportXLSX()" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light,#e6d18a) 100%);color:#1a1a1a;font-weight:700;border:none;">📊 تصدير Excel (XLSX)</button>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="ra-section">
+        <h3>📈 ملخص القسم</h3>
+        <div class="ra-stats">
+          <div class="ra-stat gold"><div class="lbl">إجمالي مبيعات القسم</div><div class="val" id="ca_total_revenue">—</div></div>
+          <div class="ra-stat gold"><div class="lbl">إجمالي القطع المباعة</div><div class="val" id="ca_total_units">—</div></div>
+          <div class="ra-stat green"><div class="lbl">أفضل منتج</div><div class="val" id="ca_best_name" style="font-size:14px;">—</div><div class="lbl" id="ca_best_sub" style="margin-top:4px;">—</div></div>
+          <div class="ra-stat red"><div class="lbl">أقل منتج</div><div class="val" id="ca_worst_name" style="font-size:14px;">—</div><div class="lbl" id="ca_worst_sub" style="margin-top:4px;">—</div></div>
+        </div>
+      </div>
+
+      <!-- Top Products table -->
+      <div class="ra-section">
+        <h3>🏆 الأصناف الأكثر مبيعاً</h3>
+        <div class="ra-tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>المنتج</th><th>الكمية المباعة</th><th>الإيراد</th><th>النسبة</th>
+            </tr></thead>
+            <tbody id="ca_top_products_body"><tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detailed products table -->
+      <div class="ra-section">
+        <h3>📋 تفاصيل جميع منتجات القسم</h3>
+        <div class="ra-tbl-wrap" style="max-height:460px;">
+          <table>
+            <thead><tr>
+              <th>#</th><th>المنتج</th><th>الكمية المباعة</th><th>الإيراد</th><th>متوسط السعر</th><th>نسبة مبيعات القسم</th>
+            </tr></thead>
+            <tbody id="ca_all_products_body"><tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Hidden compatibility anchors (preserved so existing _render code paths remain valid) -->
+      <ol id="ca_top5_list" style="display:none;"></ol>
+      <div id="ca_top5_empty" style="display:none;"></div>
+
+    </div>
+  </div>
+  <!-- =================== END CATEGORY ANALYTICS MODAL =================== -->
+
+</body>
 </html>

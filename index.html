@@ -6612,9 +6612,9 @@ on conflict do nothing;
         <div class="ra-tbl-wrap">
           <table>
             <thead><tr>
-              <th>#</th><th>المنتج</th><th>عدد المرتجعات</th><th>الكمية المرتجعة</th><th>قيمة المرتجعات</th>
+              <th>#</th><th>المنتج</th><th>عدد المرتجعات</th><th>الكمية المرتجعة</th><th>قيمة المرتجعات</th><th>إجمالي الكمية المباعة</th><th>إجمالي قيمة المبيعات</th><th>نسبة المرتجع %</th>
             </tr></thead>
-            <tbody id="raTopProductsBody"><tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
+            <tbody id="raTopProductsBody"><tr><td colspan="8" class="muted" style="text-align:center;padding:18px;">جاري التحميل...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -6682,8 +6682,9 @@ on conflict do nothing;
     loadData: async function() {
       var returns = await DB.getReturns();
       var invoices = await DB.getInvoices();
+      var invoiceItems = await DB.getAllInvoiceItems();
       var totalSales = invoices.reduce(function(s, iv){ return s + (parseFloat(iv.netTotal)||0); }, 0);
-      window.ReturnsAnalytics.cache = { returns: returns, invoices: invoices, totalSales: totalSales };
+      window.ReturnsAnalytics.cache = { returns: returns, invoices: invoices, invoiceItems: invoiceItems, totalSales: totalSales };
     },
 
     populateCustomers: async function() {
@@ -6757,7 +6758,35 @@ on conflict do nothing;
 
       var topProds = Object.entries(prodStats).map(function(e){
         return { name: e[0], count: e[1].count, qty: e[1].qty, value: e[1].value };
-      }).sort(function(a,b){ return b.count - a.count; });
+      });
+
+      /* Build sold-qty/value map for returned products using same active filters */
+      var _filteredInvIds = {};
+      (window.ReturnsAnalytics.cache.invoices || []).forEach(function(iv) {
+        var d = String(iv.date || iv.createdAt || '').substring(0,10);
+        if (fromDate && d < fromDate) return;
+        if (toDate && d > toDate) return;
+        if (customer && iv.channel !== customer) return;
+        _filteredInvIds[String(iv.id)] = true;
+      });
+      var _soldMap = {};
+      (window.ReturnsAnalytics.cache.invoiceItems || []).forEach(function(it) {
+        if (!_filteredInvIds[String(it.invoiceId)]) return;
+        var pname = it.name || it.barcode || '—';
+        if (!_soldMap[pname]) _soldMap[pname] = { soldQty: 0, soldValue: 0 };
+        _soldMap[pname].soldQty  += (parseFloat(it.qty) || 0);
+        _soldMap[pname].soldValue += (parseFloat(it.net) || 0);
+      });
+      topProds.forEach(function(p) {
+        var s = _soldMap[p.name] || { soldQty: 0, soldValue: 0 };
+        p.soldQty   = s.soldQty;
+        p.soldValue = s.soldValue;
+      });
+      topProds.sort(function(a,b){
+        if (b.qty !== a.qty) return b.qty - a.qty;
+        if (b.value !== a.value) return b.value - a.value;
+        return b.count - a.count;
+      });
 
       var mostProd = topProds.length ? topProds[0].name : '—';
 
@@ -6772,14 +6801,18 @@ on conflict do nothing;
       var topBody = document.getElementById('raTopProductsBody');
       if (topBody) {
         topBody.innerHTML = topProds.slice(0,15).map(function(p, idx){
+          var retRate = p.soldQty > 0 ? ((p.qty / p.soldQty) * 100).toFixed(1) + '%' : '—';
           return '<tr>' +
             '<td class="muted">'+(idx+1)+'</td>' +
             '<td>'+escapeHtml(p.name)+'</td>' +
             '<td class="num">'+p.count+'</td>' +
             '<td class="num">'+p.qty.toFixed(2)+'</td>' +
-            '<td class="num gold">'+fmt(p.value)+' ج.م</td>' +
+            '<td class="num" style="color:var(--red);">'+fmt(p.value)+' ج.م</td>' +
+            '<td class="num">'+p.soldQty.toFixed(2)+'</td>' +
+            '<td class="num" style="color:var(--green);">'+fmt(p.soldValue)+' ج.م</td>' +
+            '<td class="num" style="color:var(--gold);">'+retRate+'</td>' +
           '</tr>';
-        }).join('') || '<tr><td colspan="5" class="muted" style="text-align:center;padding:18px;">لا توجد بيانات</td></tr>';
+        }).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:18px;">لا توجد بيانات</td></tr>';
       }
 
       var logBody = document.getElementById('raLogBody');
@@ -6794,6 +6827,13 @@ on conflict do nothing;
           groups[key].count += 1;
           groups[key].total += r.total;
         });
+        /* Sort by real date ascending (oldest → newest) */
+        order.sort(function(a, b){
+          var da = new Date(groups[a].date || 0);
+          var db = new Date(groups[b].date || 0);
+          return da - db;
+        });
+
         /* Store for details lookup (isolated) */
         window.ReturnsAnalytics._logGroups = groups;
 
@@ -6809,6 +6849,20 @@ on conflict do nothing;
           '</tr>';
         }).join('') || '<tr><td colspan="6" class="muted" style="text-align:center;padding:18px;">لا توجد مرتجعات</td></tr>';
       }
+
+      /* Snapshot for export — avoids re-running async _gather() pipeline */
+      window.ReturnsAnalytics._computed = {
+        filters: { fromDate: fromDate||'—', toDate: toDate||'—', customer: customer||'الكل', search: search||'—' },
+        totalAmount: totalAmount,
+        ops: ops,
+        netAfter: netAfter,
+        pct: totalSales > 0 ? (totalAmount / totalSales) * 100 : 0,
+        topCust: topCust,
+        mostProd: mostProd,
+        topProducts: topProds,
+        logRows: logRows,
+        daily: daily
+      };
 
       window.ReturnsAnalytics.renderDailyChart(daily);
       window.ReturnsAnalytics.renderSalesVsReturns(totalSales, totalAmount);
@@ -7135,6 +7189,29 @@ mergeXml +
     var topProducts = Object.entries(prodStats).map(function(e){return {name:e[0],count:e[1].count,qty:e[1].qty,value:e[1].value};}).sort(function(a,b){return b.count-a.count;});
     var mostProd = topProducts.length?topProducts[0].name:'—';
 
+    /* Enrich topProducts with sold qty/value using same active filters */
+    var _gFiltInvIds = {};
+    (cache.invoices||[]).forEach(function(iv){
+      var d = String(iv.date||iv.createdAt||'').substring(0,10);
+      if (fromDate && d < fromDate) return;
+      if (toDate && d > toDate) return;
+      if (customer && iv.channel !== customer) return;
+      _gFiltInvIds[String(iv.id)] = true;
+    });
+    var _gSoldMap = {};
+    (cache.invoiceItems||[]).forEach(function(it){
+      if (!_gFiltInvIds[String(it.invoiceId)]) return;
+      var pname = it.name||it.barcode||'—';
+      if (!_gSoldMap[pname]) _gSoldMap[pname]={soldQty:0,soldValue:0};
+      _gSoldMap[pname].soldQty  += (parseFloat(it.qty)||0);
+      _gSoldMap[pname].soldValue += (parseFloat(it.net)||0);
+    });
+    topProducts.forEach(function(p){
+      var s = _gSoldMap[p.name]||{soldQty:0,soldValue:0};
+      p.soldQty   = s.soldQty;
+      p.soldValue = s.soldValue;
+    });
+
     return {
       filters:{fromDate:fromDate||'—', toDate:toDate||'—', customer:customer||'الكل', search:search||'—'},
       totalAmount:totalAmount, ops:ops, netAfter:netAfter, pct:pct,
@@ -7143,66 +7220,147 @@ mergeXml +
   };
 
   /* ---- professional XLSX export ---- */
-  RA.exportXLSX = async function(){
+  RA.exportXLSX = function(){
     try {
-      var d = await RA._gather();
-      var H = 1, R = 3, C = 4, N = 5, L = 6, T = 2; /* style ids */
+      var d = RA._computed;
+      if (!d) { if (typeof toast === 'function') toast('⚠️ يرجى فتح التحليل أولاً ثم المحاولة', 'err'); return; }
+      var H = 1, R = 3, C = 4, N = 5, L = 6, T = 2;
+      var prods = d.topProducts || [];
 
-      /* Sheet 1: Summary */
-      var s1 = { name:'Returns Summary', cols:[34,26], freeze:1, rows:[] };
-      s1.rows.push({ cells:[{v:'📊 ملخص تحليل المرتجعات', s:T},{v:'', s:T}], merge:'A1:B1' });
-      function kv(label,val,style){ s1.rows.push({cells:[{v:label,s:L},{v:val,s:style!=null?style:R, t:(style===C?'n':'s')}]}); }
-      kv('إجمالي قيمة المرتجعات', d.totalAmount, C);
-      kv('عدد عمليات المرتجع', d.ops, N); s1.rows[s1.rows.length-1].cells[1].t='n';
-      kv('صافي المبيعات بعد المرتجع', d.netAfter, C);
-      kv('نسبة المرتجع من المبيعات', d.pct.toFixed(2)+'%');
-      kv('أكثر عميل مرتجعات', d.topCust);
-      kv('أكثر منتج مرتجع', d.mostProd);
-      s1.rows.push({cells:[{v:'',s:0},{v:'',s:0}]});
-      s1.rows.push({cells:[{v:'الفلاتر المطبّقة',s:H},{v:'',s:H}], merge:'A'+(s1.rows.length+1)+':B'+(s1.rows.length+1)});
-      kv('من تاريخ', d.filters.fromDate);
-      kv('إلى تاريخ', d.filters.toDate);
-      kv('العميل', d.filters.customer);
-      kv('بحث المنتج', d.filters.search);
+      /* ── Precompute customer stats from logRows ── */
+      var custValue = {}, custOps = {};
+      (d.logRows||[]).forEach(function(r){
+        var ch = r.channel || '—';
+        custValue[ch] = (custValue[ch]||0) + (r.total||0);
+        if (!custOps[ch]) custOps[ch] = {};
+        if (r.number) custOps[ch][r.number] = true;
+      });
+      var custList = Object.keys(custValue).map(function(c){
+        return { name:c, value:custValue[c], count:Object.keys(custOps[c]||{}).length };
+      });
+      var top5CustVal = custList.slice().sort(function(a,b){ return b.value-a.value; }).slice(0,5);
+      var top5CustCnt = custList.slice().sort(function(a,b){ return b.count-a.count; }).slice(0,5);
 
-      /* Sheet 2: Top Returned Products */
-      var s2 = { name:'Top Returned Products', cols:[34,16,18,20], freeze:1, rows:[] };
-      s2.rows.push({cells:[
-        {v:'اسم المنتج',s:H},{v:'عدد المرتجعات',s:H},{v:'الكمية المرتجعة',s:H},{v:'قيمة المرتجعات',s:H}
+      /* ── Period stats from daily ── */
+      var activeDays = Object.keys(d.daily||{}).filter(function(k){ return (d.daily[k].value||0)>0; });
+      var avgDaily = activeDays.length>0 ? d.totalAmount/activeDays.length : 0;
+      var peakDay='—', peakVal=0;
+      activeDays.forEach(function(k){ if(d.daily[k].value>peakVal){ peakDay=k; peakVal=d.daily[k].value; } });
+
+      /* ── Product spotlights ── */
+      var top5Qty = prods.slice(0,5);
+      var highestRateProd = prods.reduce(function(best,p){
+        var rate = p.soldQty>0?(p.qty/p.soldQty)*100:0;
+        var bRate = (best&&best.soldQty>0)?(best.qty/best.soldQty)*100:0;
+        return (!best||rate>bRate)?p:best;
+      }, null);
+      var highestValProd = prods.reduce(function(best,p){ return (!best||p.value>best.value)?p:best; }, null);
+
+      /* ══════════════════════════════════════════════
+         SHEET 1 — Top Returned Products (aggregated)
+         ══════════════════════════════════════════════ */
+      var s1 = { name:'Top Returned Products', cols:[36,18,20,18,20,16], freeze:2, rows:[] };
+      /* Title row */
+      s1.rows.push({cells:[
+        {v:'📦 أكثر المنتجات مرتجعاً — مجمّع حسب الفترة المختارة',s:T},{v:'',s:T},{v:'',s:T},{v:'',s:T},{v:'',s:T},{v:'',s:T}
+      ], merge:'A1:F1'});
+      /* Header row */
+      s1.rows.push({cells:[
+        {v:'اسم المنتج',s:H},{v:'إجمالي الكمية المرتجعة',s:H},{v:'إجمالي قيمة المرتجعات',s:H},
+        {v:'إجمالي الكمية المباعة',s:H},{v:'إجمالي قيمة المبيعات',s:H},{v:'نسبة المرتجع %',s:H}
       ]});
-      d.topProducts.forEach(function(p){
-        s2.rows.push({cells:[
-          {v:p.name,s:R},{v:p.count,s:N,t:'n'},{v:Number(p.qty.toFixed(2)),s:N,t:'n'},{v:Number(p.value.toFixed(2)),s:C,t:'n'}
+      /* Data rows — sorted desc by returned qty (already sorted in _computed) */
+      prods.forEach(function(p){
+        var retRate = (p.soldQty||0)>0 ? Number(((p.qty/p.soldQty)*100).toFixed(2)) : 0;
+        s1.rows.push({cells:[
+          {v:p.name,s:R},
+          {v:Number(p.qty.toFixed(2)),s:N,t:'n'},
+          {v:Number(p.value.toFixed(2)),s:C,t:'n'},
+          {v:Number((p.soldQty||0).toFixed(2)),s:N,t:'n'},
+          {v:Number((p.soldValue||0).toFixed(2)),s:C,t:'n'},
+          {v:retRate,s:N,t:'n'}
         ]});
       });
-      if (d.topProducts.length===0) s2.rows.push({cells:[{v:'لا توجد بيانات',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R}]});
+      if (!prods.length) s1.rows.push({cells:[{v:'لا توجد بيانات',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R}]});
 
-      /* Sheet 3: Returns Log */
-      var s3 = { name:'Returns Log', cols:[16,14,22,30,12,16,24], freeze:1, rows:[] };
-      s3.rows.push({cells:[
-        {v:'رقم المرتجع',s:H},{v:'التاريخ',s:H},{v:'العميل',s:H},{v:'المنتج',s:H},{v:'الكمية',s:H},{v:'الإجمالي',s:H},{v:'ملاحظات',s:H}
-      ]});
-      d.logRows.forEach(function(r){
-        var dt = String(r.date||'').substring(0,10);
-        s3.rows.push({cells:[
-          {v:r.number||'—',s:R},{v:dt,s:R},{v:r.channel||'—',s:R},{v:r.product,s:R},
-          {v:Number(r.qty.toFixed(2)),s:N,t:'n'},{v:Number(r.total.toFixed(2)),s:C,t:'n'},{v:r.notes||'',s:R}
-        ]});
+      /* ══════════════════════════════════════════════
+         SHEET 2 — Returns Summary (management dashboard)
+         ══════════════════════════════════════════════ */
+      var s2 = { name:'Returns Summary', cols:[32,28], freeze:1, rows:[] };
+
+      function _pushTitle(text){
+        var r = s2.rows.length+1;
+        s2.rows.push({cells:[{v:text,s:T},{v:'',s:T}], merge:'A'+r+':B'+r});
+      }
+      function _pushSec(text){
+        var r = s2.rows.length+1;
+        s2.rows.push({cells:[{v:text,s:H},{v:'',s:H}], merge:'A'+r+':B'+r});
+      }
+      function _pushRow(label, val, vs){
+        var isNum = (vs===C||vs===N);
+        s2.rows.push({cells:[{v:label,s:L},{v:val,s:vs!=null?vs:R,t:isNum?'n':'s'}]});
+      }
+      function _pushBlank(){
+        s2.rows.push({cells:[{v:'',s:0},{v:'',s:0}]});
+      }
+
+      _pushTitle('📊 لوحة تحليل المرتجعات التنفيذية');
+      _pushBlank();
+
+      /* A) Executive Summary */
+      _pushSec('أ) الملخص التنفيذي');
+      _pushRow('إجمالي قيمة المرتجعات',    Number(d.totalAmount.toFixed(2)), C);
+      _pushRow('عدد عمليات المرتجع',        d.ops, N);
+      _pushRow('صافي المبيعات بعد المرتجع', Number(d.netAfter.toFixed(2)), C);
+      _pushRow('نسبة المرتجع من المبيعات',  d.pct.toFixed(2)+'%');
+      _pushRow('أكثر عميل مرتجعات',         d.topCust||'—');
+      _pushRow('أكثر منتج مرتجع',           d.mostProd||'—');
+      _pushRow('الفترة المختارة', (d.filters.fromDate||'الكل')+' → '+(d.filters.toDate||'الكل'));
+      _pushBlank();
+
+      /* B) Product Performance */
+      _pushSec('ب) أداء المنتجات');
+      _pushRow('أعلى 5 منتجات مرتجعة (بالكمية)', '');
+      top5Qty.forEach(function(p,i){
+        _pushRow('   '+(i+1)+'. '+p.name, Number(p.qty.toFixed(2)), N);
       });
-      if (d.logRows.length===0) s3.rows.push({cells:[{v:'لا توجد مرتجعات',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R}]});
+      if (highestRateProd){
+        var hrRate = highestRateProd.soldQty>0?((highestRateProd.qty/highestRateProd.soldQty)*100).toFixed(1)+'%':'—';
+        _pushRow('أعلى نسبة مرتجع', highestRateProd.name+' ('+hrRate+')');
+      }
+      if (highestValProd){
+        _pushRow('أعلى قيمة مرتجعات', highestValProd.name+' — '+Number(highestValProd.value.toFixed(2))+' ج.م');
+      }
+      _pushBlank();
 
-      /* Sheet 4: Charts Data */
-      var s4 = { name:'Charts Data', cols:[18,18,20], freeze:1, rows:[] };
-      s4.rows.push({cells:[{v:'التاريخ',s:H},{v:'عدد المرتجعات',s:H},{v:'قيمة المرتجعات',s:H}]});
-      Object.keys(d.daily).sort().forEach(function(k){
-        s4.rows.push({cells:[{v:k,s:R},{v:d.daily[k].count,s:N,t:'n'},{v:Number(d.daily[k].value.toFixed(2)),s:C,t:'n'}]});
-      });
-      s4.rows.push({cells:[{v:'',s:0},{v:'',s:0},{v:'',s:0}]});
-      s4.rows.push({cells:[{v:'المبيعات مقابل المرتجعات',s:H},{v:'',s:H},{v:'',s:H}], merge:'A'+(s4.rows.length+1)+':C'+(s4.rows.length+1)});
-      s4.rows.push({cells:[{v:'إجمالي المبيعات',s:L},{v:Number(((RA.cache&&RA.cache.totalSales)||0).toFixed(2)),s:C,t:'n'},{v:'',s:0}]});
-      s4.rows.push({cells:[{v:'إجمالي المرتجعات',s:L},{v:Number(d.totalAmount.toFixed(2)),s:C,t:'n'},{v:'',s:0}]});
+      /* C) Customer Analysis */
+      _pushSec('ج) تحليل العملاء');
+      _pushRow('أعلى 5 عملاء بقيمة المرتجعات', '');
+      top5CustVal.forEach(function(c,i){ _pushRow('   '+(i+1)+'. '+c.name, Number(c.value.toFixed(2)), C); });
+      _pushBlank();
+      _pushRow('أعلى 5 عملاء بعدد المرتجعات', '');
+      top5CustCnt.forEach(function(c,i){ _pushRow('   '+(i+1)+'. '+c.name, c.count, N); });
+      _pushBlank();
 
-      var bytes = RA._buildXLSX([s1,s2,s3,s4]);
+      /* D) Period Analysis */
+      _pushSec('د) تحليل الفترة');
+      _pushRow('تاريخ البداية',          d.filters.fromDate||'—');
+      _pushRow('تاريخ النهاية',           d.filters.toDate||'—');
+      _pushRow('عدد الأيام النشطة',       activeDays.length, N);
+      _pushRow('متوسط المرتجعات اليومية', Number(avgDaily.toFixed(2)), C);
+      _pushRow('أعلى يوم مرتجعات',        peakDay);
+      _pushRow('قيمة أعلى يوم',           Number(peakVal.toFixed(2)), C);
+      _pushBlank();
+
+      /* E) Filters Applied */
+      _pushSec('هـ) الفلاتر المطبّقة');
+      _pushRow('من تاريخ',   d.filters.fromDate||'الكل');
+      _pushRow('إلى تاريخ',  d.filters.toDate||'الكل');
+      _pushRow('العميل',      d.filters.customer||'الكل');
+      _pushRow('بحث المنتج', d.filters.search||'—');
+
+      /* ── Build & download ── */
+      var bytes = RA._buildXLSX([s1,s2]);
       var blob = new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
@@ -7218,17 +7376,22 @@ mergeXml +
   };
 
   /* ---- CSV export (modal-scoped, uses same filtered data) ---- */
-  RA.exportCSV = async function(){
+  RA.exportCSV = function(){
     try {
-      var d = await RA._gather();
-      var lines = [];
-      lines.push('رقم المرتجع,التاريخ,العميل,المنتج,الكمية,الإجمالي,ملاحظات');
-      d.logRows.forEach(function(r){
-        var dt = String(r.date||'').substring(0,10);
-        function q(x){ x=String(x==null?'':x); return /[",\n]/.test(x) ? '"'+x.replace(/"/g,'""')+'"' : x; }
-        lines.push([q(r.number||''),q(dt),q(r.channel||''),q(r.product),r.qty.toFixed(2),r.total.toFixed(2),q(r.notes||'')].join(','));
+      var d = RA._computed;
+      if (!d) { if (typeof toast === 'function') toast('⚠️ يرجى فتح التحليل أولاً ثم المحاولة', 'err'); return; }
+      function q(x){ x=String(x==null?'':x); return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x; }
+      var lines = ['اسم المنتج,إجمالي الكمية المرتجعة,إجمالي قيمة المرتجعات,إجمالي الكمية المباعة,إجمالي قيمة المبيعات,نسبة المرتجع %'];
+      (d.topProducts||[]).forEach(function(p){
+        var retRate = (p.soldQty||0)>0 ? ((p.qty/p.soldQty)*100).toFixed(2) : '0.00';
+        lines.push([q(p.name||''),
+                    (parseFloat(p.qty)||0).toFixed(2),
+                    (parseFloat(p.value)||0).toFixed(2),
+                    (parseFloat(p.soldQty)||0).toFixed(2),
+                    (parseFloat(p.soldValue)||0).toFixed(2),
+                    retRate].join(','));
       });
-      var csv = '\uFEFF' + lines.join('\n'); /* BOM for Arabic */
+      var csv = '﻿' + lines.join('\n');
       var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
@@ -7238,6 +7401,7 @@ mergeXml +
       if (typeof toast === 'function') toast('✅ تم تصدير CSV', 'ok');
     } catch (err){
       console.error('[ReturnsAnalytics] CSV export error:', err);
+      if (typeof toast === 'function') toast('❌ فشل تصدير CSV', 'err');
     }
   };
 })();

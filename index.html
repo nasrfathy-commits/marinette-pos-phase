@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- ============================================================
-  SUPABASE CONFIG — ضع مفاتيحك هنا
+  SUPABASE CONFIG — ضع مفاتيحك هنا 
   إذا تركتها فارغة → Demo Mode تلقائياً
   ============================================================ -->
 <script>
@@ -671,6 +671,31 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
 .ip-detail-block .ip-detail-lbl{font-size:10px;color:var(--w60);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;}
 .ip-detail-block .ip-detail-val{font-weight:700;}
 .ip-detail-block.is-pending{border-color:rgba(224,82,82,0.35);background:rgba(224,82,82,0.06);}
+
+/* ============================================================
+   CLIENT COMMISSION ANALYSIS — page styles (Phase 9)
+   ============================================================ */
+.ca2-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:22px;}
+.ca2-kpi{background:var(--black-3);border:1px solid var(--gold-border);border-radius:var(--radius);padding:16px 18px;display:flex;flex-direction:column;gap:5px;transition:border-color 0.2s,transform 0.18s;}
+.ca2-kpi:hover{border-color:var(--gold);transform:translateY(-2px);}
+.ca2-kpi.highlight{border-color:var(--gold);background:linear-gradient(135deg,var(--black-3),rgba(201,168,76,0.06));}
+.ca2-kpi .ca2-lbl{font-size:10px;font-weight:700;color:var(--w30);text-transform:uppercase;letter-spacing:1px;}
+.ca2-kpi .ca2-val{font-family:var(--font-num);font-size:20px;font-weight:700;color:var(--gold-light);line-height:1.1;}
+.ca2-kpi .ca2-val.red{color:var(--red);}
+.ca2-kpi .ca2-val.green{color:var(--green);}
+
+/* Commission section inside product form */
+.comm-section{background:rgba(201,168,76,0.05);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:14px 16px;}
+.comm-section h4{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;}
+.comm-row{display:flex;align-items:center;gap:14px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);flex-wrap:wrap;}
+.comm-row:last-child{border-bottom:none;}
+.comm-cust-name{min-width:130px;font-size:13px;color:var(--w90);font-weight:500;}
+.comm-rate-wrap{display:flex;align-items:center;gap:5px;}
+.comm-rate-input{width:72px;padding:5px 8px;background:var(--black-5);border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:var(--white);font-family:var(--font-num);font-size:13px;text-align:center;outline:none;transition:border-color 0.15s;}
+.comm-rate-input:focus{border-color:var(--gold);}
+.comm-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--w60);cursor:pointer;user-select:none;}
+.comm-toggle input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);cursor:pointer;}
+.comm-toggle.enabled{color:var(--green);}
 </style>
 </head>
 <body>
@@ -708,8 +733,9 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
   <button class="tab-btn active" onclick="showPage('invoice')"   data-page="invoice">🧾 الفاتورة</button>
   <button class="tab-btn"        onclick="showPage('invoices')"  data-page="invoices">📋 الفواتير</button>
   <button class="tab-btn"        onclick="showPage('dashboard')" data-page="dashboard">📊 لوحة التحكم</button>
-  <button class="tab-btn"        onclick="showPage('returns')"   data-page="returns">↩️ المرتجعات</button>
-  <button class="tab-btn"        onclick="showPage('statement')" data-page="statement">📄 كشف الحساب</button>
+  <button class="tab-btn"        onclick="showPage('returns')"    data-page="returns">↩️ المرتجعات</button>
+  <button class="tab-btn"        onclick="showPage('commission')" data-page="commission">📈 تحليل عمولة العملاء</button>
+  <button class="tab-btn"        onclick="showPage('statement')"  data-page="statement">📄 كشف الحساب</button>
   <button class="tab-btn"        onclick="showPage('collections')" data-page="collections">⏳ التحصيلات</button>
   <button class="tab-btn"        onclick="showPage('products')"  data-page="products">📦 المنتجات</button>
   <button class="tab-btn"        onclick="showPage('pricing')"   data-page="pricing">💰 أسعار العملاء</button>
@@ -892,6 +918,15 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
         </button>
         <button class="btn btn-outline" id="cancelEditProdBtn" style="display:none;" onclick="cancelProductEdit()">✕ إلغاء</button>
         <button class="btn btn-outline" onclick="clearProductForm()">🗑 مسح</button>
+      </div>
+
+      <!-- Commission rules section — shown when editing an existing product with linked customers -->
+      <div id="productCommissionsSection" style="display:none;margin-top:16px;">
+        <div class="comm-section">
+          <h4>🤝 عمولة العملاء على هذا المنتج</h4>
+          <div id="productCommissionsBody"><p class="muted small">لا يوجد عملاء مرتبطون بهذا المنتج</p></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="saveProductCommissions()">💾 حفظ إعدادات العمولة</button>
+        </div>
       </div>
     </div>
 
@@ -1503,6 +1538,139 @@ body.light-mode .theme-toggle-thumb { transform: translateX(-14px); }
     </div>
   </div><!-- /page-pricing -->
 
+
+  <!-- =================== PAGE: COMMISSION ANALYSIS (Phase 9) =================== -->
+  <div class="page" id="page-commission">
+    <div class="sec-title">
+      <div class="icon-badge">📈</div>
+      <h2>تحليل عمولة العملاء</h2>
+      <div class="gold-line"></div>
+      <button class="btn btn-outline btn-sm" onclick="window.CommissionAnalytics && CommissionAnalytics.refresh()">🔄 تحديث</button>
+      <button class="btn btn-sm" onclick="window.CommissionAnalytics && CommissionAnalytics.exportXLSX()" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light,#e6d18a) 100%);color:#1a1a1a;font-weight:700;border:none;">📊 تصدير Excel (XLSX)</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar" style="margin-bottom:20px;">
+      <div class="form-group" style="min-width:200px;">
+        <label>العميل</label>
+        <select id="ca2_client" onchange="window.CommissionAnalytics && CommissionAnalytics.refresh()">
+          <option value="">— اختر العميل —</option>
+        </select>
+      </div>
+      <div class="form-group" style="min-width:210px;">
+        <label>نوع التحليل</label>
+        <select id="ca2_analysis_type" onchange="window.CommissionAnalytics && CommissionAnalytics.refresh()">
+          <option value="commission">خاضعة للعمولة</option>
+          <option value="non-commission">غير خاضعة للعمولة</option>
+          <option value="all">الكل</option>
+        </select>
+      </div>
+      <div class="form-group" style="min-width:160px;">
+        <label>القسم</label>
+        <select id="ca2_category" onchange="window.CommissionAnalytics && CommissionAnalytics.refresh()">
+          <option value="">جميع الأقسام</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>من تاريخ</label>
+        <input type="date" id="ca2_from" oninput="window.CommissionAnalytics && CommissionAnalytics.refresh()">
+      </div>
+      <div class="form-group">
+        <label>إلى تاريخ</label>
+        <input type="date" id="ca2_to" oninput="window.CommissionAnalytics && CommissionAnalytics.refresh()">
+      </div>
+      <div class="form-group" style="min-width:200px;">
+        <label>بحث المنتج (اختياري)</label>
+        <input type="text" id="ca2_product" placeholder="اسم المنتج أو الباركود..." oninput="window.CommissionAnalytics && CommissionAnalytics.refresh()">
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="ca2_empty" class="empty">
+      <div class="empty-icon">📈</div>
+      <p id="ca2_empty_msg">اختر عميلاً من القائمة أعلاه لعرض تحليل العمولة</p>
+    </div>
+
+    <!-- Content — shown after client is selected -->
+    <div id="ca2_content" style="display:none;">
+
+      <!-- KPI Cards (8 cards) -->
+      <div class="ca2-kpi-grid">
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">💰 إجمالي المبيعات الفعلية</div>
+          <div class="ca2-val" id="ca2_kpi_sales">—</div>
+        </div>
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">🏷️ إجمالي خصومات القطعة</div>
+          <div class="ca2-val" style="color:var(--w60);" id="ca2_kpi_item_discounts">—</div>
+        </div>
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">↩️ إجمالي المرتجعات</div>
+          <div class="ca2-val red" id="ca2_kpi_returns">—</div>
+        </div>
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">📊 صافي بعد المرتجع</div>
+          <div class="ca2-val" id="ca2_kpi_net_sales">—</div>
+        </div>
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">🤝 إجمالي العمولة</div>
+          <div class="ca2-val" style="color:var(--gold);" id="ca2_kpi_commission">—</div>
+        </div>
+        <div class="ca2-kpi highlight">
+          <div class="ca2-lbl">✅ الصافي الحقيقي النهائي</div>
+          <div class="ca2-val green" id="ca2_kpi_real_net">—</div>
+        </div>
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">📦 إجمالي القطع</div>
+          <div class="ca2-val" id="ca2_kpi_total_qty">—</div>
+        </div>
+        <div class="ca2-kpi">
+          <div class="ca2-lbl">🗂️ عدد الأصناف</div>
+          <div class="ca2-val" id="ca2_kpi_items_count">—</div>
+        </div>
+      </div>
+
+      <!-- Breakdown section — only visible in "الكل" mode -->
+      <div id="ca2_breakdown" style="display:none;background:var(--black-3);border:1px solid var(--gold-border);border-radius:var(--radius);padding:16px 20px;margin-bottom:22px;">
+        <div style="font-weight:700;color:var(--gold);margin-bottom:12px;font-size:13px;">📊 تفصيل الكل</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:13px;">
+          <span class="muted">مبيعات المنتجات الخاضعة للعمولة:</span><span class="num" id="ca2_bd_comm_sales">—</span>
+          <span class="muted">مبيعات المنتجات غير الخاضعة للعمولة:</span><span class="num" id="ca2_bd_noncomm_sales">—</span>
+          <span class="muted">إجمالي المرتجعات:</span><span class="num" style="color:var(--red);" id="ca2_bd_returns">—</span>
+          <span class="muted">خصم العمولة المحتسب:</span><span class="num" style="color:var(--gold);" id="ca2_bd_comm_deduction">—</span>
+          <span style="font-weight:700;">الصافي الحقيقي النهائي:</span><span class="num" style="color:var(--green);font-weight:700;" id="ca2_bd_final_net">—</span>
+        </div>
+      </div>
+
+      <!-- Product table -->
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>المنتج</th>
+              <th>الكمية المباعة</th>
+              <th>قيمة المبيعات (فعلي)</th>
+              <th>الكمية المرتجعة</th>
+              <th>قيمة المرتجعات</th>
+              <th>الكمية الصافية</th>
+              <th>خصم القطعة الإجمالي</th>
+              <th>العمولة %</th>
+              <th>قيمة العمولة</th>
+              <th>الصافي الحقيقي</th>
+            </tr>
+          </thead>
+          <tbody id="ca2_tbody">
+            <tr><td colspan="11" class="muted" style="text-align:center;padding:22px;">اختر عميلاً لعرض التحليل</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /ca2_content -->
+
+  </div><!-- /page-commission -->
+
+
 </main><!-- /main -->
 
 <!-- Print iframe (hidden, used by print module) -->
@@ -1654,6 +1822,7 @@ var K = {
   DRAFT      : 'marinette_inv_draft_v1',
   MODE       : 'marinette_mode_v2',
   PRICES     : 'marinette_customer_prices_v1',  /* Phase 8: product-master pricing */
+  COMMISSIONS: 'marinette_commissions_v1',       /* Phase 9: client commission rules */
 };
 
 /* ---- App state ---- */
@@ -2871,8 +3040,9 @@ function showPage(id) {
   if (id==='channels')  renderChannelsList();
   if (id==='dashboard') loadDashboard();
   if (id==='returns')   { initReturnIfEmpty(); renderReturnsList(); retFocusScanner(); }
-  if (id==='statement') { initStatementPage(); }
-  if (id==='pricing')   { initPricingPage(); }
+  if (id==='statement')  { initStatementPage(); }
+  if (id==='pricing')    { initPricingPage(); }
+  if (id==='commission') { window.CommissionAnalytics && CommissionAnalytics.init(); }
 }
 
 
@@ -3173,6 +3343,7 @@ function editProduct(id) {
   var row = document.getElementById('prod-row-'+id);
   if (row) row.classList.add('editing');
   document.getElementById('fp_barcode').focus();
+  renderProductCommissions(id);
 }
 
 function cancelProductEdit() {
@@ -3183,6 +3354,8 @@ function cancelProductEdit() {
   document.getElementById('formCardTitle').textContent = '➕ إضافة منتج جديد';
   document.querySelectorAll('#productsBody tr').forEach(function(r){ r.classList.remove('editing'); });
   clearProductForm();
+  var cs = document.getElementById('productCommissionsSection');
+  if (cs) cs.style.display = 'none';
 }
 
 function clearProductForm() {
@@ -3194,6 +3367,103 @@ function clearProductForm() {
   if (costEl) costEl.value = '';
   var catEl = document.getElementById('fp_category');
   if (catEl) catEl.value = 'Bakery';
+}
+
+/* ============================================================
+   COMMISSION HELPERS — Phase 9
+   Stored in localStorage: [{id, product_code, customer_name, rate, enabled}]
+   Does NOT touch any existing product/price/invoice logic.
+   ============================================================ */
+
+function renderProductCommissions(productId) {
+  var section = document.getElementById('productCommissionsSection');
+  var body    = document.getElementById('productCommissionsBody');
+  if (!section || !body) return;
+
+  var p = APP.products.find(function(x){ return x.id === productId; });
+  if (!p) { section.style.display = 'none'; return; }
+  var code = String(p.product_code || p.barcode || '').trim();
+  if (!code) { section.style.display = 'none'; return; }
+
+  /* Find all customers linked to this product via customerPrices */
+  var linkedCustomers = (APP.customerPrices || [])
+    .filter(function(r){ return String(r.product_code || '').trim() === code; })
+    .map(function(r){ return r.channel_name; });
+
+  if (linkedCustomers.length === 0) {
+    body.innerHTML = '<p class="muted small" style="margin:0;">لا يوجد عملاء مرتبطون بهذا المنتج — اربط العملاء أولاً من جدول المنتجات</p>';
+    section.style.display = 'block';
+    return;
+  }
+
+  var allComms = localGet(K.COMMISSIONS);
+
+  body.innerHTML = linkedCustomers.map(function(custName) {
+    var comm    = allComms.find(function(c){ return c.product_code === code && c.customer_name === custName; });
+    var rate    = comm ? (parseFloat(comm.rate) || 0) : 0;
+    var enabled = comm ? !!comm.enabled : false;
+    var eCust   = escapeHtml(custName);
+    var eCode   = escapeHtml(code);
+    return '<div class="comm-row" data-code="'+eCode+'" data-cust="'+eCust+'">' +
+      '<div class="comm-cust-name">'+eCust+'</div>' +
+      '<div class="comm-rate-wrap">' +
+        '<input type="number" class="comm-rate-input" min="0" max="100" step="0.01" value="'+rate+'" placeholder="0">' +
+        '<span style="font-size:12px;color:var(--w60);">%</span>' +
+      '</div>' +
+      '<label class="comm-toggle'+(enabled?' enabled':'')+'">' +
+        '<input type="checkbox" class="comm-enable-chk"'+(enabled?' checked':'')+' onchange="this.parentElement.className=\'comm-toggle\'+(this.checked?\' enabled\':\'\')">' +
+        '<span class="comm-toggle-lbl">'+(enabled?'مفعّل':'معطّل')+'</span>' +
+      '</label>' +
+    '</div>';
+  }).join('');
+
+  /* Update label text on checkbox change */
+  body.querySelectorAll('.comm-enable-chk').forEach(function(chk) {
+    chk.addEventListener('change', function() {
+      var lbl = chk.parentElement.querySelector('.comm-toggle-lbl');
+      if (lbl) lbl.textContent = chk.checked ? 'مفعّل' : 'معطّل';
+    });
+  });
+
+  section.style.display = 'block';
+}
+
+function saveProductCommissions() {
+  var rows = document.querySelectorAll('#productCommissionsBody .comm-row');
+  if (!rows.length) return;
+
+  var allComms = localGet(K.COMMISSIONS);
+  var changed = false;
+
+  rows.forEach(function(row) {
+    var code     = row.getAttribute('data-code') || '';
+    var custName = row.getAttribute('data-cust') || '';
+    if (!code || !custName) return;
+
+    var rateInput = row.querySelector('.comm-rate-input');
+    var enableChk = row.querySelector('.comm-enable-chk');
+    if (!rateInput || !enableChk) return;
+
+    var rate    = parseFloat(rateInput.value) || 0;
+    var enabled = enableChk.checked;
+
+    var idx = -1;
+    for (var i = 0; i < allComms.length; i++) {
+      if (allComms[i].product_code === code && allComms[i].customer_name === custName) { idx = i; break; }
+    }
+    if (idx >= 0) {
+      allComms[idx].rate    = rate;
+      allComms[idx].enabled = enabled;
+    } else {
+      allComms.push({ id: uid(), product_code: code, customer_name: custName, rate: rate, enabled: enabled });
+    }
+    changed = true;
+  });
+
+  if (changed) {
+    localSet(K.COMMISSIONS, allComms);
+    toast('✅ تم حفظ إعدادات العمولة', 'ok');
+  }
 }
 
 function confirmDeleteProduct(id) {
@@ -8997,6 +9267,530 @@ mergeXml +
     </div>
   </div>
   <!-- =================== END CATEGORY ANALYTICS MODAL =================== -->
+
+
+  <!-- =================== CLIENT COMMISSION ANALYSIS — isolated namespace (Phase 9) =================== -->
+  <script>
+  (function(){
+  /* ============================================================
+     CommissionAnalytics — Phase 10
+     Read-only accounting engine. Supports:
+       commission      — products where commission enabled = true
+       non-commission  — products where commission enabled = false / not set
+       all             — all products (with split breakdown)
+     Historical invoice prices used throughout. No writes.
+     ============================================================ */
+
+  function _esc(s){ return (typeof escapeHtml==='function')?escapeHtml(s):String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function _fmt(n){ return (typeof fmt==='function')?fmt(n):(parseFloat(n)||0).toFixed(2); }
+  function _fmtD(s){ return (typeof fmtDateStr==='function')?fmtDateStr(s):(s||'—'); }
+
+  var _cache = { invoices:[], allItems:[], returns:[], allReturnItems:[], loaded:false };
+
+  function _getComms(){ return (typeof localGet==='function')?localGet(K.COMMISSIONS):[]; }
+
+  function _populateClientSel(){
+    var sel = document.getElementById('ca2_client');
+    if (!sel) return;
+    var channels = (window.APP && Array.isArray(APP.channels)) ? APP.channels : [];
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">— اختر العميل —</option>';
+    channels.forEach(function(c){
+      if (!c||!c.name) return;
+      var o = document.createElement('option');
+      o.value = c.name; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+  }
+
+  function _populateCategorySel(){
+    var sel = document.getElementById('ca2_category');
+    if (!sel) return;
+    var cur = sel.value;
+    var cats = {};
+    (window.APP && Array.isArray(APP.products) ? APP.products : []).forEach(function(p){
+      var c = String(p.category||'').trim();
+      if (c) cats[c] = true;
+    });
+    var names = Object.keys(cats).sort();
+    var existing = [];
+    for (var i=0; i<sel.options.length; i++){
+      if (sel.options[i].value !== '') existing.push(sel.options[i].value);
+    }
+    var same = existing.length===names.length && existing.every(function(v,i){ return v===names[i]; });
+    if (same) return;
+    sel.innerHTML = '<option value="">جميع الأقسام</option>';
+    names.forEach(function(name){
+      var o = document.createElement('option');
+      o.value = name; o.textContent = name;
+      sel.appendChild(o);
+    });
+    if (cur && names.indexOf(cur)!==-1) sel.value = cur;
+  }
+
+  var CA = {
+
+    init: async function(){
+      _populateClientSel();
+      _populateCategorySel();
+      if (!_cache.loaded) await CA._loadData();
+      CA.refresh();
+    },
+
+    _loadData: async function(){
+      try {
+        _cache.invoices       = await DB.getInvoices();
+        _cache.allItems       = await DB.getAllInvoiceItems();
+        _cache.returns        = await DB.getReturns();
+        _cache.allReturnItems = await DB.getAllReturnItems();
+        _cache.loaded = true;
+      } catch(e){ console.error('[CommissionAnalytics] loadData:', e); }
+    },
+
+    refresh: async function(){
+      var client       = (document.getElementById('ca2_client')||{}).value       || '';
+      var category     = (document.getElementById('ca2_category')||{}).value     || '';
+      var fromDate     = (document.getElementById('ca2_from')||{}).value         || '';
+      var toDate       = (document.getElementById('ca2_to')||{}).value           || '';
+      var search       = ((document.getElementById('ca2_product')||{}).value     || '').toLowerCase().trim();
+      var analysisType = (document.getElementById('ca2_analysis_type')||{}).value|| 'commission';
+
+      var content = document.getElementById('ca2_content');
+      var empty   = document.getElementById('ca2_empty');
+
+      function _showEmpty(msg){
+        if (content) content.style.display = 'none';
+        if (empty)   empty.style.display   = 'block';
+        var m = document.getElementById('ca2_empty_msg');
+        if (m) m.textContent = msg;
+      }
+
+      if (!client){ _showEmpty('اختر عميلاً من القائمة أعلاه لعرض تحليل العمولة'); return; }
+
+      /* Build commMap: product_code → rate (enabled commissions for this client only) */
+      var allComms = _getComms();
+      var commMap  = {};
+      allComms.forEach(function(c){
+        if (c.customer_name === client && c.enabled)
+          commMap[c.product_code] = parseFloat(c.rate) || 0;
+      });
+
+      if (!_cache.loaded) await CA._loadData();
+
+      var data = CA._compute(client, fromDate, toDate, search, commMap, category, analysisType);
+      CA._lastComputed = data;
+      CA._lastFilters  = { client:client, category:category, fromDate:fromDate, toDate:toDate, analysisType:analysisType };
+
+      if (!data.products.length){
+        var msgs = {
+          'commission':     'لا توجد منتجات خاضعة للعمولة لهذا العميل في هذه الفترة — فعّلها من صفحة المنتجات (تعديل المنتج ← عمولة العملاء)',
+          'non-commission': 'لا توجد بيانات مبيعات لمنتجات غير خاضعة للعمولة لهذا العميل في هذه الفترة',
+          'all':            'لا توجد بيانات مبيعات لهذا العميل في هذه الفترة'
+        };
+        _showEmpty(msgs[analysisType] || 'لا توجد بيانات');
+        return;
+      }
+
+      if (content) content.style.display = 'block';
+      if (empty)   empty.style.display   = 'none';
+      CA._renderKPIs(data.summary, analysisType);
+      CA._renderTable(data.products);
+    },
+
+    _compute: function(client, fromDate, toDate, search, commMap, category, analysisType){
+      /* ---- Filter invoices by client + date ---- */
+      var filtInvIds = {};
+      (_cache.invoices||[]).forEach(function(iv){
+        if (iv.channel !== client) return;
+        var d = String(iv.date||iv.createdAt||'').substring(0,10);
+        if (fromDate && d < fromDate) return;
+        if (toDate   && d > toDate)   return;
+        filtInvIds[String(iv.id)] = true;
+      });
+
+      /* ---- Filter returns by client + date ---- */
+      var filtRetIds = {};
+      (_cache.returns||[]).forEach(function(r){
+        if (r.channel !== client) return;
+        var d = String(r.date||r.createdAt||'').substring(0,10);
+        if (fromDate && d < fromDate) return;
+        if (toDate   && d > toDate)   return;
+        filtRetIds[String(r.id)] = r;
+      });
+
+      /* ---- barcode / product_code → canonical code ---- */
+      var bcToCode = {};
+      var prodMap  = {};
+      (window.APP && Array.isArray(APP.products) ? APP.products : []).forEach(function(p){
+        var code = String(p.product_code||p.barcode||'').trim();
+        var bc   = String(p.barcode||'').trim();
+        if (bc)   bcToCode[bc]   = code;
+        if (code) bcToCode[code] = code;
+        if (code) prodMap[code]  = p;
+      });
+
+      /* ---- Per-product accumulators built dynamically from invoice items ---- */
+      var prodAcc = {};
+
+      function _getOrCreate(code, name){
+        if (!prodAcc[code]){
+          var prod   = prodMap[code];
+          var isComm = commMap.hasOwnProperty(code);
+          prodAcc[code] = {
+            code: code,
+            name: name || (prod ? prod.name : code),
+            isCommission:  isComm,
+            commissionRate: isComm ? commMap[code] : 0,
+            soldQty: 0, soldValue: 0,
+            itemDiscountTotal: 0,
+            returnedQty: 0, returnedValue: 0
+          };
+        }
+        return prodAcc[code];
+      }
+
+      /* ---- Aggregate invoice items ---- */
+      (_cache.allItems||[]).forEach(function(it){
+        var invId = String(it.invoiceId||it.invoice_id||'').trim();
+        if (!filtInvIds[invId]) return;
+        var bc   = String(it.barcode||'').trim();
+        var code = bcToCode[bc] || bc;
+        var isComm = commMap.hasOwnProperty(code);
+
+        /* Analysis type gate */
+        if (analysisType === 'commission'     && !isComm) return;
+        if (analysisType === 'non-commission' &&  isComm) return;
+
+        /* Category filter */
+        if (category){
+          var prod = prodMap[code];
+          if (!prod){
+            prod = (APP.products||[]).find(function(p){ return String(p.product_code||p.barcode||'').trim()===code; });
+          }
+          var prodCat = prod ? String(prod.category||'').trim() : '';
+          if (prodCat !== category) return;
+        }
+
+        /* Search filter */
+        if (search){
+          var nm = (it.name||bc||'').toLowerCase();
+          if (nm.indexOf(search)===-1 && bc.toLowerCase().indexOf(search)===-1) return;
+        }
+
+        var n    = (typeof normalizeItem==='function') ? normalizeItem(it) : it;
+        var qty  = parseFloat(n.qty)   || 0;
+        var price= parseFloat(n.price) || 0;
+        /* Historical per-piece discount stored on the invoice item */
+        var discPerPiece       = parseFloat(n.discountValue) || 0;
+        var effectiveUnitPrice = price - discPerPiece;
+
+        var acc = _getOrCreate(code, n.name||it.name);
+        if (n.name||it.name) acc.name = n.name||it.name||acc.name;
+        acc.soldQty           += qty;
+        acc.soldValue         += qty * effectiveUnitPrice;
+        acc.itemDiscountTotal += qty * discPerPiece;
+      });
+
+      /* ---- Aggregate return items (original invoice sold price via stored total) ---- */
+      (_cache.allReturnItems||[]).forEach(function(it){
+        var retId = String(it.returnId||it.return_id||'').trim();
+        if (!filtRetIds[retId]) return;
+        var bc   = String(it.barcode||'').trim();
+        var code = bcToCode[bc] || bc;
+        if (!prodAcc[code]) return;
+        var qty = parseFloat(it.qty) || 0;
+        var effectiveTotal = parseFloat(it.total) || 0;
+        if (!effectiveTotal && qty > 0) {
+          var price2  = parseFloat(it.price) || 0;
+          var discPP2 = parseFloat(it.discount_value)||parseFloat(it.discountValue)||parseFloat(it.discount)||0;
+          effectiveTotal = qty * (price2 - discPP2);
+        }
+        prodAcc[code].returnedQty   += qty;
+        prodAcc[code].returnedValue += effectiveTotal;
+      });
+
+      /* ---- Build rows ---- */
+      var rows = Object.keys(prodAcc).map(function(code){
+        var p    = prodAcc[code];
+        var rate = p.commissionRate;
+        var netAfterReturns = p.soldValue - p.returnedValue;
+        var commVal = (rate > 0 && netAfterReturns > 0) ? (netAfterReturns * rate / 100) : 0;
+        var realNet = netAfterReturns - commVal;
+        return {
+          code: code, name: p.name,
+          isCommission: p.isCommission,
+          soldQty: p.soldQty, soldValue: p.soldValue,
+          itemDiscountTotal: p.itemDiscountTotal,
+          returnedQty: p.returnedQty, returnedValue: p.returnedValue,
+          netQty: p.soldQty - p.returnedQty,
+          netAfterReturns: netAfterReturns,
+          commissionRate: rate, commissionValue: commVal,
+          realNet: realNet
+        };
+      });
+
+      rows.sort(function(a,b){
+        if (b.realNet!==a.realNet) return b.realNet-a.realNet;
+        return b.soldValue-a.soldValue;
+      });
+
+      /* ---- Summary totals ---- */
+      var tot = {
+        totalSales:0, totalItemDiscounts:0, totalReturns:0,
+        netSales:0, commissionValue:0, realNetProfit:0,
+        totalQty:0, totalItems: rows.length,
+        commSales:0, commReturns:0, commDeduction:0,
+        nonCommSales:0, nonCommReturns:0
+      };
+
+      rows.forEach(function(r){
+        tot.totalSales        += r.soldValue;
+        tot.totalItemDiscounts+= r.itemDiscountTotal;
+        tot.totalReturns      += r.returnedValue;
+        tot.commissionValue   += r.commissionValue;
+        tot.totalQty          += r.soldQty;
+        if (r.isCommission){
+          tot.commSales    += r.soldValue;
+          tot.commReturns  += r.returnedValue;
+          tot.commDeduction+= r.commissionValue;
+        } else {
+          tot.nonCommSales  += r.soldValue;
+          tot.nonCommReturns+= r.returnedValue;
+        }
+      });
+
+      tot.netSales      = tot.totalSales - tot.totalReturns;
+      /* Final net = sum(realNet per row) = netSales - commissionValue (works for all 3 modes) */
+      tot.realNetProfit = tot.netSales - tot.commissionValue;
+
+      CA._filtRetIds = filtRetIds;
+      return { products:rows, summary:tot };
+    },
+
+    _renderKPIs: function(s, analysisType){
+      function set(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
+      set('ca2_kpi_sales',          _fmt(s.totalSales)          + ' ج.م');
+      set('ca2_kpi_item_discounts', _fmt(s.totalItemDiscounts)  + ' ج.م');
+      set('ca2_kpi_returns',        _fmt(s.totalReturns)        + ' ج.م');
+      set('ca2_kpi_net_sales',      _fmt(s.netSales)            + ' ج.م');
+      set('ca2_kpi_commission',     _fmt(s.commissionValue)     + ' ج.م');
+      set('ca2_kpi_real_net',       _fmt(s.realNetProfit)       + ' ج.م');
+      set('ca2_kpi_total_qty',      (s.totalQty||0).toFixed(2) + ' قطعة');
+      set('ca2_kpi_items_count',    String(s.totalItems||0)     + ' صنف');
+
+      /* Breakdown section — only for "الكل" mode */
+      var bd = document.getElementById('ca2_breakdown');
+      if (bd){
+        if (analysisType === 'all'){
+          bd.style.display = 'block';
+          set('ca2_bd_comm_sales',     _fmt(s.commSales)     + ' ج.م');
+          set('ca2_bd_noncomm_sales',  _fmt(s.nonCommSales)  + ' ج.م');
+          set('ca2_bd_returns',        _fmt(s.totalReturns)  + ' ج.م');
+          set('ca2_bd_comm_deduction', _fmt(s.commDeduction) + ' ج.م');
+          set('ca2_bd_final_net',      _fmt(s.realNetProfit) + ' ج.م');
+        } else {
+          bd.style.display = 'none';
+        }
+      }
+    },
+
+    _renderTable: function(rows){
+      var tbody = document.getElementById('ca2_tbody');
+      if (!tbody) return;
+      if (!rows||!rows.length){
+        tbody.innerHTML = '<tr><td colspan="11" class="muted" style="text-align:center;padding:22px;">لا توجد بيانات — تأكد من وجود فواتير للعميل في هذه الفترة</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(function(p,i){
+        var rateClr  = p.commissionRate>0 ? 'color:var(--gold);' : 'color:var(--w60);';
+        var netClr   = p.realNet>=0 ? 'color:var(--green);font-weight:700;' : 'color:var(--red);font-weight:700;';
+        var rateDisp = p.isCommission ? p.commissionRate.toFixed(2)+'%' : '—';
+        var commDisp = p.isCommission ? _fmt(p.commissionValue)+' ج.م' : '—';
+        return '<tr>' +
+          '<td class="muted">'+(i+1)+'</td>' +
+          '<td style="font-weight:600;">'+_esc(p.name)+'</td>' +
+          '<td class="num">'+p.soldQty.toFixed(2)+'</td>' +
+          '<td class="num" style="color:var(--gold-light);">'+_fmt(p.soldValue)+' ج.م</td>' +
+          '<td class="num" style="color:var(--red);">'+p.returnedQty.toFixed(2)+'</td>' +
+          '<td class="num" style="color:var(--red);">'+_fmt(p.returnedValue)+' ج.م</td>' +
+          '<td class="num">'+p.netQty.toFixed(2)+'</td>' +
+          '<td class="num" style="color:var(--w60);">'+_fmt(p.itemDiscountTotal)+' ج.م</td>' +
+          '<td class="num" style="'+rateClr+'font-weight:600;">'+rateDisp+'</td>' +
+          '<td class="num" style="color:var(--gold);">'+commDisp+'</td>' +
+          '<td class="num" style="'+netClr+'">'+_fmt(p.realNet)+' ج.م</td>' +
+        '</tr>';
+      }).join('');
+    },
+
+    exportXLSX: function(){
+      try {
+        var d = CA._lastComputed;
+        var f = CA._lastFilters || {};
+        if (!d){ if (typeof toast==='function') toast('⚠️ يرجى اختيار عميل أولاً','err'); return; }
+
+        var RA = window.ReturnsAnalytics;
+        if (!RA||typeof RA._buildXLSX!=='function'){
+          if (typeof toast==='function') toast('⚠️ محرك التصدير غير متاح','err'); return;
+        }
+
+        var H=1, T=2, R=3, C=4, N=5, L=6;
+        var s     = d.summary;
+        var prods = d.products;
+        var client= f.client   ||'—';
+        var fromD = f.fromDate ||'الكل';
+        var toD   = f.toDate   ||'الكل';
+        var typeLabels = { 'commission':'خاضعة للعمولة', 'non-commission':'غير خاضعة للعمولة', 'all':'الكل' };
+        var typeLabel  = typeLabels[f.analysisType||'commission'] || '';
+
+        /* ══ SHEET 1 — Summary ══ */
+        var sh1 = { name:'Commission Summary', cols:[36,26], freeze:1, rows:[] };
+        function _t1(txt){ var r=sh1.rows.length+1; sh1.rows.push({cells:[{v:txt,s:T},{v:'',s:T}],merge:'A'+r+':B'+r}); }
+        function _h1(txt){ var r=sh1.rows.length+1; sh1.rows.push({cells:[{v:txt,s:H},{v:'',s:H}],merge:'A'+r+':B'+r}); }
+        function _r1(lbl,val,vs){ var isNum=(vs===C||vs===N); sh1.rows.push({cells:[{v:lbl,s:L},{v:val,s:vs!=null?vs:R,t:isNum?'n':'s'}]}); }
+        function _b1(){ sh1.rows.push({cells:[{v:'',s:0},{v:'',s:0}]}); }
+
+        _t1('📈 تقرير تحليل عمولة العملاء — Marinette POS');
+        _b1();
+        _h1('📋 معلومات التقرير');
+        _r1('العميل',      client);
+        _r1('نوع التحليل', typeLabel);
+        _r1('من تاريخ',   fromD);
+        _r1('إلى تاريخ',  toD);
+        _b1();
+        _h1('💰 ملخص الأرقام');
+        _r1('إجمالي المبيعات الفعلية',    Number(s.totalSales.toFixed(2)),         C);
+        _r1('إجمالي خصومات القطعة',       Number(s.totalItemDiscounts.toFixed(2)), C);
+        _r1('إجمالي المرتجعات',           Number(s.totalReturns.toFixed(2)),       C);
+        _r1('صافي بعد المرتجع',           Number(s.netSales.toFixed(2)),           C);
+        _r1('إجمالي العمولة',             Number(s.commissionValue.toFixed(2)),    C);
+        _b1();
+        _h1('🏆 الصافي الحقيقي النهائي');
+        _r1('الصافي الحقيقي النهائي', Number(s.realNetProfit.toFixed(2)), C);
+        _r1('إجمالي القطع المباعة',   Number((s.totalQty||0).toFixed(2)), N);
+        _r1('عدد الأصناف',            s.totalItems||0, N);
+        if (f.analysisType === 'all'){
+          _b1();
+          _h1('📊 تفصيل الكل');
+          _r1('مبيعات خاضعة للعمولة',   Number(s.commSales.toFixed(2)),     C);
+          _r1('مبيعات غير خاضعة',       Number(s.nonCommSales.toFixed(2)),  C);
+          _r1('خصم العمولة المحتسب',     Number(s.commDeduction.toFixed(2)), C);
+        }
+
+        /* ══ SHEET 2 — Product Breakdown ══ */
+        var sh2 = { name:'Product Breakdown', cols:[32,13,17,13,17,12,18,12,17,17], freeze:1, rows:[] };
+        sh2.rows.push({cells:[
+          {v:'المنتج',s:H},{v:'كمية المبيعات',s:H},{v:'قيمة المبيعات (فعلي)',s:H},
+          {v:'كمية المرتجعات',s:H},{v:'قيمة المرتجعات',s:H},{v:'الكمية الصافية',s:H},
+          {v:'خصم القطعة الإجمالي',s:H},{v:'العمولة %',s:H},{v:'قيمة العمولة',s:H},{v:'الصافي الحقيقي',s:H}
+        ]});
+        prods.forEach(function(p){
+          sh2.rows.push({cells:[
+            {v:p.name,s:R},
+            {v:Number(p.soldQty.toFixed(2)),s:N,t:'n'},
+            {v:Number(p.soldValue.toFixed(2)),s:C,t:'n'},
+            {v:Number(p.returnedQty.toFixed(2)),s:N,t:'n'},
+            {v:Number(p.returnedValue.toFixed(2)),s:C,t:'n'},
+            {v:Number(p.netQty.toFixed(2)),s:N,t:'n'},
+            {v:Number(p.itemDiscountTotal.toFixed(2)),s:C,t:'n'},
+            {v:p.isCommission?Number(p.commissionRate.toFixed(2)):0,s:N,t:'n'},
+            {v:Number(p.commissionValue.toFixed(2)),s:C,t:'n'},
+            {v:Number(p.realNet.toFixed(2)),s:C,t:'n'}
+          ]});
+        });
+        if (!prods.length){
+          var empCells=[]; for(var z=0;z<10;z++) empCells.push({v:z===0?'لا توجد بيانات':'',s:R});
+          sh2.rows.push({cells:empCells});
+        }
+
+        /* ══ SHEET 3 — Returns Breakdown ══ */
+        var sh3 = { name:'Returns Breakdown', cols:[18,14,20,32,13,17], freeze:1, rows:[] };
+        sh3.rows.push({cells:[
+          {v:'رقم المرتجع',s:H},{v:'التاريخ',s:H},{v:'العميل',s:H},
+          {v:'المنتج',s:H},{v:'الكمية المرتجعة',s:H},{v:'قيمة المرتجع',s:H}
+        ]});
+
+        var prodCodes = {};
+        prods.forEach(function(p){ prodCodes[p.code] = true; });
+        var bcToCode2 = {};
+        (window.APP&&Array.isArray(APP.products)?APP.products:[]).forEach(function(p){
+          var code=String(p.product_code||p.barcode||'').trim();
+          var bc=String(p.barcode||'').trim();
+          if (bc&&prodCodes[code])   bcToCode2[bc]  =code;
+          if (code&&prodCodes[code]) bcToCode2[code] =code;
+        });
+
+        var filtRetIds = CA._filtRetIds || {};
+        var retLog = [];
+        (_cache.allReturnItems||[]).forEach(function(it){
+          var retId = String(it.returnId||it.return_id||'').trim();
+          var ret   = filtRetIds[retId];
+          if (!ret) return;
+          var bc   = String(it.barcode||'').trim();
+          var code = bcToCode2[bc]||bc;
+          if (!prodCodes[code]) return;
+          retLog.push({ number:ret.number||'—', date:ret.date||ret.createdAt||'', channel:ret.channel||'—',
+                        product:it.name||bc||'—', qty:parseFloat(it.qty)||0, total:parseFloat(it.total)||0 });
+        });
+        retLog.sort(function(a,b){ return (a.date||'')<(b.date||'')?-1:1; });
+
+        retLog.forEach(function(r){
+          sh3.rows.push({cells:[
+            {v:r.number,s:R},{v:_fmtD(r.date),s:R},{v:r.channel,s:R},
+            {v:r.product,s:R},
+            {v:Number(r.qty.toFixed(2)),s:N,t:'n'},
+            {v:Number(r.total.toFixed(2)),s:C,t:'n'}
+          ]});
+        });
+        if (!retLog.length){
+          sh3.rows.push({cells:[{v:'لا توجد مرتجعات للمنتجات المحددة',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R},{v:'',s:R}]});
+        }
+
+        var bytes = RA._buildXLSX([sh1, sh2, sh3]);
+        var blob  = new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        var url   = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'commission-'+client+'-'+new Date().toISOString().split('T')[0]+'.xlsx';
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },100);
+        if (typeof toast==='function') toast('✅ تم تصدير ملف Excel','ok');
+      } catch(err){
+        console.error('[CommissionAnalytics] exportXLSX:', err);
+        if (typeof toast==='function') toast('❌ فشل تصدير Excel','err');
+      }
+    }
+  };
+
+  window.CommissionAnalytics = CA;
+
+  /* Hook showPage — same non-invasive pattern as existing modules */
+  function _hookShowPage(){
+    if (typeof window.showPage!=='function'||window.showPage._caCommWrapped) return false;
+    var orig = window.showPage;
+    window.showPage = function(id){
+      var r = orig.apply(this, arguments);
+      if (id==='commission'){
+        setTimeout(function(){
+          try { _cache.loaded=false; CA.init(); } catch(e){ console.warn('[CommissionAnalytics] showPage hook:', e); }
+        }, 50);
+      }
+      return r;
+    };
+    window.showPage._caCommWrapped = true;
+    return true;
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', _hookShowPage);
+  else _hookShowPage();
+  var _tries=0, _iv=setInterval(function(){
+    _hookShowPage(); _tries++;
+    if ((window.showPage&&window.showPage._caCommWrapped)||_tries>40) clearInterval(_iv);
+  },75);
+
+  console.log('[CommissionAnalytics] module ready — Phase 10');
+  })();
+  </script>
+
 
 </body>
 </html>

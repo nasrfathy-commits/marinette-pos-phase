@@ -2663,6 +2663,72 @@ var DB = {
     localSet(K.RETURNS,   localGet(K.RETURNS).filter(function(x){ return x.id !== id; }));
     localSet(K.RET_ITEMS, localGet(K.RET_ITEMS).filter(function(x){ return x.returnId !== id; }));
   },
+
+  /* ---- COMMISSIONS (Phase 11) ---- */
+  getCommissions: async function() {
+    if (APP.mode === 'live') {
+      try {
+        var res = await APP.sb.from('product_commissions').select('*');
+        if (res.error) throw res.error;
+        return (res.data || []).map(function(r) {
+          return { id: r.id, product_code: r.product_id, customer_name: r.client_id,
+                   rate: parseFloat(r.commission_rate) || 0, enabled: !!r.is_enabled };
+        });
+      } catch(e) { console.warn('DB.getCommissions:', e); return localGet(K.COMMISSIONS); }
+    }
+    return localGet(K.COMMISSIONS);
+  },
+
+  saveCommission: async function(comm) {
+    if (APP.mode === 'live') {
+      try {
+        var row = {
+          product_id:      comm.product_code,
+          client_id:       comm.customer_name,
+          commission_rate: parseFloat(comm.rate) || 0,
+          is_enabled:      !!comm.enabled,
+          updated_at:      new Date().toISOString()
+        };
+        var res = await APP.sb.from('product_commissions')
+          .upsert(row, { onConflict: 'product_id,client_id' })
+          .select().single();
+        if (res.error) throw res.error;
+        return;
+      } catch(e) { console.warn('DB.saveCommission:', e); }
+    }
+    var all = localGet(K.COMMISSIONS);
+    var idx = -1;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].product_code === comm.product_code && all[i].customer_name === comm.customer_name) { idx = i; break; }
+    }
+    if (idx >= 0) {
+      all[idx].rate    = comm.rate;
+      all[idx].enabled = comm.enabled;
+    } else {
+      all.push({ id: uid(), product_code: comm.product_code, customer_name: comm.customer_name,
+                 rate: comm.rate, enabled: comm.enabled });
+    }
+    localSet(K.COMMISSIONS, all);
+  },
+
+  migrateCommissions: async function() {
+    if (APP.mode !== 'live') return;
+    try {
+      var existing = await APP.sb.from('product_commissions').select('id').limit(1);
+      if (existing.error) throw existing.error;
+      if ((existing.data || []).length > 0) return;
+      var local = localGet(K.COMMISSIONS);
+      if (!local || !local.length) return;
+      for (var i = 0; i < local.length; i++) {
+        await DB.saveCommission(local[i]);
+      }
+      localStorage.removeItem(K.COMMISSIONS);
+      toast('✅ تم نقل إعدادات العمولة إلى Supabase', 'ok');
+      console.log('[DB.migrateCommissions] migrated', local.length, 'records');
+    } catch(e) {
+      console.warn('[DB.migrateCommissions]:', e);
+    }
+  },
 };
 
 
@@ -2839,6 +2905,7 @@ async function activateLiveMode() {
   document.getElementById('authBtn').style.display = 'inline-flex';
   toast('🟢 متصل بـ Supabase — Live Mode', 'ok');
   await loadInitialData();
+  await DB.migrateCommissions();
   populateChannelSelect();
   renderProductsTable();
   /* Force InvoicePayments to reload from Supabase now that APP.sb is confirmed ready.
@@ -3375,7 +3442,7 @@ function clearProductForm() {
    Does NOT touch any existing product/price/invoice logic.
    ============================================================ */
 
-function renderProductCommissions(productId) {
+async function renderProductCommissions(productId) {
   var section = document.getElementById('productCommissionsSection');
   var body    = document.getElementById('productCommissionsBody');
   if (!section || !body) return;
@@ -3396,7 +3463,7 @@ function renderProductCommissions(productId) {
     return;
   }
 
-  var allComms = localGet(K.COMMISSIONS);
+  var allComms = await DB.getCommissions();
 
   body.innerHTML = linkedCustomers.map(function(custName) {
     var comm    = allComms.find(function(c){ return c.product_code === code && c.customer_name === custName; });
@@ -3428,13 +3495,11 @@ function renderProductCommissions(productId) {
   section.style.display = 'block';
 }
 
-function saveProductCommissions() {
+async function saveProductCommissions() {
   var rows = document.querySelectorAll('#productCommissionsBody .comm-row');
   if (!rows.length) return;
 
-  var allComms = localGet(K.COMMISSIONS);
-  var changed = false;
-
+  var saves = [];
   rows.forEach(function(row) {
     var code     = row.getAttribute('data-code') || '';
     var custName = row.getAttribute('data-cust') || '';
@@ -3444,24 +3509,16 @@ function saveProductCommissions() {
     var enableChk = row.querySelector('.comm-enable-chk');
     if (!rateInput || !enableChk) return;
 
-    var rate    = parseFloat(rateInput.value) || 0;
-    var enabled = enableChk.checked;
-
-    var idx = -1;
-    for (var i = 0; i < allComms.length; i++) {
-      if (allComms[i].product_code === code && allComms[i].customer_name === custName) { idx = i; break; }
-    }
-    if (idx >= 0) {
-      allComms[idx].rate    = rate;
-      allComms[idx].enabled = enabled;
-    } else {
-      allComms.push({ id: uid(), product_code: code, customer_name: custName, rate: rate, enabled: enabled });
-    }
-    changed = true;
+    saves.push(DB.saveCommission({
+      product_code:  code,
+      customer_name: custName,
+      rate:          parseFloat(rateInput.value) || 0,
+      enabled:       enableChk.checked
+    }));
   });
 
-  if (changed) {
-    localSet(K.COMMISSIONS, allComms);
+  if (saves.length) {
+    await Promise.all(saves);
     toast('✅ تم حفظ إعدادات العمولة', 'ok');
   }
 }
@@ -9287,7 +9344,7 @@ mergeXml +
 
   var _cache = { invoices:[], allItems:[], returns:[], allReturnItems:[], loaded:false };
 
-  function _getComms(){ return (typeof localGet==='function')?localGet(K.COMMISSIONS):[]; }
+  async function _getComms(){ return (window.APP && APP.mode==='live' && window.DB) ? DB.getCommissions() : (typeof localGet==='function')?localGet(K.COMMISSIONS):[]; }
 
   function _populateClientSel(){
     var sel = document.getElementById('ca2_client');
@@ -9369,7 +9426,7 @@ mergeXml +
       if (!client){ _showEmpty('اختر عميلاً من القائمة أعلاه لعرض تحليل العمولة'); return; }
 
       /* Build commMap: product_code → rate (enabled commissions for this client only) */
-      var allComms = _getComms();
+      var allComms = await _getComms();
       var commMap  = {};
       allComms.forEach(function(c){
         if (c.customer_name === client && c.enabled)
